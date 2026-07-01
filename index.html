@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Seismic Pulse — Alerta Sísmica</title>
+<style>
+:root{
+  --bg:#000000;
+  --surface:#131315;
+  --surface-2:#1c1c1f;
+  --surface-hover:#28282c;
+  --stroke:rgba(255,255,255,0.09);
+  --stroke-strong:rgba(255,255,255,0.16);
+  --text-1:#f5f5f7;
+  --text-2:rgba(235,235,245,0.62);
+  --text-3:rgba(235,235,245,0.4);
+  --danger:#ff2d20;
+  --danger-2:#ff6b5e;
+  --warning:#ff9f0a;
+  --safe:#30d158;
+  --info:#0a84ff;
+  --deep:#bf5af2;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+}
+
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+html{background:var(--bg);}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text-1);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:196px;
+}
+::-webkit-scrollbar{display:none;}
+*{scrollbar-width:none;}
+button{font-family:inherit; border:none; background:none; color:inherit; cursor:pointer;}
+input{font-family:inherit;}
+
+/* ============ SISTEMA DE ÍCONOS SVG INLINE (sin dependencia de red) ============ */
+svg.icon{width:1em; height:1em; display:inline-block; vertical-align:-0.15em; flex-shrink:0;}
+svg.icon *{fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+svg.icon.filled *{fill:currentColor; stroke:none;}
+
+/* ===================== TOP BAR ===================== */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(26px) saturate(180%);
+  -webkit-backdrop-filter:blur(26px) saturate(180%);
+  border-bottom:0.5px solid var(--stroke);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.topbar-title{
+  font-size:21px; font-weight:800; letter-spacing:-0.02em;
+  display:flex; align-items:center; gap:9px;
+}
+.topbar-title .brand-icon{width:24px; height:24px; color:var(--danger-2);}
+.topbar-actions{display:flex; align-items:center; gap:12px;}
+.icon-btn{
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface-2); font-size:16px; color:var(--text-1);
+  transition:transform .15s ease, background .15s ease;
+}
+.icon-btn:active{transform:scale(0.88); background:var(--surface-hover);}
+.status-chip{
+  display:flex; align-items:center; gap:6px;
+  font-size:11.5px; font-weight:700; color:var(--safe);
+  background:rgba(48,209,88,0.13);
+  border:0.5px solid rgba(48,209,88,0.32);
+  padding:6px 11px 6px 9px; border-radius:20px;
+  text-transform:uppercase; letter-spacing:.03em;
+}
+.status-chip .dot{width:6px; height:6px; border-radius:50%; background:var(--safe); box-shadow:0 0 7px var(--safe);}
+.status-chip.warn{color:var(--warning); background:rgba(255,159,10,0.13); border-color:rgba(255,159,10,0.32);}
+.status-chip.warn .dot{background:var(--warning); box-shadow:0 0 7px var(--warning);}
+.status-chip.danger{color:var(--danger-2); background:rgba(255,45,32,0.16); border-color:rgba(255,45,32,0.42);}
+.status-chip.danger .dot{background:var(--danger); box-shadow:0 0 9px var(--danger);}
+.status-chip.pulse .dot{animation:dotpulse 1.3s ease-in-out infinite;}
+@keyframes dotpulse{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.45; transform:scale(1.4);}}
+
+/* ===================== SEGMENT TABS ===================== */
+.segment-wrap{padding:14px 20px 6px; overflow-x:auto;}
+.segment{
+  display:inline-flex; background:var(--surface); border-radius:11px; padding:3px;
+  border:0.5px solid var(--stroke);
+}
+.segment button{
+  padding:8px 17px; font-size:13px; font-weight:700; color:var(--text-2);
+  border-radius:9px; transition:background .2s ease, color .2s ease;
+  white-space:nowrap;
+}
+.segment button.active{background:var(--surface-2); color:var(--text-1);}
+
+/* ===================== HERO RADAR — SONAR DE DETECCIÓN ===================== */
+.hero{padding:14px 20px 26px; display:flex; flex-direction:column; align-items:center;}
+.radar-stage{
+  position:relative; width:290px; height:290px;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:20px;
+}
+/* Anillo de escala fija (retícula tipo sismógrafo) */
+.radar-grid{position:absolute; inset:0; border-radius:50%; opacity:.5;}
+.radar-grid .ring{position:absolute; border:1px solid rgba(255,255,255,0.06); border-radius:50%;}
+.radar-sweep{
+  position:absolute; inset:0; border-radius:50%; overflow:hidden;
+  animation:sweep 2.6s linear infinite;
+  opacity:.9;
+}
+.radar-sweep::before{
+  content:''; position:absolute; top:50%; left:50%; width:50%; height:2px;
+  background:linear-gradient(90deg, var(--sweep-color,#ff6b5e), transparent);
+  transform-origin:0 50%;
+  box-shadow:0 0 12px 2px var(--sweep-color,#ff6b5e);
+}
+.radar-sweep::after{
+  content:''; position:absolute; top:0; left:50%; width:50%; height:50%;
+  background:conic-gradient(from 0deg, var(--sweep-color,#ff6b5e) 0deg, transparent 55deg);
+  transform-origin:0 100%;
+  opacity:.22;
+}
+@keyframes sweep{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+
+.radar-ring{
+  position:absolute; border-radius:50%;
+  border:1.5px solid var(--ring-color, rgba(255,59,48,0.4));
+  opacity:0;
+}
+.radar-ring.animate{animation:ripple 2.4s cubic-bezier(.15,.65,.3,1) infinite;}
+.radar-ring:nth-child(4){animation-delay:0s;}
+.radar-ring:nth-child(5){animation-delay:.8s;}
+.radar-ring:nth-child(6){animation-delay:1.6s;}
+@keyframes ripple{
+  0%{width:110px; height:110px; opacity:1; border-width:3px;}
+  100%{width:290px; height:290px; opacity:0; border-width:0.5px;}
+}
+
+.radar-core{
+  position:relative; z-index:2;
+  width:154px; height:154px; border-radius:50%;
+  background:radial-gradient(circle at 32% 26%, var(--core-light,#4a1310), var(--core-dark,#170504) 72%);
+  border:1.5px solid var(--stroke-strong);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.04), 0 24px 60px -16px var(--glow, rgba(255,45,32,0.65)), inset 0 0 40px -10px var(--glow, rgba(255,45,32,0.4));
+  transition:box-shadow .6s ease, background .6s ease;
+  animation:coreheartbeat 1.8s ease-in-out infinite;
+}
+@keyframes coreheartbeat{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.035);}
+}
+.radar-core .mag{font-size:42px; font-weight:800; letter-spacing:-0.03em; line-height:1;}
+.radar-core .mag-label{font-size:10.5px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:.09em; margin-top:5px;}
+.radar-core .core-icon{width:28px; height:28px; margin-bottom:7px; color:var(--core-icon,#ff6b5e);}
+.radar-core .core-icon.spin{animation:spin 1s linear infinite;}
+
+.hero-status-text{font-size:21px; font-weight:800; letter-spacing:-0.01em; text-align:center; margin-bottom:5px;}
+.hero-sub-text{font-size:14px; color:var(--text-2); text-align:center; max-width:310px; line-height:1.45;}
+
+/* ===================== NEAREST CARD ===================== */
+.nearest-card{
+  margin:0 20px 24px;
+  background:var(--surface); border:0.5px solid var(--stroke); border-radius:16px;
+  padding:16px;
+  display:flex; align-items:center; gap:14px;
+  transition:transform .12s ease;
+}
+.nearest-card:active{transform:scale(0.98);}
+.nearest-badge{
+  width:54px; height:54px; border-radius:15px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; font-weight:800;
+  background:var(--badge-bg, rgba(255,159,10,0.15)); color:var(--badge-fg, var(--warning));
+}
+.nearest-info{flex:1; min-width:0;}
+.nearest-info .place{font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.nearest-info .meta{font-size:12.5px; color:var(--text-2); margin-top:3px; display:flex; gap:10px; flex-wrap:wrap;}
+.nearest-info .meta span{display:inline-flex; align-items:center; gap:4px;}
+.nearest-info .meta svg{width:13px; height:13px;}
+.nearest-chevron{color:var(--text-3); width:16px; height:16px; flex-shrink:0;}
+
+/* ===================== SECTION HEADERS ===================== */
+.section{padding:0 20px 8px;}
+.section-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.section-head h2{font-size:19px; font-weight:800; letter-spacing:-0.01em;}
+.section-head .see-all{font-size:13px; color:var(--info); font-weight:700;}
+
+/* ===================== HORIZONTAL SCROLLERS ===================== */
+.hscroll{display:flex; gap:14px; overflow-x:auto; padding:2px 20px 6px; margin:0 -20px; scroll-snap-type:x proximity;}
+.zone-card{scroll-snap-align:start; flex-shrink:0; width:148px; display:flex; flex-direction:column; gap:8px;}
+.zone-art{
+  width:148px; height:148px; border-radius:14px;
+  background:linear-gradient(155deg, var(--art-a), var(--art-b));
+  display:flex; align-items:flex-end; padding:11px;
+  position:relative; overflow:hidden;
+  border:0.5px solid var(--stroke);
+}
+.zone-art::after{content:''; position:absolute; inset:0; background:radial-gradient(circle at 75% 18%, rgba(255,255,255,0.16), transparent 60%);}
+.zone-art svg{position:relative; width:24px; height:24px; color:rgba(255,255,255,0.95);}
+.zone-mag-tag{position:absolute; top:9px; right:9px; font-size:11px; font-weight:800; padding:4px 8px; border-radius:7px; background:rgba(0,0,0,0.5); color:#fff; backdrop-filter:blur(6px);}
+.zone-title{font-size:13.5px; font-weight:700; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.zone-sub{font-size:12px; color:var(--text-2);}
+
+/* ===================== FEED LIST ===================== */
+.feed-list{display:flex; flex-direction:column;}
+.feed-row{display:flex; align-items:center; gap:12px; padding:11px 20px; transition:background .15s ease;}
+.feed-row:active{background:var(--surface-2);}
+.feed-num{width:40px; height:40px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff;}
+.feed-body{flex:1; min-width:0;}
+.feed-title{font-size:14.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.feed-meta{font-size:12.5px; color:var(--text-2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.feed-time{font-size:12px; color:var(--text-3); flex-shrink:0; text-align:right; min-width:44px; font-weight:600;}
+.feed-divider{height:0.5px; background:var(--stroke); margin-left:71px;}
+
+/* ===================== WEATHER STRIP ===================== */
+.weather-strip{margin:0 20px 4px; background:var(--surface); border:0.5px solid var(--stroke); border-radius:16px; padding:16px;}
+.weather-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.weather-head .loc{font-size:13px; font-weight:700; color:var(--text-2); display:flex; align-items:center; gap:6px;}
+.weather-head .loc svg{width:14px; height:14px;}
+.weather-head .risk-tag{font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px;}
+.weather-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;}
+.weather-metric{background:var(--surface-2); border-radius:13px; padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center;}
+.weather-metric svg{width:19px; height:19px; color:var(--info);}
+.weather-metric .val{font-size:15px; font-weight:800;}
+.weather-metric .lbl{font-size:10px; color:var(--text-3); text-transform:uppercase; letter-spacing:.04em; font-weight:700;}
+
+/* ===================== GLOBO 3D ===================== */
+.globe-panel{margin:0 20px 4px; border-radius:20px; overflow:hidden; border:0.5px solid var(--stroke); background:radial-gradient(circle at 50% 30%, #0a1220, #000000 75%);}
+.globe-stage{position:relative; width:100%; aspect-ratio:1/1; max-height:340px;}
+.globe-stage canvas{display:block; width:100% !important; height:100% !important; touch-action:none;}
+.globe-hint{
+  position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:700; color:var(--text-2);
+  background:rgba(0,0,0,0.5); backdrop-filter:blur(8px);
+  padding:6px 12px; border-radius:20px; border:0.5px solid var(--stroke);
+  pointer-events:none; opacity:1; transition:opacity .5s ease;
+}
+.globe-hint svg{width:13px; height:13px;}
+.globe-loading{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; transition:opacity .4s ease;}
+.globe-loading svg{width:30px; height:30px; color:var(--danger-2); animation:spin 1s linear infinite;}
+.globe-loading span{font-size:12.5px; color:var(--text-2); font-weight:600;}
+.map-footer{display:flex; align-items:center; justify-content:space-between; padding:11px 15px; font-size:11.5px; color:var(--text-2); border-top:0.5px solid var(--stroke);}
+.map-legend{display:flex; align-items:center; gap:13px;}
+.map-legend span{display:flex; align-items:center; gap:5px; font-weight:600;}
+.map-legend .sw{width:8px; height:8px; border-radius:50%;}
+
+/* ===================== SETTINGS ===================== */
+.setting-row{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--surface); border-bottom:0.5px solid var(--stroke);}
+.setting-row:first-child{border-radius:16px 16px 0 0;}
+.setting-row:last-child{border-radius:0 0 16px 16px; border-bottom:none;}
+.setting-row .left{display:flex; align-items:center; gap:12px;}
+.setting-row .left .ico-badge{width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0;}
+.setting-row .left .ico-badge svg{width:16px; height:16px;}
+.setting-row .label{font-size:14.5px; font-weight:600;}
+.setting-row .desc{font-size:12px; color:var(--text-2); margin-top:1px;}
+
+.switch{width:48px; height:28px; border-radius:16px; background:var(--surface-2); position:relative; flex-shrink:0; transition:background .2s ease; border:0.5px solid var(--stroke);}
+.switch.on{background:var(--safe); border-color:var(--safe);}
+.switch .knob{position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%; background:#fff; transition:transform .2s ease; box-shadow:0 1px 3px rgba(0,0,0,0.4);}
+.switch.on .knob{transform:translateX(20px);}
+
+.slider-row{padding:14px 16px; background:var(--surface);}
+.slider-row .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+.slider-row .top .label{font-size:14.5px; font-weight:600;}
+.slider-row .top .value{font-size:14px; font-weight:800; color:var(--danger-2);}
+input[type=range]{-webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--surface-2); outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.5); cursor:pointer; border:0.5px solid var(--stroke);}
+input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; background:#fff; border:none; cursor:pointer;}
+
+.alarm-test-btn{
+  width:100%; border-radius:16px; padding:18px; display:flex; align-items:center; justify-content:center; gap:10px;
+  font-size:15px; font-weight:800; color:#fff;
+  background:linear-gradient(135deg, #ff2d20, #d40f0f);
+  box-shadow:0 14px 34px -12px rgba(255,45,32,0.55);
+  transition:transform .12s ease;
+}
+.alarm-test-btn:active{transform:scale(0.97);}
+.alarm-test-btn svg{width:20px; height:20px;}
+.alarm-test-btn.playing{animation:btnflash .5s ease-in-out infinite;}
+@keyframes btnflash{0%,100%{box-shadow:0 14px 34px -12px rgba(255,45,32,0.55);} 50%{box-shadow:0 14px 44px -8px rgba(255,45,32,0.95);}}
+
+/* ===================== NOW MONITORING ===================== */
+.now-monitoring{
+  position:fixed; left:10px; right:10px; bottom:calc(env(safe-area-inset-bottom) + 76px);
+  z-index:80;
+  background:rgba(24,24,27,0.88);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border:0.5px solid var(--stroke-strong);
+  border-radius:16px; padding:10px 11px;
+  display:flex; align-items:center; gap:11px;
+  box-shadow:0 14px 34px -10px rgba(0,0,0,0.65);
+}
+.nm-art{
+  width:44px; height:44px; border-radius:10px; flex-shrink:0;
+  background:radial-gradient(circle at 35% 30%, var(--core-light,#4a1310), var(--core-dark,#170504) 78%);
+  display:flex; align-items:center; justify-content:center;
+  border:0.5px solid var(--stroke-strong);
+}
+.nm-art svg{width:20px; height:20px; color:var(--core-icon,#ff6b5e);}
+.nm-body{flex:1; min-width:0;}
+.nm-title{font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.nm-sub{font-size:11.5px; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;}
+.nm-actions{display:flex; align-items:center; gap:5px; flex-shrink:0;}
+.nm-actions .icon-btn{width:34px; height:34px; background:transparent;}
+.nm-actions .icon-btn.play{background:var(--surface-hover);}
+
+/* ===================== TAB BAR ===================== */
+.tabbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:90;
+  padding:9px 8px calc(env(safe-area-inset-bottom) + 8px);
+  background:rgba(8,8,10,0.88);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-top:0.5px solid var(--stroke);
+  display:flex;
+}
+.tab-item{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:5px 0; color:var(--text-3); transition:color .15s ease, transform .15s ease;}
+.tab-item svg{width:24px; height:24px;}
+.tab-item span{font-size:10px; font-weight:700;}
+.tab-item.active{color:var(--danger-2);}
+.tab-item:active{transform:scale(0.9);}
+
+/* ===================== VIEWS ===================== */
+.view{display:none;}
+.view.active{display:block;}
+
+.divider-lg{height:8px;}
+.divider-xl{height:26px;}
+.empty-state{padding:44px 20px; text-align:center; color:var(--text-2);}
+.empty-state svg{width:36px; height:36px; color:var(--text-3); margin-bottom:10px;}
+.empty-state p{font-size:13.5px; line-height:1.5;}
+
+.skeleton{background:linear-gradient(90deg, var(--surface-2) 25%, var(--surface-hover) 37%, var(--surface-2) 63%); background-size:400% 100%; animation:sk 1.4s ease infinite;}
+@keyframes sk{0%{background-position:100% 50%;} 100%{background-position:0 50%;}}
+
+/* ===================== TOAST DE ALERTA — MÁXIMA URGENCIA ===================== */
+.toast-alert{
+  position:fixed; top:calc(env(safe-area-inset-top) + 8px); left:12px; right:12px; z-index:200;
+  background:linear-gradient(135deg, #ff2d20, #b80c0c);
+  border-radius:18px; padding:16px 17px;
+  display:flex; align-items:center; gap:13px;
+  box-shadow:0 20px 50px -12px rgba(255,45,32,0.7), 0 0 0 1px rgba(255,255,255,0.08);
+  transform:translateY(-160%) scale(0.9); opacity:0;
+  transition:transform .5s cubic-bezier(.17,.9,.24,1.2), opacity .3s ease;
+}
+.toast-alert.show{transform:translateY(0) scale(1); opacity:1; animation:toastshake .4s ease 1;}
+.toast-alert.blinking{animation:toastblink 0.9s ease-in-out infinite;}
+@keyframes toastshake{
+  0%,100%{transform:translateY(0) translateX(0) scale(1);}
+  20%{transform:translateY(0) translateX(-4px) scale(1);}
+  40%{transform:translateY(0) translateX(4px) scale(1);}
+  60%{transform:translateY(0) translateX(-3px) scale(1);}
+  80%{transform:translateY(0) translateX(3px) scale(1);}
+}
+@keyframes toastblink{0%,100%{box-shadow:0 20px 50px -12px rgba(255,45,32,0.7), 0 0 0 1px rgba(255,255,255,0.08);} 50%{box-shadow:0 20px 65px -6px rgba(255,45,32,1), 0 0 0 2px rgba(255,255,255,0.25);}}
+.toast-alert .alert-icon{width:30px; height:30px; color:#fff; flex-shrink:0; animation:iconshake 0.6s ease-in-out infinite;}
+@keyframes iconshake{0%,100%{transform:rotate(0deg);} 25%{transform:rotate(-12deg);} 75%{transform:rotate(12deg);}}
+.toast-alert .txt{flex:1;}
+.toast-alert .txt .t0{font-size:10px; font-weight:800; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px;}
+.toast-alert .txt .t1{font-size:15px; font-weight:800; color:#fff;}
+.toast-alert .txt .t2{font-size:12.5px; color:rgba(255,255,255,0.88); margin-top:1px; font-weight:600;}
+.toast-alert .close{color:#fff; width:20px; height:20px; opacity:.9; flex-shrink:0;}
+
+.brand-footer{padding:26px 20px 10px; text-align:center;}
+.brand-footer svg{width:22px; height:22px; color:var(--text-3); margin-bottom:9px;}
+.brand-footer p{font-size:11.5px; color:var(--text-3); line-height:1.55;}
+
+/* Overlay de pantalla completa cuando hay alerta crítica activa */
+.screen-flash{
+  position:fixed; inset:0; z-index:150; pointer-events:none;
+  background:rgba(255,45,32,0.16);
+  opacity:0;
+}
+.screen-flash.active{animation:flashfull 0.5s ease-in-out 5;}
+@keyframes flashfull{0%,100%{opacity:0;} 50%{opacity:1;}}
+
+@media (min-width:640px){
+  body{max-width:520px; margin:0 auto; border-left:0.5px solid var(--stroke); border-right:0.5px solid var(--stroke);}
+  .now-monitoring, .tabbar{max-width:520px; left:50%; transform:translateX(-50%); right:auto;}
+  .now-monitoring{width:calc(520px - 20px);}
+  .tabbar{width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="screen-flash" id="screenFlash"></div>
+
+<!-- ===================== TOAST DE ALERTA ===================== -->
+<div class="toast-alert" id="toastAlert">
+  <svg class="icon filled alert-icon" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v6m0 3.2h.01"/></svg>
+  <div class="txt">
+    <div class="t0">Alerta sísmica</div>
+    <div class="t1" id="toastTitle">Actividad detectada</div>
+    <div class="t2" id="toastSub">M 4.5 · a 320 km</div>
+  </div>
+  <button class="close" onclick="dismissToast()" aria-label="Cerrar">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
+<!-- ===================== TOP BAR ===================== -->
+<div class="topbar">
+  <div class="topbar-title">
+    <svg class="icon brand-icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/><circle cx="19" cy="6" r="2" fill="currentColor" stroke="none"/></svg>
+    Seismic Pulse
+  </div>
+  <div class="topbar-actions">
+    <div class="status-chip pulse" id="connStatus"><span class="dot"></span>Monitoreando</div>
+    <button class="icon-btn" onclick="goToView('settings')" aria-label="Ajustes">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===================== VIEW: INICIO ===================== -->
+<div class="view active" id="view-home">
+
+  <div class="segment-wrap">
+    <div class="segment" role="tablist">
+      <button class="active" data-range="hour" onclick="setRange('hour', this)">Última hora</button>
+      <button data-range="day" onclick="setRange('day', this)">Hoy</button>
+      <button data-range="week" onclick="setRange('week', this)">Semana</button>
+    </div>
+  </div>
+
+  <!-- RADAR HERO -->
+  <div class="hero">
+    <div class="radar-stage" id="radarStage">
+      <div class="radar-grid">
+        <div class="ring" style="inset:0;"></div>
+        <div class="ring" style="inset:34px;"></div>
+        <div class="ring" style="inset:68px;"></div>
+        <div class="ring" style="inset:102px;"></div>
+      </div>
+      <div class="radar-sweep" id="radarSweep"></div>
+      <div class="radar-ring animate" id="ring1"></div>
+      <div class="radar-ring animate" id="ring2"></div>
+      <div class="radar-ring animate" id="ring3"></div>
+      <div class="radar-core" id="radarCore">
+        <svg class="icon core-icon spin" id="coreIconSvg" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <div class="mag" id="coreMag">—</div>
+        <div class="mag-label" id="coreLabel">Escaneando</div>
+      </div>
+    </div>
+    <div class="hero-status-text" id="heroStatusText">Conectando con la red sísmica</div>
+    <div class="hero-sub-text" id="heroSubText">Sincronizando con la red global de sensores del USGS para calcular la actividad más cercana a tu posición.</div>
+  </div>
+
+  <!-- SISMO MÁS CERCANO -->
+  <div class="nearest-card" id="nearestCard" style="display:none;" onclick="openDetail(currentNearest)">
+    <div class="nearest-badge" id="nearestBadge">—</div>
+    <div class="nearest-info">
+      <div class="place" id="nearestPlace">—</div>
+      <div class="meta">
+        <span id="nearestDist"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>—</span>
+        <span id="nearestDepth"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>—</span>
+        <span id="nearestTime"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>—</span>
+      </div>
+    </div>
+    <svg class="icon nearest-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+  </div>
+
+  <div class="divider-lg"></div>
+
+  <!-- ZONAS EN SEGUIMIENTO -->
+  <div class="section">
+    <div class="section-head">
+      <h2>Zonas en seguimiento</h2>
+      <span class="see-all" onclick="goToView('zones')">Ver todas</span>
+    </div>
+  </div>
+  <div class="hscroll" id="zonesScroll"></div>
+
+  <div class="divider-xl"></div>
+
+  <!-- CLIMA Y PRESIÓN -->
+  <div class="section">
+    <div class="section-head"><h2>Clima y presión local</h2></div>
+  </div>
+  <div class="weather-strip">
+    <div class="weather-head">
+      <div class="loc" id="weatherLoc"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>Localizando…</div>
+      <div class="risk-tag" id="pressureRisk">—</div>
+    </div>
+    <div class="weather-grid" id="weatherGrid">
+      <div class="weather-metric"><div class="skeleton" style="width:19px;height:19px;border-radius:50%;"></div><div class="skeleton" style="width:34px;height:12px;border-radius:4px;"></div><div class="lbl">Temp.</div></div>
+      <div class="weather-metric"><div class="skeleton" style="width:19px;height:19px;border-radius:50%;"></div><div class="skeleton" style="width:34px;height:12px;border-radius:4px;"></div><div class="lbl">Presión</div></div>
+      <div class="weather-metric"><div class="skeleton" style="width:19px;height:19px;border-radius:50%;"></div><div class="skeleton" style="width:34px;height:12px;border-radius:4px;"></div><div class="lbl">Humedad</div></div>
+      <div class="weather-metric"><div class="skeleton" style="width:19px;height:19px;border-radius:50%;"></div><div class="skeleton" style="width:34px;height:12px;border-radius:4px;"></div><div class="lbl">Viento</div></div>
+    </div>
+  </div>
+
+  <div class="divider-xl"></div>
+
+  <!-- GLOBO 3D -->
+  <div class="section">
+    <div class="section-head"><h2>El globo, en vivo</h2></div>
+  </div>
+  <div class="globe-panel">
+    <div class="globe-stage" id="globeStage">
+      <div class="globe-loading" id="globeLoading">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <span>Construyendo el globo…</span>
+      </div>
+      <div class="globe-hint" id="globeHint">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/></svg>
+        Arrastra para rotar el globo
+      </div>
+    </div>
+    <div class="map-footer">
+      <div class="map-legend">
+        <span><span class="sw" style="background:var(--safe);"></span>M &lt;4</span>
+        <span><span class="sw" style="background:var(--warning);"></span>M 4–6</span>
+        <span><span class="sw" style="background:var(--danger);"></span>M 6+</span>
+      </div>
+      <span id="mapCount">— eventos</span>
+    </div>
+  </div>
+
+  <div class="divider-xl"></div>
+
+  <!-- FEED RECIENTE -->
+  <div class="section">
+    <div class="section-head">
+      <h2>Actividad reciente</h2>
+      <span class="see-all" onclick="goToView('feed')">Ver todo</span>
+    </div>
+  </div>
+  <div class="feed-list" id="homeFeedList"></div>
+
+  <div class="brand-footer">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg>
+    <p>Datos sísmicos en tiempo real del Servicio Geológico de Estados Unidos (USGS).<br>Datos meteorológicos de Open-Meteo.</p>
+  </div>
+</div>
+
+<!-- ===================== VIEW: FEED COMPLETO ===================== -->
+<div class="view" id="view-feed">
+  <div class="segment-wrap" style="padding-top:16px;">
+    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Toda la actividad</h2></div>
+  </div>
+  <div class="segment-wrap">
+    <div class="segment">
+      <button class="active" data-mag="0" onclick="setMagFilter(0, this)">Todo</button>
+      <button data-mag="3" onclick="setMagFilter(3, this)">M3+</button>
+      <button data-mag="4.5" onclick="setMagFilter(4.5, this)">M4.5+</button>
+      <button data-mag="6" onclick="setMagFilter(6, this)">M6+</button>
+    </div>
+  </div>
+  <div class="divider-lg"></div>
+  <div class="feed-list" id="fullFeedList"></div>
+</div>
+
+<!-- ===================== VIEW: ZONAS ===================== -->
+<div class="view" id="view-zones">
+  <div class="segment-wrap" style="padding-top:16px;">
+    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Zonas en seguimiento</h2></div>
+  </div>
+  <div class="section" style="padding-top:6px;">
+    <p style="font-size:13.5px; color:var(--text-2); line-height:1.5;">Regiones de alta actividad tectónica monitoreadas de forma constante, ordenadas por número de eventos recientes.</p>
+  </div>
+  <div class="divider-lg"></div>
+  <div class="section" id="zonesGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:14px;"></div>
+</div>
+
+<!-- ===================== VIEW: AJUSTES ===================== -->
+<div class="view" id="view-settings">
+  <div class="segment-wrap" style="padding-top:16px;">
+    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes de alerta</h2></div>
+  </div>
+
+  <div class="section" style="padding-top:10px;"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Alarma sísmica</p></div>
+  <div class="section">
+    <div class="setting-row">
+      <div class="left">
+        <div class="ico-badge" style="background:var(--danger);"><svg class="icon filled" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div><div class="label">Alarma sonora</div><div class="desc">Sirena de emergencia al detectar un sismo relevante</div></div>
+      </div>
+      <div class="switch on" id="switchAlarm" onclick="toggleSwitch(this,'alarm')"><div class="knob"></div></div>
+    </div>
+    <div class="setting-row">
+      <div class="left">
+        <div class="ico-badge" style="background:var(--deep);"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="8" height="20" rx="2"/><path d="M2 9v6M22 8v8M19 6v12"/></svg></div>
+        <div><div class="label">Vibración</div><div class="desc">Patrón de vibración de emergencia</div></div>
+      </div>
+      <div class="switch on" id="switchVibrate" onclick="toggleSwitch(this,'vibrate')"><div class="knob"></div></div>
+    </div>
+    <div class="setting-row">
+      <div class="left">
+        <div class="ico-badge" style="background:var(--info);"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+        <div><div class="label">Ubicación en tiempo real</div><div class="desc">Calcula distancia desde tu posición</div></div>
+      </div>
+      <div class="switch" id="switchGeo" onclick="toggleSwitch(this,'geo')"><div class="knob"></div></div>
+    </div>
+  </div>
+
+  <div class="divider-lg"></div>
+
+  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Umbral de sensibilidad</p></div>
+  <div class="section">
+    <div class="slider-row" style="border-radius:16px;">
+      <div class="top"><span class="label">Magnitud mínima para alertar</span><span class="value" id="magThreshVal">M 4.5</span></div>
+      <input type="range" min="2" max="7" step="0.5" value="4.5" id="magThresh" oninput="updateMagThresh(this.value)">
+    </div>
+  </div>
+
+  <div class="divider-lg"></div>
+
+  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Probar sirena de emergencia</p></div>
+  <div class="section">
+    <button class="alarm-test-btn" id="testAlarmBtn" onclick="testAlarm()">
+      <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+      Activar sirena sísmica
+    </button>
+  </div>
+
+  <div class="divider-lg"></div>
+
+  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Sobre la app</p></div>
+  <div class="section">
+    <div class="setting-row">
+      <div class="left"><div class="ico-badge" style="background:var(--surface-2); color:var(--text-2);"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="9" width="20" height="10" rx="2"/><path d="M6 9V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2M9 13h.01M15 13h.01"/></svg></div><div><div class="label">Fuente sísmica</div><div class="desc">USGS Earthquake Hazards Program</div></div></div>
+    </div>
+    <div class="setting-row">
+      <div class="left"><div class="ico-badge" style="background:var(--surface-2); color:var(--text-2);"><svg class="icon" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div><div><div class="label">Fuente meteorológica</div><div class="desc">Open-Meteo</div></div></div>
+    </div>
+    <div class="setting-row">
+      <div class="left"><div class="ico-badge" style="background:var(--surface-2); color:var(--text-2);"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg></div><div><div class="label">Frecuencia de actualización</div><div class="desc">Cada 60 segundos</div></div></div>
+    </div>
+  </div>
+
+  <div class="divider-xl"></div>
+</div>
+
+<!-- ===================== VIEW: DETALLE ===================== -->
+<div class="view" id="view-detail">
+  <div class="segment-wrap" style="padding-top:16px; display:flex; align-items:center; gap:12px;">
+    <button class="icon-btn" onclick="goToView('home')" aria-label="Volver"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div style="font-size:16px; font-weight:800;">Detalle del evento</div>
+  </div>
+
+  <div class="hero" style="padding-top:20px;">
+    <div class="radar-stage" style="width:190px; height:190px;">
+      <div class="radar-core" id="detailCore" style="width:190px; height:190px; animation:none;">
+        <svg class="icon filled" id="detailIcon" viewBox="0 0 24 24" style="width:32px;height:32px;"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z"/></svg>
+        <div class="mag" id="detailMag" style="font-size:46px;">—</div>
+        <div class="mag-label" id="detailMagType">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="text-align:center;">
+    <div style="font-size:19px; font-weight:800; margin-bottom:4px;" id="detailPlace">—</div>
+    <div style="font-size:13.5px; color:var(--text-2); font-weight:600;" id="detailDate">—</div>
+  </div>
+
+  <div class="divider-lg"></div>
+
+  <div class="section" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
+      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M12 3v14M6 13l6 6 6-6"/></svg>
+      <div class="val" id="detailDepth" style="font-size:17px;">—</div>
+      <div class="lbl">Profundidad</div>
+    </div>
+    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
+      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <div class="val" id="detailDistance" style="font-size:17px;">—</div>
+      <div class="lbl">Distancia</div>
+    </div>
+    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
+      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M12 2 1 21h22L12 2zm0 6v6m0 3.2h.01"/></svg>
+      <div class="val" id="detailTsunami" style="font-size:17px;">—</div>
+      <div class="lbl">Riesgo tsunami</div>
+    </div>
+    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
+      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <div class="val" id="detailSig" style="font-size:17px;">—</div>
+      <div class="lbl">Índice de impacto</div>
+    </div>
+  </div>
+
+  <div class="divider-lg"></div>
+
+  <div class="section">
+    <button id="detailLinkBtn" onclick="window.open(currentDetailUrl,'_blank')" style="width:100%; background:var(--surface); border:0.5px solid var(--stroke); border-radius:16px; padding:16px; display:flex; align-items:center; justify-content:center; gap:9px; font-size:14.5px; font-weight:700;">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+      Ver informe completo en USGS
+    </button>
+  </div>
+  <div class="divider-xl"></div>
+</div>
+
+<!-- ===================== NOW MONITORING ===================== -->
+<div class="now-monitoring" onclick="goToView('detail'); event.stopPropagation();">
+  <div class="nm-art" id="nmArt"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg></div>
+  <div class="nm-body">
+    <div class="nm-title" id="nmTitle">Monitoreo activo</div>
+    <div class="nm-sub" id="nmSub">Conectando con USGS…</div>
+  </div>
+  <div class="nm-actions">
+    <button class="icon-btn" onclick="event.stopPropagation(); refreshAll();" aria-label="Actualizar">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+    </button>
+    <button class="icon-btn play" id="nmPlayBtn" onclick="event.stopPropagation(); toggleMonitoring();" aria-label="Pausar monitoreo">
+      <svg class="icon filled" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===================== TAB BAR ===================== -->
+<div class="tabbar">
+  <div class="tab-item active" data-tab="home" onclick="goToView('home')">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/><circle cx="19" cy="6" r="1.6" fill="currentColor" stroke="none"/></svg>
+    <span>Radar</span>
+  </div>
+  <div class="tab-item" data-tab="feed" onclick="goToView('feed')">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+    <span>Actividad</span>
+  </div>
+  <div class="tab-item" data-tab="zones" onclick="goToView('zones')">
+    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg>
+    <span>Zonas</span>
+  </div>
+  <div class="tab-item" data-tab="settings" onclick="goToView('settings')">
+    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Ajustes</span>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============================================================
+   SEISMIC PULSE — Lógica principal
+   Fuentes de datos reales:
+   - USGS Earthquake Hazards Program (GeoJSON feed, sin API key)
+   - Open-Meteo (clima y presión atmosférica, sin API key)
+   ============================================================ */
+
+const USGS_FEEDS = {
+  hour: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
+  day:  'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson',
+  week: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson'
+};
+
+let state = {
+  range: 'day',
+  quakes: [],
+  userLat: 19.4326,
+  userLon: -99.1332,
+  hasRealGeo: false,
+  monitoring: true,
+  alarmOn: true,
+  vibrateOn: true,
+  geoOn: false,
+  magThreshold: 4.5,
+  lastAlertedId: null,
+  magFilter: 0,
+  currentDetail: null
+};
+
+let currentNearest = null;
+let currentDetailUrl = '#';
+
+/* -------------------- NAVEGACIÓN -------------------- */
+function goToView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const tab = document.querySelector('.tab-item[data-tab="' + name + '"]');
+  if(tab) tab.classList.add('active');
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function setRange(range, btn){
+  state.range = range;
+  document.querySelectorAll('.segment button[data-range]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadQuakes();
+}
+
+function setMagFilter(mag, btn){
+  state.magFilter = mag;
+  document.querySelectorAll('.segment button[data-mag]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFullFeed();
+}
+
+/* -------------------- UTILIDADES -------------------- */
+function haversine(lat1, lon1, lat2, lon2){
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function magColor(mag){
+  if(mag >= 6) return {light:'#5a1712', dark:'#1f0604', glow:'rgba(255,45,32,0.7)', badgeBg:'rgba(255,45,32,0.17)', badgeFg:'#ff6b5e', numBg:'#ff2d20'};
+  if(mag >= 4.5) return {light:'#3a2c10', dark:'#1c1506', glow:'rgba(255,159,10,0.58)', badgeBg:'rgba(255,159,10,0.17)', badgeFg:'#ff9f0a', numBg:'#ff9f0a'};
+  if(mag >= 3) return {light:'#0d2a4a', dark:'#04101f', glow:'rgba(10,132,255,0.5)', badgeBg:'rgba(10,132,255,0.17)', badgeFg:'#0a84ff', numBg:'#0a84ff'};
+  return {light:'#0d3a1e', dark:'#04160c', glow:'rgba(48,209,88,0.45)', badgeBg:'rgba(48,209,88,0.17)', badgeFg:'#30d158', numBg:'#30d158'};
+}
+
+function timeAgo(ts){
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff/60000);
+  if(min < 1) return 'ahora';
+  if(min < 60) return min + ' min';
+  const h = Math.floor(min/60);
+  if(h < 24) return h + ' h';
+  const d = Math.floor(h/24);
+  return d + ' d';
+}
+
+function fmtDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleString('es-ES', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+}
+
+/* -------------------- CARGA DE SISMOS (USGS) -------------------- */
+async function loadQuakes(){
+  try{
+    setConnStatus('loading');
+    const res = await fetch(USGS_FEEDS[state.range]);
+    if(!res.ok) throw new Error('USGS respondió ' + res.status);
+    const data = await res.json();
+    state.quakes = data.features
+      .map(f => ({
+        id: f.id,
+        mag: f.properties.mag,
+        place: f.properties.place || 'Ubicación desconocida',
+        time: f.properties.time,
+        updated: f.properties.updated,
+        tsunami: f.properties.tsunami,
+        sig: f.properties.sig,
+        alert: f.properties.alert,
+        url: f.properties.url,
+        lon: f.geometry.coordinates[0],
+        lat: f.geometry.coordinates[1],
+        depth: f.geometry.coordinates[2]
+      }))
+      .filter(q => typeof q.mag === 'number')
+      .sort((a,b) => b.time - a.time);
+
+    state.quakes.forEach(q => q.distance = haversine(state.userLat, state.userLon, q.lat, q.lon));
+
+    renderAll();
+    setConnStatus('ok');
+    checkForAlarm();
+  }catch(err){
+    console.error('Error cargando USGS:', err);
+    setConnStatus('error');
+  }
+}
+
+function setConnStatus(mode){
+  const chip = document.getElementById('connStatus');
+  if(mode === 'loading'){
+    chip.className = 'status-chip'; chip.innerHTML = '<span class="dot"></span>Sincronizando';
+  }else if(mode === 'ok'){
+    chip.className = 'status-chip pulse'; chip.innerHTML = '<span class="dot"></span>Monitoreando';
+  }else{
+    chip.className = 'status-chip danger'; chip.innerHTML = '<span class="dot"></span>Sin conexión';
+  }
+}
+
+/* -------------------- RENDER GENERAL -------------------- */
+function renderAll(){
+  renderRadar();
+  renderNearest();
+  renderZonesScroll();
+  renderHomeFeed();
+  renderFullFeed();
+  updateGlobePoints();
+  renderNowMonitoring();
+}
+
+function renderRadar(){
+  const sweep = document.getElementById('radarSweep');
+  if(state.quakes.length === 0){
+    document.getElementById('coreIconSvg').outerHTML = '<svg class="icon core-icon" id="coreIconSvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 15s1.5 2 3 2 3-2 3-2M9 9h.01M15 9h.01"/></svg>';
+    document.getElementById('coreMag').textContent = '0';
+    document.getElementById('coreLabel').textContent = 'Sin datos';
+    document.getElementById('heroStatusText').textContent = 'Todo en calma';
+    document.getElementById('heroSubText').textContent = 'No se registró actividad sísmica relevante en este rango de tiempo.';
+    sweep.style.setProperty('--sweep-color', '#30d158');
+    document.querySelectorAll('.radar-ring').forEach(r => r.style.setProperty('--ring-color', '#30d158'));
+    return;
+  }
+
+  const nearest = [...state.quakes].sort((a,b) => a.distance - b.distance)[0];
+  const strongest = [...state.quakes].sort((a,b) => b.mag - a.mag)[0];
+  currentNearest = nearest;
+
+  const c = magColor(nearest.mag);
+  const core = document.getElementById('radarCore');
+  core.style.setProperty('--core-light', c.light);
+  core.style.setProperty('--core-dark', c.dark);
+  core.style.setProperty('--glow', c.glow);
+  core.style.setProperty('--core-icon', c.badgeFg);
+  sweep.style.setProperty('--sweep-color', c.badgeFg);
+  document.querySelectorAll('.radar-ring').forEach(r => r.style.setProperty('--ring-color', c.badgeFg));
+
+  const iconEl = document.getElementById('coreIconSvg');
+  iconEl.outerHTML = '<svg class="icon filled core-icon" id="coreIconSvg" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z"/></svg>';
+
+  document.getElementById('coreMag').textContent = nearest.mag.toFixed(1);
+  document.getElementById('coreLabel').textContent = 'Magnitud';
+
+  if(nearest.mag >= state.magThreshold){
+    document.getElementById('heroStatusText').textContent = 'Sismo relevante cerca de ti';
+  }else{
+    document.getElementById('heroStatusText').textContent = 'Actividad detectada';
+  }
+  document.getElementById('heroSubText').textContent =
+    nearest.place + ' — a ' + Math.round(nearest.distance).toLocaleString('es-ES') + ' km. Sismo más fuerte del periodo: M ' + strongest.mag.toFixed(1) + '.';
+}
+
+function renderNearest(){
+  if(!currentNearest){ document.getElementById('nearestCard').style.display = 'none'; return; }
+  const q = currentNearest;
+  const c = magColor(q.mag);
+  document.getElementById('nearestCard').style.display = 'flex';
+  const badge = document.getElementById('nearestBadge');
+  badge.textContent = q.mag.toFixed(1);
+  badge.style.background = c.badgeBg;
+  badge.style.color = c.badgeFg;
+  document.getElementById('nearestPlace').textContent = q.place;
+  document.getElementById('nearestDist').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>' + Math.round(q.distance).toLocaleString('es-ES') + ' km';
+  document.getElementById('nearestDepth').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>' + q.depth.toFixed(0) + ' km prof.';
+  document.getElementById('nearestTime').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>' + timeAgo(q.time);
+}
+
+/* -------------------- ZONAS -------------------- */
+const ICON_MOUNTAIN = '<path d="m8 21 4-13 4 13M3 21h18M10 14l-2-2-3 5"/>';
+const ICON_BUILDING = '<rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 8h1M14 8h1M9 12h1M14 12h1"/>';
+const ICON_WAVE = '<path d="M2 12s2-3 5-3 5 3 8 3 5-3 5-3M2 18s2-3 5-3 5 3 8 3 5-3 5-3"/>';
+const ICON_TORII = '<path d="M3 6h18M5 6v14M19 6v14M8 6 7 3h10l-1 3M4 10h16"/>';
+const ICON_ANCHOR = '<circle cx="12" cy="5" r="2"/><path d="M12 7v14M5 12H2a10 10 0 0 0 20 0h-3M8 15l4 6 4-6"/>';
+const ICON_CACTUS = '<path d="M12 22V8a2 2 0 0 1 4 0v3M12 22V8a2 2 0 0 0-4 0v3M8 11H6a2 2 0 0 0-2 2v3M16 11h2a2 2 0 0 1 2 2v3"/>';
+const ICON_COLUMNS = '<path d="M4 22V9M9 22V9M15 22V9M20 22V9M2 9h20L12 3z"/>';
+const ICON_PALM = '<path d="M12 22V10M12 10c-3-4-8-4-9-1 3 1 5 0 9 1zM12 10c3-4 8-4 9-1-3 1-5 0-9 1zM12 10c-1-4 1-8 4-9-1 3-1 5-4 9z"/>';
+const ICON_PEAK = '<path d="m12 3 9 18H3L12 3z"/><path d="m12 3 4 13H8L12 3z"/>';
+const ICON_SAIL = '<path d="M4 21h16M6 21V4l10 8H6M18 21c0-3 2-4 2-7"/>';
+
+const ZONE_DEFS = [
+  {key:'Alaska', icon:ICON_MOUNTAIN, a:'#1c3d5a', b:'#0a1c2e'},
+  {key:'California', icon:ICON_BUILDING, a:'#4a2d1c', b:'#241208'},
+  {key:'Chile', icon:ICON_WAVE, a:'#1c4a3d', b:'#081f18'},
+  {key:'Japan', icon:ICON_TORII, a:'#4a1c2d', b:'#240a12'},
+  {key:'Indonesia', icon:ICON_ANCHOR, a:'#3d1c4a', b:'#1a0824'},
+  {key:'Mexico', icon:ICON_CACTUS, a:'#4a3d1c', b:'#241e08'},
+  {key:'Turkey', icon:ICON_COLUMNS, a:'#1c2d4a', b:'#080f24'},
+  {key:'Philippines', icon:ICON_PALM, a:'#1c4a2d', b:'#082412'},
+  {key:'Peru', icon:ICON_PEAK, a:'#4a1c1c', b:'#240808'},
+  {key:'New Zealand', icon:ICON_SAIL, a:'#2d4a1c', b:'#122408'}
+];
+const ZONE_LABELS = {'New Zealand':'Nueva Zelanda', 'Mexico':'México', 'Turkey':'Turquía', 'Japan':'Japón'};
+
+function renderZonesScroll(){
+  const zoneStats = computeZoneStats();
+  const wrap = document.getElementById('zonesScroll');
+  wrap.innerHTML = '';
+  zoneStats.slice(0,10).forEach(z => {
+    const el = document.createElement('div');
+    el.className = 'zone-card';
+    el.onclick = () => filterByZone(z.key);
+    el.innerHTML =
+      '<div class="zone-art" style="--art-a:' + z.def.a + '; --art-b:' + z.def.b + ';">' +
+        '<div class="zone-mag-tag">' + z.count + '</div>' +
+        '<svg class="icon" viewBox="0 0 24 24">' + z.def.icon + '</svg>' +
+      '</div>' +
+      '<div class="zone-title">' + z.label + '</div>' +
+      '<div class="zone-sub">Máx. M ' + z.maxMag.toFixed(1) + '</div>';
+    wrap.appendChild(el);
+  });
+}
+
+function computeZoneStats(){
+  const stats = {};
+  ZONE_DEFS.forEach(def => stats[def.key] = {def, key:def.key, label: ZONE_LABELS[def.key] || def.key, count:0, maxMag:0});
+  state.quakes.forEach(q => {
+    ZONE_DEFS.forEach(def => {
+      if(q.place.includes(def.key)){
+        stats[def.key].count++;
+        if(q.mag > stats[def.key].maxMag) stats[def.key].maxMag = q.mag;
+      }
+    });
+  });
+  return Object.values(stats).filter(z => z.count > 0).sort((a,b) => b.count - a.count);
+}
+
+function renderZonesGrid(){
+  const zoneStats = computeZoneStats();
+  const grid = document.getElementById('zonesGrid');
+  if(zoneStats.length === 0){
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><path d="m4 4 16 16"/></svg><p>No hay zonas con actividad suficiente en este rango.</p></div>';
+    return;
+  }
+  grid.innerHTML = '';
+  zoneStats.forEach(z => {
+    const el = document.createElement('div');
+    el.onclick = () => { filterByZone(z.key); };
+    el.innerHTML =
+      '<div class="zone-art" style="--art-a:' + z.def.a + '; --art-b:' + z.def.b + '; width:100%; height:130px;">' +
+        '<div class="zone-mag-tag">' + z.count + ' eventos</div>' +
+        '<svg class="icon" viewBox="0 0 24 24" style="width:28px;height:28px;">' + z.def.icon + '</svg>' +
+      '</div>' +
+      '<div class="zone-title" style="margin-top:8px;">' + z.label + '</div>' +
+      '<div class="zone-sub">Máx. M ' + z.maxMag.toFixed(1) + '</div>';
+    grid.appendChild(el);
+  });
+}
+
+function filterByZone(key){
+  goToView('feed');
+  state.zoneFilter = key;
+  renderFullFeed();
+}
+
+/* -------------------- FEEDS -------------------- */
+function renderHomeFeed(){
+  const list = document.getElementById('homeFeedList');
+  const top = [...state.quakes].sort((a,b) => b.time - a.time).slice(0,6);
+  renderFeedInto(list, top);
+}
+
+function renderFullFeed(){
+  const list = document.getElementById('fullFeedList');
+  let filtered = state.quakes.filter(q => q.mag >= state.magFilter);
+  if(state.zoneFilter){
+    filtered = filtered.filter(q => q.place.includes(state.zoneFilter));
+  }
+  filtered = filtered.sort((a,b) => b.time - a.time);
+  renderFeedInto(list, filtered, true);
+}
+
+function renderFeedInto(container, quakes, showEmpty){
+  container.innerHTML = '';
+  if(quakes.length === 0 && showEmpty){
+    container.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><p>No hay eventos que coincidan con este filtro.</p></div>';
+    return;
+  }
+  quakes.forEach((q, idx) => {
+    const c = magColor(q.mag);
+    const row = document.createElement('div');
+    row.className = 'feed-row';
+    row.onclick = () => openDetail(q);
+    row.innerHTML =
+      '<div class="feed-num" style="background:' + c.numBg + ';">' + q.mag.toFixed(1) + '</div>' +
+      '<div class="feed-body">' +
+        '<div class="feed-title">' + q.place + '</div>' +
+        '<div class="feed-meta">' + q.depth.toFixed(0) + ' km prof. · ' + Math.round(q.distance).toLocaleString('es-ES') + ' km de ti</div>' +
+      '</div>' +
+      '<div class="feed-time">' + timeAgo(q.time) + '</div>';
+    container.appendChild(row);
+    if(idx < quakes.length - 1){
+      const div = document.createElement('div');
+      div.className = 'feed-divider';
+      container.appendChild(div);
+    }
+  });
+}
+
+/* -------------------- DETALLE -------------------- */
+function openDetail(q){
+  if(!q) return;
+  state.currentDetail = q;
+  const c = magColor(q.mag);
+  const core = document.getElementById('detailCore');
+  core.style.setProperty('--core-light', c.light);
+  core.style.setProperty('--core-dark', c.dark);
+  core.style.setProperty('--glow', c.glow);
+  document.getElementById('detailIcon').style.color = c.badgeFg;
+  document.getElementById('detailMag').textContent = q.mag.toFixed(1);
+  document.getElementById('detailMagType').textContent = q.mag >= 6 ? 'Fuerte' : q.mag >= 4.5 ? 'Moderado' : q.mag >= 3 ? 'Leve' : 'Menor';
+  document.getElementById('detailPlace').textContent = q.place;
+  document.getElementById('detailDate').textContent = fmtDate(q.time);
+  document.getElementById('detailDepth').textContent = q.depth.toFixed(0) + ' km';
+  document.getElementById('detailDistance').textContent = Math.round(q.distance).toLocaleString('es-ES') + ' km';
+  document.getElementById('detailTsunami').textContent = q.tsunami === 1 ? 'Posible' : 'Ninguno';
+  document.getElementById('detailSig').textContent = q.sig || '—';
+  currentDetailUrl = q.url || '#';
+  goToView('detail');
+}
+
+/* -------------------- NOW MONITORING -------------------- */
+function renderNowMonitoring(){
+  if(!currentNearest) return;
+  const c = magColor(currentNearest.mag);
+  const art = document.getElementById('nmArt');
+  art.style.setProperty('--core-light', c.light);
+  art.style.setProperty('--core-dark', c.dark);
+  art.style.setProperty('--core-icon', c.badgeFg);
+  document.getElementById('nmTitle').textContent = currentNearest.place;
+  document.getElementById('nmSub').textContent = 'M ' + currentNearest.mag.toFixed(1) + ' · ' + Math.round(currentNearest.distance).toLocaleString('es-ES') + ' km · ' + timeAgo(currentNearest.time);
+}
+
+function toggleMonitoring(){
+  state.monitoring = !state.monitoring;
+  const btn = document.getElementById('nmPlayBtn');
+  btn.innerHTML = state.monitoring
+    ? '<svg class="icon filled" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
+    : '<svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>';
+  if(state.monitoring){ startPolling(); } else { stopPolling(); }
+}
+
+/* -------------------- CLIMA (Open-Meteo) -------------------- */
+async function loadWeather(){
+  try{
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + state.userLat + '&longitude=' + state.userLon +
+      '&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,weather_code&timezone=auto';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Open-Meteo respondió ' + res.status);
+    const data = await res.json();
+    const cur = data.current;
+
+    const grid = document.getElementById('weatherGrid');
+    grid.innerHTML =
+      metricHtml('<path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>', Math.round(cur.temperature_2m) + '°C', 'Temp.') +
+      metricHtml('<path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/>', Math.round(cur.pressure_msl) + ' hPa', 'Presión') +
+      metricHtml('<path d="M12 2s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>', Math.round(cur.relative_humidity_2m) + '%', 'Humedad') +
+      metricHtml('<path d="M3 8h9a3 3 0 1 0-3-3M3 16h13a3 3 0 1 1-3 3M3 12h16a3 3 0 1 0-3-3"/>', Math.round(cur.wind_speed_10m) + ' km/h', 'Viento');
+
+    const risk = document.getElementById('pressureRisk');
+    if(cur.pressure_msl < 1005){
+      risk.textContent = 'Presión baja';
+      risk.style.background = 'rgba(255,159,10,0.15)'; risk.style.color = 'var(--warning)';
+    }else if(cur.pressure_msl > 1025){
+      risk.textContent = 'Presión alta';
+      risk.style.background = 'rgba(10,132,255,0.15)'; risk.style.color = 'var(--info)';
+    }else{
+      risk.textContent = 'Presión estable';
+      risk.style.background = 'rgba(48,209,88,0.15)'; risk.style.color = 'var(--safe)';
+    }
+
+    reverseGeocode();
+  }catch(err){
+    console.error('Error cargando Open-Meteo:', err);
+    document.getElementById('weatherGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1; padding:14px;"><p>No se pudo obtener el clima ahora mismo.</p></div>';
+  }
+}
+
+function metricHtml(pathD, val, lbl){
+  return '<div class="weather-metric"><svg class="icon" viewBox="0 0 24 24">' + pathD + '</svg><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
+}
+
+async function reverseGeocode(){
+  try{
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + state.userLat + '&longitude=' + state.userLon + '&current=temperature_2m&timezone=auto';
+    const res = await fetch(url);
+    const data = await res.json();
+    document.getElementById('weatherLoc').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>' + (data.timezone ? data.timezone.split('/').pop().replace('_',' ') : 'Tu ubicación');
+  }catch(e){
+    document.getElementById('weatherLoc').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>Tu ubicación';
+  }
+}
+
+/* -------------------- GEOLOCALIZACIÓN -------------------- */
+function toggleSwitch(el, key){
+  const isOn = el.classList.toggle('on');
+  state[key + 'On'] = isOn;
+  if(key === 'geo'){
+    if(isOn){ requestGeolocation(); } else { state.hasRealGeo = false; }
+  }
+}
+
+function requestGeolocation(){
+  if(!navigator.geolocation){ return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      state.userLat = pos.coords.latitude;
+      state.userLon = pos.coords.longitude;
+      state.hasRealGeo = true;
+      loadWeather();
+      state.quakes.forEach(q => q.distance = haversine(state.userLat, state.userLon, q.lat, q.lon));
+      renderAll();
+      if(globeReady) positionUserMarker();
+    },
+    err => { console.warn('Geolocalización no disponible:', err.message); },
+    {enableHighAccuracy:false, timeout:8000}
+  );
+}
+
+/* ============================================================
+   SIRENA DE EMERGENCIA SÍSMICA — Web Audio API, multicapa
+   Diseñada para sonar como una alerta oficial real: barrido de
+   sirena de dos tonos, golpe grave de impacto, y textura de
+   ruido de "temblor" de fondo. Sin dependencia de archivos de
+   audio externos: se sintetiza 100% en el navegador.
+   ============================================================ */
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+  return audioCtx;
+}
+
+function buildRumbleNoiseBuffer(ctx, duration){
+  const bufferSize = ctx.sampleRate * duration;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  let lastOut = 0;
+  for(let i=0;i<bufferSize;i++){
+    const white = Math.random() * 2 - 1;
+    lastOut = (lastOut + 0.02 * white) / 1.02;
+    data[i] = lastOut * 3.2;
+  }
+  return buffer;
+}
+
+function playSeismicSiren(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 4.6;
+
+  const master = ctx.createGain();
+  master.gain.value = 0.0001;
+  master.connect(ctx.destination);
+  master.gain.exponentialRampToValueAtTime(0.55, now + 0.05);
+
+  /* CAPA 1 — sirena de dos tonos tipo alerta oficial de emergencia (agresiva, tipo EAS) */
+  const sirenOsc = ctx.createOscillator();
+  sirenOsc.type = 'sawtooth';
+  const sirenGain = ctx.createGain();
+  sirenGain.gain.value = 0.5;
+  const sirenFilter = ctx.createBiquadFilter();
+  sirenFilter.type = 'bandpass';
+  sirenFilter.frequency.value = 1000;
+  sirenFilter.Q.value = 0.7;
+  sirenOsc.connect(sirenFilter).connect(sirenGain).connect(master);
+
+  const steps = 22;
+  for(let i=0;i<=steps;i++){
+    const t = now + (i/steps) * duration;
+    const freq = (i % 2 === 0) ? 1046 : 784;
+    sirenOsc.frequency.setValueAtTime(freq, t);
+  }
+
+  /* CAPA 2 — armónico agudo que refuerza la sirena, tipo alarma antiaérea */
+  const harmOsc = ctx.createOscillator();
+  harmOsc.type = 'square';
+  const harmGain = ctx.createGain();
+  harmGain.gain.value = 0.16;
+  harmOsc.connect(harmGain).connect(master);
+  for(let i=0;i<=steps;i++){
+    const t = now + (i/steps) * duration;
+    const freq = (i % 2 === 0) ? 1046*1.5 : 784*1.5;
+    harmOsc.frequency.setValueAtTime(freq, t);
+  }
+
+  /* CAPA 3 — golpes de impacto grave, como "sacudidas" sincronizadas */
+  const impactCount = 10;
+  const impactOscs = [];
+  for(let i=0;i<impactCount;i++){
+    const t = now + i * (duration/impactCount);
+    const osc = ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = 48;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.42, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+    osc.connect(g).connect(master);
+    osc.start(t);
+    osc.stop(t + 0.26);
+    impactOscs.push(osc);
+  }
+
+  /* CAPA 4 — textura de ruido grave tipo "temblor de tierra" de fondo */
+  const noiseBuffer = buildRumbleNoiseBuffer(ctx, duration);
+  const noiseSource = ctx.createBufferSource();
+  noiseSource.buffer = noiseBuffer;
+  const noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.value = 120;
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0, now);
+  noiseGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
+  noiseGain.gain.setValueAtTime(0.5, now + duration - 0.6);
+  noiseGain.gain.linearRampToValueAtTime(0, now + duration);
+  noiseSource.connect(noiseFilter).connect(noiseGain).connect(master);
+
+  /* cierre */
+  master.gain.setValueAtTime(0.55, now + duration - 0.35);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  sirenOsc.start(now); sirenOsc.stop(now + duration);
+  harmOsc.start(now); harmOsc.stop(now + duration);
+  noiseSource.start(now); noiseSource.stop(now + duration);
+
+  return duration;
+}
+
+function testAlarm(){
+  const btn = document.getElementById('testAlarmBtn');
+  const dur = playSeismicSiren();
+  if(state.vibrateOn && navigator.vibrate){ navigator.vibrate([250,90,250,90,250,90,600]); }
+  btn.classList.add('playing');
+  flashScreen();
+  setTimeout(() => btn.classList.remove('playing'), dur*1000);
+}
+
+function flashScreen(){
+  const el = document.getElementById('screenFlash');
+  el.classList.remove('active');
+  void el.offsetWidth;
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('active'), 2600);
+}
+
+function updateMagThresh(val){
+  state.magThreshold = parseFloat(val);
+  document.getElementById('magThreshVal').textContent = 'M ' + parseFloat(val).toFixed(1);
+}
+
+function checkForAlarm(){
+  if(!state.monitoring || !state.alarmOn) return;
+  const relevant = state.quakes.filter(q => q.mag >= state.magThreshold).sort((a,b) => b.time - a.time)[0];
+  if(relevant && relevant.id !== state.lastAlertedId){
+    state.lastAlertedId = relevant.id;
+    triggerAlert(relevant);
+  }
+}
+
+function triggerAlert(q){
+  const dur = playSeismicSiren();
+  if(state.vibrateOn && navigator.vibrate){ navigator.vibrate([300,100,300,100,300,100,700]); }
+  flashScreen();
+  document.getElementById('toastTitle').textContent = 'M ' + q.mag.toFixed(1) + ' — ' + q.place;
+  document.getElementById('toastSub').textContent = 'A ' + Math.round(q.distance).toLocaleString('es-ES') + ' km de ti · ' + q.depth.toFixed(0) + ' km de profundidad';
+  const toast = document.getElementById('toastAlert');
+  toast.classList.add('show');
+  if(q.mag >= 6){ toast.classList.add('blinking'); } else { toast.classList.remove('blinking'); }
+  setTimeout(dismissToast, 7500);
+}
+
+function dismissToast(){
+  const toast = document.getElementById('toastAlert');
+  toast.classList.remove('show');
+  toast.classList.remove('blinking');
+}
+
+/* -------------------- POLLING -------------------- */
+let pollInterval = null;
+function startPolling(){
+  if(pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(() => { loadQuakes(); }, 60000);
+}
+function stopPolling(){
+  if(pollInterval){ clearInterval(pollInterval); pollInterval = null; }
+}
+function refreshAll(){
+  loadQuakes();
+  loadWeather();
+}
+
+/* ============================================================
+   GLOBO TERRÁQUEO 3D — three.js
+   La textura de continentes se dibuja íntegramente en un
+   <canvas> local a partir de coordenadas reales (sin depender
+   de ninguna imagen externa), así el globo siempre se ve.
+   ============================================================ */
+let globeScene, globeCamera, globeRenderer, globeMesh, globeGroup, userMarker;
+let globeReady = false;
+let quakeMarkers = [];
+let isDragging = false, lastPointerX = 0, lastPointerY = 0;
+let globeRotVelX = 0, globeRotVelY = 0.0016;
+
+// Contornos continentales simplificados (lon, lat) — suficientes puntos para ser reconocibles a simple vista
+const CONTINENTS = [
+  // Norteamérica
+  [[-168,66],[-165,60],[-155,58],[-135,58],[-130,54],[-125,48],[-124,40],[-117,32],[-105,20],[-97,18],[-90,15],[-86,13],[-83,9],[-80,8],[-77,8],[-81,25],[-80,31],[-76,35],[-75,39],[-70,43],[-66,45],[-60,47],[-55,51],[-60,55],[-65,60],[-75,62],[-85,66],[-95,68],[-110,70],[-130,70],[-150,70],[-165,68],[-168,66]],
+  // Groenlandia
+  [[-45,60],[-35,64],[-25,70],[-30,78],[-45,82],[-60,78],[-55,68],[-48,62],[-45,60]],
+  // Sudamérica
+  [[-79,9],[-77,3],[-80,-4],[-81,-6],[-75,-14],[-72,-18],[-70,-23],[-71,-30],[-73,-38],[-73,-45],[-70,-52],[-68,-55],[-65,-55],[-62,-50],[-58,-42],[-56,-35],[-48,-25],[-40,-15],[-38,-10],[-35,-6],[-40,0],[-50,2],[-60,5],[-70,9],[-79,9]],
+  // Europa
+  [[-9,43],[-9,36],[0,38],[10,36],[15,37],[19,40],[23,36],[28,36],[27,40],[30,45],[28,46],[33,45],[38,47],[40,44],[38,40],[35,36],[27,35],[24,35],[20,40],[15,41],[13,45],[9,44],[4,44],[-2,43],[-9,43],
+    [-9,43],[-5,48],[0,50],[2,51],[4,52],[8,54],[12,56],[10,58],[5,58],[2,55],[-3,58],[-5,52],[-9,54],[-10,52],[-9,43]],
+  // África
+  [[-17,15],[-17,21],[-9,28],[-6,33],[0,37],[10,37],[11,33],[20,32],[25,32],[32,31],[35,31],[36,27],[42,12],[43,5],[41,0],[40,-10],[35,-19],[33,-25],[27,-33],[20,-34],[16,-29],[12,-18],[13,-9],[9,-2],[8,4],[2,6],[-4,5],[-9,5],[-13,9],[-17,15]],
+  // Asia
+  [[27,40],[33,45],[40,44],[45,42],[48,42],[50,46],[55,45],[60,50],[65,55],[70,58],[75,62],[85,68],[95,72],[110,72],[125,72],[140,70],[150,60],[160,60],[170,66],[178,68],[180,65],[175,60],[165,55],[155,52],[142,45],[130,35],[122,30],[121,25],[120,23],[110,18],[103,10],[100,6],[97,5],[95,15],[92,21],[88,22],[80,15],[75,10],[73,15],[68,23],[62,25],[57,26],[52,26],[48,30],[44,33],[36,36],[27,40]],
+  // Australia
+  [[113,-22],[114,-28],[118,-33],[124,-33],[131,-31],[136,-35],[140,-38],[145,-38],[150,-37],[153,-28],[151,-24],[145,-16],[142,-11],[135,-12],[130,-12],[126,-14],[122,-18],[113,-22]],
+  // Antártida (banda simplificada)
+  [[-180,-66],[-150,-70],[-120,-73],[-90,-74],[-60,-72],[-30,-70],[0,-68],[30,-67],[60,-66],[90,-66],[120,-66],[150,-66],[180,-66],[150,-64],[120,-64],[90,-64],[60,-64],[30,-64],[0,-64],[-30,-64],[-60,-64],[-90,-64],[-120,-64],[-150,-64],[-180,-64],[-180,-66]]
+];
+
+function latLonToXY(lat, lon, w, h){
+  const x = (lon + 180) / 360 * w;
+  const y = (90 - lat) / 180 * h;
+  return [x,y];
+}
+
+function buildEarthTexture(){
+  const w = 1600, h = 800;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  // océano profundo
+  const oceanGrad = ctx.createLinearGradient(0,0,0,h);
+  oceanGrad.addColorStop(0,'#0b3a63');
+  oceanGrad.addColorStop(0.5,'#0a2f52');
+  oceanGrad.addColorStop(1,'#082542');
+  ctx.fillStyle = oceanGrad;
+  ctx.fillRect(0,0,w,h);
+
+  // rejilla de paralelos/meridianos sutil
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for(let lon=-180; lon<=180; lon+=20){
+    const [x] = latLonToXY(0, lon, w, h);
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+  }
+  for(let lat=-80; lat<=80; lat+=20){
+    const [,y] = latLonToXY(lat, 0, w, h);
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+  }
+
+  // continentes
+  ctx.fillStyle = '#1f7a4a';
+  ctx.strokeStyle = '#2fa868';
+  ctx.lineWidth = 1.5;
+  CONTINENTS.forEach(poly => {
+    ctx.beginPath();
+    poly.forEach(([lon,lat], i) => {
+      const [x,y] = latLonToXY(lat, lon, w, h);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  });
+
+  // sombreado leve tipo relieve
+  const shade = ctx.createRadialGradient(w*0.3,h*0.3,50,w*0.3,h*0.3,w*0.9);
+  shade.addColorStop(0,'rgba(255,255,255,0.06)');
+  shade.addColorStop(1,'rgba(0,0,0,0.18)');
+  ctx.fillStyle = shade;
+  ctx.fillRect(0,0,w,h);
+
+  return canvas;
+}
+
+function initGlobe(){
+  const stage = document.getElementById('globeStage');
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+
+  globeScene = new THREE.Scene();
+  globeCamera = new THREE.PerspectiveCamera(45, width/height, 0.1, 100);
+  globeCamera.position.z = 6.4;
+
+  globeRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  globeRenderer.setSize(width, height);
+  globeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  stage.appendChild(globeRenderer.domElement);
+
+  globeGroup = new THREE.Group();
+  globeScene.add(globeGroup);
+
+  const earthCanvas = buildEarthTexture();
+  const texture = new THREE.CanvasTexture(earthCanvas);
+  texture.needsUpdate = true;
+
+  const geometry = new THREE.SphereGeometry(2.4, 64, 64);
+  const material = new THREE.MeshPhongMaterial({map:texture, shininess:8, specular:0x333333});
+  globeMesh = new THREE.Mesh(geometry, material);
+  globeGroup.add(globeMesh);
+
+  // atmósfera exterior sutil
+  const atmoGeo = new THREE.SphereGeometry(2.52, 48, 48);
+  const atmoMat = new THREE.MeshBasicMaterial({color:0x3a8fff, transparent:true, opacity:0.08, side:THREE.BackSide});
+  const atmoMesh = new THREE.Mesh(atmoGeo, atmoMat);
+  globeGroup.add(atmoMesh);
+
+  // estrellas de fondo
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 500;
+  const starPos = new Float32Array(starCount*3);
+  for(let i=0;i<starCount;i++){
+    const r = 20 + Math.random()*20;
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.acos((Math.random()*2)-1);
+    starPos[i*3] = r*Math.sin(phi)*Math.cos(theta);
+    starPos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+    starPos[i*3+2] = r*Math.cos(phi);
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const starMat = new THREE.PointsMaterial({color:0xffffff, size:0.045, transparent:true, opacity:0.65});
+  const stars = new THREE.Points(starGeo, starMat);
+  globeScene.add(stars);
+
+  globeScene.add(new THREE.AmbientLight(0x8899bb, 0.9));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+  sun.position.set(5,3,5);
+  globeScene.add(sun);
+
+  // marcador de usuario
+  const markerGeo = new THREE.SphereGeometry(0.045, 16, 16);
+  const markerMat = new THREE.MeshBasicMaterial({color:0x0a84ff});
+  userMarker = new THREE.Mesh(markerGeo, markerMat);
+  globeGroup.add(userMarker);
+  positionUserMarker();
+
+  globeGroup.rotation.y = -1.9;
+  globeGroup.rotation.x = 0.25;
+
+  // interacción: arrastrar para rotar (mouse y touch)
+  const dom = globeRenderer.domElement;
+  dom.addEventListener('pointerdown', e => {
+    isDragging = true; lastPointerX = e.clientX; lastPointerY = e.clientY;
+    document.getElementById('globeHint').style.opacity = '0';
+  });
+  window.addEventListener('pointerup', () => { isDragging = false; });
+  window.addEventListener('pointermove', e => {
+    if(!isDragging) return;
+    const dx = e.clientX - lastPointerX;
+    const dy = e.clientY - lastPointerY;
+    globeGroup.rotation.y += dx * 0.006;
+    globeGroup.rotation.x += dy * 0.004;
+    globeGroup.rotation.x = Math.max(-1.1, Math.min(1.1, globeGroup.rotation.x));
+    globeRotVelY = dx * 0.0006;
+    lastPointerX = e.clientX; lastPointerY = e.clientY;
+  });
+  dom.style.cursor = 'grab';
+
+  window.addEventListener('resize', onGlobeResize);
+
+  globeReady = true;
+  document.getElementById('globeLoading').style.opacity = '0';
+  setTimeout(() => { document.getElementById('globeLoading').style.display = 'none'; }, 450);
+  setTimeout(() => { document.getElementById('globeHint').style.opacity = '0'; }, 4500);
+
+  animateGlobe();
+  if(state.quakes.length) updateGlobePoints();
+}
+
+function onGlobeResize(){
+  if(!globeReady) return;
+  const stage = document.getElementById('globeStage');
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+  globeCamera.aspect = width/height;
+  globeCamera.updateProjectionMatrix();
+  globeRenderer.setSize(width, height);
+}
+
+function latLonToVec3(lat, lon, radius){
+  const phi = (90 - lat) * (Math.PI/180);
+  const theta = (lon + 180) * (Math.PI/180);
+  const x = -radius * Math.sin(phi) * Math.cos(theta);
+  const z = radius * Math.sin(phi) * Math.sin(theta);
+  const y = radius * Math.cos(phi);
+  return new THREE.Vector3(x,y,z);
+}
+
+function positionUserMarker(){
+  if(!userMarker) return;
+  const pos = latLonToVec3(state.userLat, state.userLon, 2.43);
+  userMarker.position.copy(pos);
+}
+
+function updateGlobePoints(){
+  if(!globeReady) return;
+  quakeMarkers.forEach(m => globeGroup.remove(m));
+  quakeMarkers = [];
+
+  const sample = state.quakes.slice(0, 220);
+  sample.forEach(q => {
+    const c = magColor(q.mag);
+    const size = Math.max(0.02, Math.min(q.mag * 0.014, 0.09));
+    const geo = new THREE.SphereGeometry(size, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({color: new THREE.Color(c.numBg)});
+    const dot = new THREE.Mesh(geo, mat);
+    const pos = latLonToVec3(q.lat, q.lon, 2.42);
+    dot.position.copy(pos);
+    globeGroup.add(dot);
+    quakeMarkers.push(dot);
+
+    if(q.mag >= 4.5){
+      const glowGeo = new THREE.SphereGeometry(size*2.1, 8, 8);
+      const glowMat = new THREE.MeshBasicMaterial({color: new THREE.Color(c.numBg), transparent:true, opacity:0.28});
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      glow.position.copy(pos);
+      globeGroup.add(glow);
+      quakeMarkers.push(glow);
+    }
+  });
+
+  document.getElementById('mapCount').textContent = state.quakes.length.toLocaleString('es-ES') + ' eventos';
+}
+
+function animateGlobe(){
+  requestAnimationFrame(animateGlobe);
+  if(!isDragging){
+    globeGroup.rotation.y += globeRotVelY;
+    globeRotVelY += (0.0016 - globeRotVelY) * 0.02;
+  }
+  globeRenderer.render(globeScene, globeCamera);
+}
+
+/* -------------------- ARRANQUE -------------------- */
+function init(){
+  loadQuakes();
+  loadWeather();
+  startPolling();
+  setInterval(loadWeather, 5 * 60000);
+  renderZonesGrid();
+
+  if(window.THREE){
+    initGlobe();
+  }else{
+    document.getElementById('globeLoading').innerHTML = '<span>No se pudo cargar el motor 3D. Comprueba tu conexión.</span>';
+  }
+
+  // el primer clic/tap del usuario desbloquea el AudioContext (requisito de navegadores)
+  document.body.addEventListener('click', () => { getAudioCtx(); }, {once:true});
+}
+
+init();
+</script>
+</body>
+</html>
