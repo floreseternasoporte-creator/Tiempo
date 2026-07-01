@@ -446,7 +446,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
         <div class="ring" style="inset:68px;"></div>
         <div class="ring" style="inset:102px;"></div>
       </div>
-      <div class="radar-sweep" id="radarSweep"></div>
+
       <div class="radar-ring animate" id="ring1"></div>
       <div class="radar-ring animate" id="ring2"></div>
       <div class="radar-ring animate" id="ring3"></div>
@@ -525,10 +525,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   </div>
   <div class="feed-list" id="homeFeedList"></div>
 
-  <div class="brand-footer">
-    <svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg>
-    <p>Datos sísmicos en tiempo real del Servicio Geológico de Estados Unidos (USGS).<br>Datos meteorológicos de Open-Meteo.</p>
-  </div>
+
 </div>
 
 <!-- ===================== VIEW: FEED COMPLETO ===================== -->
@@ -613,18 +610,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
   <div class="divider-lg"></div>
 
-  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Sobre la app</p></div>
-  <div class="section">
-    <div class="setting-row">
-      <div class="left"><div class="ico-badge" style="background:var(--surface-2); color:var(--text-2);"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="9" width="20" height="10" rx="2"/><path d="M6 9V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2M9 13h.01M15 13h.01"/></svg></div><div><div class="label">Fuente sísmica</div><div class="desc">USGS Earthquake Hazards Program</div></div></div>
-    </div>
-    <div class="setting-row">
-      <div class="left"><div class="ico-badge" style="background:var(--surface-2); color:var(--text-2);"><svg class="icon" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div><div><div class="label">Fuente meteorológica</div><div class="desc">Open-Meteo</div></div></div>
-    </div>
-    <div class="setting-row">
-      <div class="left"><div class="ico-badge" style="background:var(--surface-2); color:var(--text-2);"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg></div><div><div class="label">Frecuencia de actualización</div><div class="desc">Cada 60 segundos</div></div></div>
-    </div>
-  </div>
+
 
   <div class="divider-xl"></div>
 </div>
@@ -795,7 +781,7 @@ function magColor(mag){
   if(mag >= 6) return {light:'#5a1712', dark:'#1f0604', glow:'rgba(255,45,32,0.7)', badgeBg:'rgba(255,45,32,0.17)', badgeFg:'#ff6b5e', numBg:'#ff2d20'};
   if(mag >= 4.5) return {light:'#3a2c10', dark:'#1c1506', glow:'rgba(255,159,10,0.58)', badgeBg:'rgba(255,159,10,0.17)', badgeFg:'#ff9f0a', numBg:'#ff9f0a'};
   if(mag >= 3) return {light:'#0d2a4a', dark:'#04101f', glow:'rgba(10,132,255,0.5)', badgeBg:'rgba(10,132,255,0.17)', badgeFg:'#0a84ff', numBg:'#0a84ff'};
-  return {light:'#0d3a1e', dark:'#04160c', glow:'rgba(48,209,88,0.45)', badgeBg:'rgba(48,209,88,0.17)', badgeFg:'#30d158', numBg:'#30d158'};
+  return {light:'#1a1a1a', dark:'#0a0a0a', glow:'rgba(150,150,150,0.4)', badgeBg:'rgba(150,150,150,0.15)', badgeFg:'#a0a0a0', numBg:'#808080'};
 }
 
 function timeAgo(ts){
@@ -880,8 +866,7 @@ function renderRadar(){
     document.getElementById('coreLabel').textContent = '';
     document.getElementById('heroStatusText').textContent = '';
     document.getElementById('heroSubText').textContent = '';
-    sweep.style.setProperty('--sweep-color', '#30d158');
-    document.querySelectorAll('.radar-ring').forEach(r => r.style.setProperty('--ring-color', '#30d158'));
+    document.querySelectorAll('.radar-ring').forEach(r => r.style.setProperty('--ring-color', '#a0a0a0'));
     return;
   }
 
@@ -895,7 +880,7 @@ function renderRadar(){
   core.style.setProperty('--core-dark', c.dark);
   core.style.setProperty('--glow', c.glow);
   core.style.setProperty('--core-icon', c.badgeFg);
-  sweep.style.setProperty('--sweep-color', c.badgeFg);
+
   document.querySelectorAll('.radar-ring').forEach(r => r.style.setProperty('--ring-color', c.badgeFg));
 
   const iconEl = document.getElementById('coreIconSvg');
@@ -1205,82 +1190,52 @@ function buildRumbleNoiseBuffer(ctx, duration){
 function playSeismicSiren(){
   const ctx = getAudioCtx();
   const now = ctx.currentTime;
-  const duration = 4.6;
+  const duration = 2.0;
 
   const master = ctx.createGain();
   master.gain.value = 0.0001;
   master.connect(ctx.destination);
-  master.gain.exponentialRampToValueAtTime(0.55, now + 0.05);
+  master.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
 
-  /* CAPA 1 — sirena de dos tonos tipo alerta oficial de emergencia (agresiva, tipo EAS) */
-  const sirenOsc = ctx.createOscillator();
-  sirenOsc.type = 'sawtooth';
-  const sirenGain = ctx.createGain();
-  sirenGain.gain.value = 0.5;
-  const sirenFilter = ctx.createBiquadFilter();
-  sirenFilter.type = 'bandpass';
-  sirenFilter.frequency.value = 1000;
-  sirenFilter.Q.value = 0.7;
-  sirenOsc.connect(sirenFilter).connect(sirenGain).connect(master);
+  /* Sonido suave y melódico: tres notas ascendentes */
+  const osc1 = ctx.createOscillator();
+  osc1.type = 'sine';
+  const gain1 = ctx.createGain();
+  gain1.gain.value = 0.3;
+  osc1.connect(gain1).connect(master);
 
-  const steps = 22;
-  for(let i=0;i<=steps;i++){
-    const t = now + (i/steps) * duration;
-    const freq = (i % 2 === 0) ? 1046 : 784;
-    sirenOsc.frequency.setValueAtTime(freq, t);
-  }
+  const osc2 = ctx.createOscillator();
+  osc2.type = 'sine';
+  const gain2 = ctx.createGain();
+  gain2.gain.value = 0.2;
+  osc2.connect(gain2).connect(master);
 
-  /* CAPA 2 — armónico agudo que refuerza la sirena, tipo alarma antiaérea */
-  const harmOsc = ctx.createOscillator();
-  harmOsc.type = 'square';
-  const harmGain = ctx.createGain();
-  harmGain.gain.value = 0.16;
-  harmOsc.connect(harmGain).connect(master);
-  for(let i=0;i<=steps;i++){
-    const t = now + (i/steps) * duration;
-    const freq = (i % 2 === 0) ? 1046*1.5 : 784*1.5;
-    harmOsc.frequency.setValueAtTime(freq, t);
-  }
+  /* Nota 1: 523 Hz (Do5) durante 0.6s */
+  osc1.frequency.setValueAtTime(523, now);
+  osc1.frequency.setValueAtTime(523, now + 0.6);
+  
+  /* Nota 2: 659 Hz (Mi5) durante 0.6s */
+  osc1.frequency.setValueAtTime(659, now + 0.6);
+  osc1.frequency.setValueAtTime(659, now + 1.2);
+  
+  /* Nota 3: 784 Hz (Sol5) durante 0.8s */
+  osc1.frequency.setValueAtTime(784, now + 1.2);
+  osc1.frequency.setValueAtTime(784, now + duration);
 
-  /* CAPA 3 — golpes de impacto grave, como "sacudidas" sincronizadas */
-  const impactCount = 10;
-  const impactOscs = [];
-  for(let i=0;i<impactCount;i++){
-    const t = now + i * (duration/impactCount);
-    const osc = ctx.createOscillator();
-    osc.type = 'square';
-    osc.frequency.value = 48;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.42, t + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
-    osc.connect(g).connect(master);
-    osc.start(t);
-    osc.stop(t + 0.26);
-    impactOscs.push(osc);
-  }
+  /* Armonía complementaria */
+  osc2.frequency.setValueAtTime(392, now);
+  osc2.frequency.setValueAtTime(392, now + 0.6);
+  osc2.frequency.setValueAtTime(494, now + 0.6);
+  osc2.frequency.setValueAtTime(494, now + 1.2);
+  osc2.frequency.setValueAtTime(587, now + 1.2);
+  osc2.frequency.setValueAtTime(587, now + duration);
 
-  /* CAPA 4 — textura de ruido grave tipo "temblor de tierra" de fondo */
-  const noiseBuffer = buildRumbleNoiseBuffer(ctx, duration);
-  const noiseSource = ctx.createBufferSource();
-  noiseSource.buffer = noiseBuffer;
-  const noiseFilter = ctx.createBiquadFilter();
-  noiseFilter.type = 'lowpass';
-  noiseFilter.frequency.value = 120;
-  const noiseGain = ctx.createGain();
-  noiseGain.gain.setValueAtTime(0, now);
-  noiseGain.gain.linearRampToValueAtTime(0.5, now + 0.3);
-  noiseGain.gain.setValueAtTime(0.5, now + duration - 0.6);
-  noiseGain.gain.linearRampToValueAtTime(0, now + duration);
-  noiseSource.connect(noiseFilter).connect(noiseGain).connect(master);
-
-  /* cierre */
-  master.gain.setValueAtTime(0.55, now + duration - 0.35);
+  /* Fade out suave */
+  master.gain.setValueAtTime(0.3, now + duration - 0.3);
   master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-  sirenOsc.start(now); sirenOsc.stop(now + duration);
-  harmOsc.start(now); harmOsc.stop(now + duration);
-  noiseSource.start(now); noiseSource.stop(now + duration);
+  osc1.start(now); osc1.stop(now + duration);
+  osc2.start(now); osc2.stop(now + duration);
 
   return duration;
 }
@@ -1325,6 +1280,17 @@ function triggerAlert(q){
   const toast = document.getElementById('toastAlert');
   toast.classList.add('show');
   if(q.mag >= 6){ toast.classList.add('blinking'); } else { toast.classList.remove('blinking'); }
+  
+  /* Notificación en tiempo real */
+  if('Notification' in window && Notification.permission === 'granted'){
+    new Notification('Alerta Sísmica', {
+      body: 'M ' + q.mag.toFixed(1) + ' en ' + q.place + ' a ' + Math.round(q.distance).toLocaleString('es-ES') + ' km',
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z" fill="%23FE2C55"/></svg>',
+      tag: 'seismic-alert',
+      requireInteraction: q.mag >= 6
+    });
+  }
+  
   setTimeout(dismissToast, 7500);
 }
 
@@ -1608,6 +1574,11 @@ function init(){
     initGlobe();
   }else{
     document.getElementById('globeLoading').innerHTML = '<span>No se pudo cargar el motor 3D. Comprueba tu conexión.</span>';
+  }
+
+  // Solicitar permisos para notificaciones en tiempo real
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
   }
 
   // el primer clic/tap del usuario desbloquea el AudioContext (requisito de navegadores)
