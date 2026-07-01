@@ -342,10 +342,13 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   background:rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.4);
   color:#fff; border-radius:50px; padding:14px 48px;
   font-size:15px; font-weight:800; letter-spacing:.04em;
-  cursor:pointer; transition:background .2s;
+  cursor:pointer; transition:background .2s, opacity .2s;
   position:absolute; bottom:calc(env(safe-area-inset-bottom) + 36px);
 }
 .toast-alert .amber-dismiss:active{background:rgba(0,0,0,0.5);}
+.toast-alert .amber-dismiss:disabled{
+  opacity:0.45; cursor:not-allowed; pointer-events:none;
+}
 
 .brand-footer{padding:26px 20px 10px; text-align:center;}
 .brand-footer svg{width:22px; height:22px; color:var(--text-3); margin-bottom:9px;}
@@ -378,7 +381,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   <div class="amber-label" id="toastType">Magnitud</div>
   <div class="amber-place" id="toastTitle">Actividad detectada</div>
   <div class="amber-sub" id="toastSub">A 320 km de ti · 10 km de profundidad</div>
-  <button class="amber-dismiss" onclick="dismissToast()">Descartar</button>
+  <button class="amber-dismiss" id="dismissBtn" onclick="dismissToast()">Descartar</button>
 </div>
 
 <!-- ===================== TOP BAR ===================== -->
@@ -1574,6 +1577,7 @@ function triggerAlert(q){
   const toast = document.getElementById('toastAlert');
   toast.classList.add('show');
   if(q.mag >= 6){ toast.classList.add('blinking'); } else { toast.classList.remove('blinking'); }
+  startDismissCountdown();
   
   /* Notificación — vía Service Worker si disponible (funciona en segundo plano) */
   if('serviceWorker' in navigator && navigator.serviceWorker.controller){
@@ -1595,13 +1599,35 @@ function triggerAlert(q){
     });
   }
   
-  setTimeout(dismissToast, 7500);
+}
+
+let _dismissCountdown = null;
+function startDismissCountdown(){
+  const btn = document.getElementById('dismissBtn');
+  if(!btn) return;
+  btn.disabled = true;
+  let secs = 5;
+  btn.textContent = 'Descartar (' + secs + ')';
+  clearInterval(_dismissCountdown);
+  _dismissCountdown = setInterval(() => {
+    secs--;
+    if(secs <= 0){
+      clearInterval(_dismissCountdown);
+      btn.disabled = false;
+      btn.textContent = 'Descartar';
+    } else {
+      btn.textContent = 'Descartar (' + secs + ')';
+    }
+  }, 1000);
 }
 
 function dismissToast(){
+  clearInterval(_dismissCountdown);
   const toast = document.getElementById('toastAlert');
   toast.classList.remove('show');
   toast.classList.remove('blinking');
+  const btn = document.getElementById('dismissBtn');
+  if(btn){ btn.disabled = false; btn.textContent = 'Descartar'; }
 }
 
 /* -------------------- POLLING -------------------- */
