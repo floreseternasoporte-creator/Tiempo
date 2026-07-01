@@ -548,6 +548,50 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
         </button>
         <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
       </div>
+      <div class="sound-option" data-sound="seismic" onclick="selectSound('seismic',this)">
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--warning);"><path d="M2 6h2l2 12 2-9 2 6 2-14 2 9 2-4h4"/></svg></div>
+        <div class="so-body">
+          <div class="so-name">Alerta Sísmica</div>
+          <div class="so-desc">Patrón de onda sísmica — tono grave con pulsos crecientes</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('seismic');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="bell" onclick="selectSound('bell',this)">
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--safe);"><path d="M6 6a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="so-body">
+          <div class="so-name">Campana de Crisis</div>
+          <div class="so-desc">Repique de campana grave — tipo iglesia en emergencia</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('bell');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="sos" onclick="selectSound('sos',this)">
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--info);"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.88 11.9a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6 6l1.06-1.06a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+        <div class="so-body">
+          <div class="so-name">SOS Morse</div>
+          <div class="so-desc">Señal SOS internacional en código Morse (· · · — — — · · ·)</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('sos');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="civildef" onclick="selectSound('civildef',this)">
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger-2);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="so-body">
+          <div class="so-name">Defensa Civil</div>
+          <div class="so-desc">Sirena clásica de defensa civil — subida y bajada lenta</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('civildef');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
     </div>
   </div>
 
@@ -1109,8 +1153,12 @@ function playSoundByKey(key){
     case 'eas':      return playEASSiren();
     case 'pulse':    return playUrgentPulse();
     case 'siren':    return playRisingSiren();
-    case 'critical': return playCriticalAlert();
-    default:         return playAmberAlert();
+    case 'critical':   return playCriticalAlert();
+    case 'seismic':    return playSeismicAlert();
+    case 'bell':       return playCrisisBell();
+    case 'sos':        return playSOS();
+    case 'civildef':   return playCivilDefense();
+    default:           return playAmberAlert();
   }
 }
 
@@ -1294,6 +1342,170 @@ function playCriticalAlert(){
   boom2.start(now + 1.6); boom2.stop(now + 2.1);
 
   siren.start(sirenStart); siren.stop(now + duration);
+  return duration;
+}
+
+/* ---- ALERTA SÍSMICA — onda grave creciente con pulsos rítmicos ---- */
+function playSeismicAlert(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 4.0;
+
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0.0001, now);
+  master.gain.linearRampToValueAtTime(0.42, now + 0.05);
+  master.gain.setValueAtTime(0.42, now + duration - 0.2);
+  master.gain.linearRampToValueAtTime(0.0001, now + duration);
+  master.connect(ctx.destination);
+
+  /* Rumble grave de fondo (simula vibración del suelo) */
+  const rumble = ctx.createOscillator();
+  rumble.type = 'sine';
+  rumble.frequency.setValueAtTime(38, now);
+  rumble.frequency.linearRampToValueAtTime(55, now + duration);
+  const rg = ctx.createGain(); rg.gain.value = 0.6;
+  rumble.connect(rg).connect(master);
+  rumble.start(now); rumble.stop(now + duration);
+
+  /* Pulsos agudos crecientes encima del rumble */
+  const intervals = [0.0, 0.5, 0.9, 1.2, 1.45, 1.65, 1.82, 1.96, 2.08, 2.18];
+  intervals.forEach((offset, i) => {
+    const t = now + offset;
+    const osc = ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = 440 + i * 55;
+    const env = ctx.createGain();
+    const beepDur = 0.07 + i * 0.008;
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.linearRampToValueAtTime(0.35 + i * 0.04, t + 0.008);
+    env.gain.setValueAtTime(0.35 + i * 0.04, t + beepDur - 0.01);
+    env.gain.linearRampToValueAtTime(0.0001, t + beepDur);
+    osc.connect(env).connect(master);
+    osc.start(t); osc.stop(t + beepDur + 0.02);
+  });
+
+  return duration;
+}
+
+/* ---- CAMPANA DE CRISIS — tañido resonante grave ---- */
+function playCrisisBell(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 5.0;
+
+  const master = ctx.createGain();
+  master.gain.value = 0.38;
+  master.connect(ctx.destination);
+
+  const strikes = [0, 1.5, 2.8, 3.9];
+  strikes.forEach(offset => {
+    const t = now + offset;
+
+    /* Tono fundamental de campana */
+    const f = ctx.createOscillator();
+    f.type = 'sine'; f.frequency.value = 180;
+    const fg = ctx.createGain();
+    fg.gain.setValueAtTime(0.0001, t);
+    fg.gain.linearRampToValueAtTime(0.7, t + 0.005);
+    fg.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+    f.connect(fg).connect(master);
+    f.start(t); f.stop(t + 1.15);
+
+    /* Armónico superior */
+    const h = ctx.createOscillator();
+    h.type = 'sine'; h.frequency.value = 540;
+    const hg = ctx.createGain();
+    hg.gain.setValueAtTime(0.0001, t);
+    hg.gain.linearRampToValueAtTime(0.35, t + 0.004);
+    hg.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+    h.connect(hg).connect(master);
+    h.start(t); h.stop(t + 0.75);
+
+    /* Golpe de percusión inicial */
+    const click = ctx.createOscillator();
+    click.type = 'sine'; click.frequency.value = 900;
+    const cg = ctx.createGain();
+    cg.gain.setValueAtTime(0.0001, t);
+    cg.gain.linearRampToValueAtTime(0.5, t + 0.002);
+    cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    click.connect(cg).connect(master);
+    click.start(t); click.stop(t + 0.05);
+  });
+
+  return duration;
+}
+
+/* ---- SOS MORSE — · · · — — — · · · ---- */
+function playSOS(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const freq = 800;
+  const dot = 0.10;
+  const dash = 0.30;
+  const gap = 0.08;
+  const charGap = 0.20;
+
+  const master = ctx.createGain();
+  master.gain.value = 0.38;
+  master.connect(ctx.destination);
+
+  function beep(t, len){
+    const o = ctx.createOscillator();
+    o.type = 'sine'; o.frequency.value = freq;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.6, t + 0.005);
+    g.gain.setValueAtTime(0.6, t + len - 0.01);
+    g.gain.linearRampToValueAtTime(0.0001, t + len);
+    o.connect(g).connect(master);
+    o.start(t); o.stop(t + len + 0.01);
+    return t + len + gap;
+  }
+
+  let t = now;
+  /* S: · · · */
+  t = beep(t, dot); t = beep(t, dot); t = beep(t, dot);
+  t += charGap;
+  /* O: — — — */
+  t = beep(t, dash); t = beep(t, dash); t = beep(t, dash);
+  t += charGap;
+  /* S: · · · */
+  t = beep(t, dot); t = beep(t, dot); t = beep(t, dot);
+
+  return t - now + 0.15;
+}
+
+/* ---- DEFENSA CIVIL — sirena wail clásica subida/bajada lenta ---- */
+function playCivilDefense(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 6.0;
+
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0.0001, now);
+  master.gain.linearRampToValueAtTime(0.45, now + 0.3);
+  master.gain.setValueAtTime(0.45, now + duration - 0.4);
+  master.gain.linearRampToValueAtTime(0.0001, now + duration);
+  master.connect(ctx.destination);
+
+  const osc = ctx.createOscillator();
+  osc.type = 'sawtooth';
+  const filt = ctx.createBiquadFilter();
+  filt.type = 'lowpass'; filt.frequency.value = 2400;
+  const g = ctx.createGain(); g.gain.value = 0.55;
+  osc.connect(filt).connect(g).connect(master);
+
+  /* Ciclos largos de 3 s: subida 2 s, bajada 1 s */
+  const cycleLen = 3.0;
+  const cycles = Math.ceil(duration / cycleLen);
+  for(let i = 0; i < cycles; i++){
+    const t = now + i * cycleLen;
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.exponentialRampToValueAtTime(900, t + cycleLen * 0.67);
+    osc.frequency.exponentialRampToValueAtTime(220, t + cycleLen);
+  }
+
+  osc.start(now); osc.stop(now + duration);
   return duration;
 }
 
