@@ -111,24 +111,7 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 /* Anillo de escala fija (retícula tipo sismógrafo) */
 .radar-grid{position:absolute; inset:0; border-radius:50%; opacity:.5;}
 .radar-grid .ring{position:absolute; border:1px solid rgba(255,255,255,0.06); border-radius:50%;}
-.radar-sweep{
-  position:absolute; inset:0; border-radius:50%; overflow:hidden;
-  animation:sweep 2.6s linear infinite;
-  opacity:.9;
-}
-.radar-sweep::before{
-  content:''; position:absolute; top:50%; left:50%; width:50%; height:2px;
-  background:linear-gradient(90deg, var(--sweep-color,#ff6b5e), transparent);
-  transform-origin:0 50%;
-  box-shadow:0 0 12px 2px var(--sweep-color,#ff6b5e);
-}
-.radar-sweep::after{
-  content:''; position:absolute; top:0; left:50%; width:50%; height:50%;
-  background:conic-gradient(from 0deg, var(--sweep-color,#ff6b5e) 0deg, transparent 55deg);
-  transform-origin:0 100%;
-  opacity:.22;
-}
-@keyframes sweep{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+
 
 .radar-ring{
   position:absolute; border-radius:50%;
@@ -196,10 +179,10 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 .section-head .see-all{font-size:13px; color:var(--info); font-weight:700;}
 
 /* ===================== HORIZONTAL SCROLLERS ===================== */
-.hscroll{display:flex; gap:14px; overflow-x:auto; padding:2px 20px 6px; margin:0 -20px; scroll-snap-type:x proximity;}
-.zone-card{scroll-snap-align:start; flex-shrink:0; width:148px; display:flex; flex-direction:column; gap:8px;}
+.hscroll{display:flex; gap:8px; overflow-x:auto; padding:2px 20px 6px; margin:0 -20px; scroll-snap-type:x proximity; scroll-behavior:smooth;}
+.zone-card{scroll-snap-align:start; flex-shrink:0; width:90px; display:flex; flex-direction:column; gap:4px;}
 .zone-art{
-  width:148px; height:148px; border-radius:14px;
+  width:90px; height:90px; border-radius:10px;
   background:linear-gradient(155deg, var(--art-a), var(--art-b));
   display:flex; align-items:flex-end; padding:11px;
   position:relative; overflow:hidden;
@@ -207,10 +190,10 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
   box-shadow:0 4px 12px rgba(254,44,85,0.12);
 }
 .zone-art::after{content:''; position:absolute; inset:0; background:radial-gradient(circle at 75% 18%, rgba(254,44,85,0.12), transparent 60%);}
-.zone-art svg{position:relative; width:24px; height:24px; color:rgba(255,255,255,0.95);}
-.zone-mag-tag{position:absolute; top:9px; right:9px; font-size:11px; font-weight:800; padding:4px 8px; border-radius:7px; background:rgba(0,0,0,0.5); color:#fff; backdrop-filter:blur(6px);}
-.zone-title{font-size:13.5px; font-weight:700; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.zone-sub{font-size:12px; color:var(--text-2);}
+.zone-art svg{position:relative; width:16px; height:16px; color:rgba(255,255,255,0.95);}
+.zone-mag-tag{position:absolute; top:4px; right:4px; font-size:8px; font-weight:800; padding:2px 4px; border-radius:4px; background:rgba(0,0,0,0.6); color:#fff; backdrop-filter:blur(6px);}
+.zone-title{font-size:10px; font-weight:700; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.zone-sub{font-size:9px; color:var(--text-2);}
 
 /* ===================== FEED LIST ===================== */
 .feed-list{display:flex; flex-direction:column;}
@@ -859,7 +842,7 @@ function renderAll(){
 }
 
 function renderRadar(){
-  const sweep = document.getElementById('radarSweep');
+
   if(state.quakes.length === 0){
     document.getElementById('coreIconSvg').outerHTML = '<svg class="icon core-icon" id="coreIconSvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 15s1.5 2 3 2 3-2 3-2M9 9h.01M15 9h.01"/></svg>';
     document.getElementById('coreMag').textContent = '0';
@@ -939,7 +922,7 @@ function renderZonesScroll(){
   const zoneStats = computeZoneStats();
   const wrap = document.getElementById('zonesScroll');
   wrap.innerHTML = '';
-  zoneStats.slice(0,10).forEach(z => {
+  zoneStats.slice(0,6).forEach(z => {
     const el = document.createElement('div');
     el.className = 'zone-card';
     el.onclick = () => filterByZone(z.key);
