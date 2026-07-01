@@ -101,22 +101,25 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 }
 .segment button.active{background:var(--primary); color:#fff; font-weight:800;}
 
-/* ===================== DETAIL RADAR CORE ===================== */
-.radar-stage{
-  position:relative; display:flex; align-items:center; justify-content:center;
+/* ===================== DETAIL MAG BANNER ===================== */
+.detail-mag-banner{
+  margin:20px 20px 4px;
+  border-radius:20px;
+  padding:28px 24px;
+  background:var(--detail-banner-bg, linear-gradient(135deg, var(--primary-lighter), var(--primary)));
+  display:flex; align-items:center; gap:20px;
+  transition:background .5s ease;
 }
-.radar-core{
-  position:relative; z-index:2;
-  width:154px; height:154px; border-radius:50%;
-  background:radial-gradient(circle at 32% 26%, var(--core-light,var(--primary-lighter)), var(--core-dark,var(--primary)) 72%);
-  border:2px solid #fff;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  box-shadow:0 0 0 1px var(--stroke), 0 24px 60px -16px rgba(236,72,153,0.4), inset 0 0 40px -10px rgba(236,72,153,0.2);
-  transition:box-shadow .6s ease, background .6s ease;
+.detail-mag-num{
+  font-size:72px; font-weight:800; letter-spacing:-0.04em; line-height:1;
+  color:var(--detail-banner-fg, #fff);
+  flex-shrink:0;
 }
-.radar-core .mag{font-size:42px; font-weight:800; letter-spacing:-0.03em; line-height:1;}
-.radar-core .mag-label{font-size:10.5px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:.09em; margin-top:5px;}
-.radar-core .core-icon{width:28px; height:28px; margin-bottom:7px; color:var(--core-icon,#ff6b5e);}
+.detail-mag-type{
+  font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--detail-banner-fg, rgba(255,255,255,0.8));
+  opacity:.85;
+}
 
 /* ===================== NEAREST CARD ===================== */
 .nearest-card{
@@ -617,14 +620,9 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
     <div style="font-size:16px; font-weight:800;">Detalle del evento</div>
   </div>
 
-  <div class="hero" style="padding-top:20px;">
-    <div class="radar-stage" style="width:190px; height:190px;">
-      <div class="radar-core" id="detailCore" style="width:190px; height:190px; animation:none;">
-        <svg class="icon filled" id="detailIcon" viewBox="0 0 24 24" style="width:32px;height:32px;"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z"/></svg>
-        <div class="mag" id="detailMag" style="font-size:46px;">—</div>
-        <div class="mag-label" id="detailMagType">—</div>
-      </div>
-    </div>
+  <div class="detail-mag-banner" id="detailMagBanner">
+    <div class="detail-mag-num" id="detailMag">—</div>
+    <div class="detail-mag-type" id="detailMagType">—</div>
   </div>
 
   <div class="section" style="text-align:center;">
@@ -1028,11 +1026,8 @@ function openDetail(q){
   if(!q) return;
   state.currentDetail = q;
   const c = magColor(q.mag);
-  const core = document.getElementById('detailCore');
-  core.style.setProperty('--core-light', c.light);
-  core.style.setProperty('--core-dark', c.dark);
-  core.style.setProperty('--glow', c.glow);
-  document.getElementById('detailIcon').style.color = c.badgeFg;
+  const banner = document.getElementById('detailMagBanner');
+  banner.style.background = 'linear-gradient(135deg, ' + c.light + ', ' + c.dark + ')';
   document.getElementById('detailMag').textContent = q.mag.toFixed(1);
   document.getElementById('detailMagType').textContent = q.mag >= 6 ? 'Fuerte' : q.mag >= 4.5 ? 'Moderado' : q.mag >= 3 ? 'Leve' : 'Menor';
   document.getElementById('detailPlace').textContent = q.place;
@@ -1550,12 +1545,22 @@ function triggerAlert(q){
   toast.classList.add('show');
   if(q.mag >= 6){ toast.classList.add('blinking'); } else { toast.classList.remove('blinking'); }
   
-  /* Notificación en tiempo real */
-  if('Notification' in window && Notification.permission === 'granted'){
-    new Notification('Alerta Sísmica', {
-      body: 'M ' + q.mag.toFixed(1) + ' en ' + q.place + ' a ' + Math.round(q.distance).toLocaleString('es-ES') + ' km',
+  /* Notificación — vía Service Worker si disponible (funciona en segundo plano) */
+  if('serviceWorker' in navigator && navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({
+      type: 'QUAKE_ALERT',
+      mag: q.mag,
+      place: q.place,
+      distance: q.distance,
+      depth: q.depth,
+      urgent: q.mag >= 6
+    });
+  } else if('Notification' in window && Notification.permission === 'granted'){
+    new Notification('ALERTA SISMICA — M ' + q.mag.toFixed(1), {
+      body: q.place + '\nA ' + Math.round(q.distance).toLocaleString('es-ES') + ' km · ' + q.depth.toFixed(0) + ' km de profundidad',
       icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z" fill="%23FE2C55"/></svg>',
       tag: 'seismic-alert',
+      renotify: true,
       requireInteraction: q.mag >= 6
     });
   }
@@ -1590,6 +1595,15 @@ function init(){
   loadWeather();
   startPolling();
   setInterval(loadWeather, 5 * 60000);
+
+  /* Registrar Service Worker para notificaciones en segundo plano */
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('[SW] Registrado:', reg.scope);
+    }).catch(err => {
+      console.warn('[SW] No se pudo registrar:', err);
+    });
+  }
 
   if('Notification' in window && Notification.permission === 'default'){
     Notification.requestPermission();
