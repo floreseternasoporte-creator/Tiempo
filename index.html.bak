@@ -6,24 +6,21 @@
 <title>Seismic Pulse — Alerta Sísmica</title>
 <style>
 :root{
-  --bg:#faf9f8;
-  --surface:#ffffff;
-  --surface-2:#f5f3f1;
-  --surface-hover:#ede8e5;
-  --stroke:rgba(236,72,153,0.08);
-  --stroke-strong:rgba(236,72,153,0.15);
-  --text-1:#1a1a1a;
-  --text-2:rgba(26,26,26,0.65);
-  --text-3:rgba(26,26,26,0.45);
+  --bg:#000000;
+  --surface:#131315;
+  --surface-2:#1c1c1f;
+  --surface-hover:#28282c;
+  --stroke:rgba(255,255,255,0.09);
+  --stroke-strong:rgba(255,255,255,0.16);
+  --text-1:#f5f5f7;
+  --text-2:rgba(235,235,245,0.62);
+  --text-3:rgba(235,235,245,0.4);
   --danger:#ff2d20;
   --danger-2:#ff6b5e;
   --warning:#ff9f0a;
   --safe:#30d158;
   --info:#0a84ff;
-  --deep:#ec4899;
-  --primary:#ec4899;
-  --primary-light:#f472b6;
-  --primary-lighter:#fbcfe8;
+  --deep:#bf5af2;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
 }
 
@@ -52,34 +49,34 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 .topbar{
   position:sticky; top:0; z-index:50;
   padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
-  background:rgba(250,249,248,0.95);
-  backdrop-filter:blur(20px) saturate(180%);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-bottom:1px solid var(--stroke);
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(26px) saturate(180%);
+  -webkit-backdrop-filter:blur(26px) saturate(180%);
+  border-bottom:0.5px solid var(--stroke);
   display:flex; align-items:center; justify-content:space-between;
 }
 .topbar-title{
   font-size:21px; font-weight:800; letter-spacing:-0.02em;
   display:flex; align-items:center; gap:9px;
 }
-.topbar-title .brand-icon{width:24px; height:24px; color:var(--primary);}
+.topbar-title .brand-icon{width:24px; height:24px; color:var(--danger-2);}
 .topbar-actions{display:flex; align-items:center; gap:12px;}
 .icon-btn{
   width:36px; height:36px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   background:var(--surface-2); font-size:16px; color:var(--text-1);
-  transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+  transition:transform .15s ease, background .15s ease;
 }
-.icon-btn:active{transform:scale(0.88); background:var(--surface-hover); box-shadow:0 0 0 3px rgba(236,72,153,0.1);}
+.icon-btn:active{transform:scale(0.88); background:var(--surface-hover);}
 .status-chip{
   display:flex; align-items:center; gap:6px;
-  font-size:11.5px; font-weight:700; color:var(--primary);
-  background:rgba(236,72,153,0.12);
-  border:0.5px solid rgba(236,72,153,0.28);
+  font-size:11.5px; font-weight:700; color:var(--safe);
+  background:rgba(48,209,88,0.13);
+  border:0.5px solid rgba(48,209,88,0.32);
   padding:6px 11px 6px 9px; border-radius:20px;
   text-transform:uppercase; letter-spacing:.03em;
 }
-.status-chip .dot{width:6px; height:6px; border-radius:50%; background:var(--primary); box-shadow:0 0 7px var(--primary);}
+.status-chip .dot{width:6px; height:6px; border-radius:50%; background:var(--safe); box-shadow:0 0 7px var(--safe);}
 .status-chip.warn{color:var(--warning); background:rgba(255,159,10,0.13); border-color:rgba(255,159,10,0.32);}
 .status-chip.warn .dot{background:var(--warning); box-shadow:0 0 7px var(--warning);}
 .status-chip.danger{color:var(--danger-2); background:rgba(255,45,32,0.16); border-color:rgba(255,45,32,0.42);}
@@ -90,15 +87,15 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 /* ===================== SEGMENT TABS ===================== */
 .segment-wrap{padding:14px 20px 6px; overflow-x:auto;}
 .segment{
-  display:inline-flex; background:var(--surface-2); border-radius:11px; padding:3px;
-  border:1px solid var(--stroke);
+  display:inline-flex; background:var(--surface); border-radius:11px; padding:3px;
+  border:0.5px solid var(--stroke);
 }
 .segment button{
   padding:8px 17px; font-size:13px; font-weight:700; color:var(--text-2);
   border-radius:9px; transition:background .2s ease, color .2s ease;
   white-space:nowrap;
 }
-.segment button.active{background:var(--primary-lighter); color:var(--primary); font-weight:800;}
+.segment button.active{background:var(--surface-2); color:var(--text-1);}
 
 /* ===================== HERO RADAR — SONAR DE DETECCIÓN ===================== */
 .hero{padding:14px 20px 26px; display:flex; flex-direction:column; align-items:center;}
@@ -146,10 +143,10 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 .radar-core{
   position:relative; z-index:2;
   width:154px; height:154px; border-radius:50%;
-  background:radial-gradient(circle at 32% 26%, var(--core-light,var(--primary-lighter)), var(--core-dark,var(--primary)) 72%);
-  border:2px solid #fff;
+  background:radial-gradient(circle at 32% 26%, var(--core-light,#4a1310), var(--core-dark,#170504) 72%);
+  border:1.5px solid var(--stroke-strong);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  box-shadow:0 0 0 1px var(--stroke), 0 24px 60px -16px rgba(236,72,153,0.4), inset 0 0 40px -10px rgba(236,72,153,0.2);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.04), 0 24px 60px -16px var(--glow, rgba(255,45,32,0.65)), inset 0 0 40px -10px var(--glow, rgba(255,45,32,0.4));
   transition:box-shadow .6s ease, background .6s ease;
   animation:coreheartbeat 1.8s ease-in-out infinite;
 }
@@ -168,13 +165,12 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 /* ===================== NEAREST CARD ===================== */
 .nearest-card{
   margin:0 20px 24px;
-  background:var(--surface); border:1px solid var(--stroke); border-radius:16px;
+  background:var(--surface); border:0.5px solid var(--stroke); border-radius:16px;
   padding:16px;
   display:flex; align-items:center; gap:14px;
-  transition:transform .12s ease, box-shadow .12s ease;
-  box-shadow:0 2px 8px rgba(236,72,153,0.05);
+  transition:transform .12s ease;
 }
-.nearest-card:active{transform:scale(0.98); box-shadow:0 4px 12px rgba(236,72,153,0.12);}
+.nearest-card:active{transform:scale(0.98);}
 .nearest-badge{
   width:54px; height:54px; border-radius:15px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -202,10 +198,9 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
   background:linear-gradient(155deg, var(--art-a), var(--art-b));
   display:flex; align-items:flex-end; padding:11px;
   position:relative; overflow:hidden;
-  border:1px solid var(--stroke);
-  box-shadow:0 4px 12px rgba(236,72,153,0.08);
+  border:0.5px solid var(--stroke);
 }
-.zone-art::after{content:''; position:absolute; inset:0; background:radial-gradient(circle at 75% 18%, rgba(236,72,153,0.1), transparent 60%);}
+.zone-art::after{content:''; position:absolute; inset:0; background:radial-gradient(circle at 75% 18%, rgba(255,255,255,0.16), transparent 60%);}
 .zone-art svg{position:relative; width:24px; height:24px; color:rgba(255,255,255,0.95);}
 .zone-mag-tag{position:absolute; top:9px; right:9px; font-size:11px; font-weight:800; padding:4px 8px; border-radius:7px; background:rgba(0,0,0,0.5); color:#fff; backdrop-filter:blur(6px);}
 .zone-title{font-size:13.5px; font-weight:700; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -223,19 +218,19 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 .feed-divider{height:0.5px; background:var(--stroke); margin-left:71px;}
 
 /* ===================== WEATHER STRIP ===================== */
-.weather-strip{margin:0 20px 4px; background:var(--surface); border:1px solid var(--stroke); border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(236,72,153,0.05);}
+.weather-strip{margin:0 20px 4px; background:var(--surface); border:0.5px solid var(--stroke); border-radius:16px; padding:16px;}
 .weather-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
 .weather-head .loc{font-size:13px; font-weight:700; color:var(--text-2); display:flex; align-items:center; gap:6px;}
 .weather-head .loc svg{width:14px; height:14px;}
 .weather-head .risk-tag{font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px;}
 .weather-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;}
-.weather-metric{background:var(--surface-2); border-radius:13px; padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center; border:0.5px solid var(--stroke);}
+.weather-metric{background:var(--surface-2); border-radius:13px; padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center;}
 .weather-metric svg{width:19px; height:19px; color:var(--info);}
 .weather-metric .val{font-size:15px; font-weight:800;}
 .weather-metric .lbl{font-size:10px; color:var(--text-3); text-transform:uppercase; letter-spacing:.04em; font-weight:700;}
 
 /* ===================== GLOBO 3D ===================== */
-.globe-panel{margin:0 20px 4px; border-radius:20px; overflow:hidden; border:1px solid var(--stroke); background:radial-gradient(circle at 50% 30%, #f9f7f5, #faf9f8 75%); box-shadow:0 2px 8px rgba(236,72,153,0.05);}
+.globe-panel{margin:0 20px 4px; border-radius:20px; overflow:hidden; border:0.5px solid var(--stroke); background:radial-gradient(circle at 50% 30%, #0a1220, #000000 75%);}
 .globe-stage{position:relative; width:100%; aspect-ratio:1/1; max-height:340px;}
 .globe-stage canvas{display:block; width:100% !important; height:100% !important; touch-action:none;}
 .globe-hint{
@@ -281,8 +276,8 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 .alarm-test-btn{
   width:100%; border-radius:16px; padding:18px; display:flex; align-items:center; justify-content:center; gap:10px;
   font-size:15px; font-weight:800; color:#fff;
-  background:linear-gradient(135deg, var(--primary), #db2777);
-  box-shadow:0 14px 34px -12px rgba(236,72,153,0.55);
+  background:linear-gradient(135deg, #ff2d20, #d40f0f);
+  box-shadow:0 14px 34px -12px rgba(255,45,32,0.55);
   transition:transform .12s ease;
 }
 .alarm-test-btn:active{transform:scale(0.97);}
@@ -294,19 +289,19 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 .now-monitoring{
   position:fixed; left:10px; right:10px; bottom:calc(env(safe-area-inset-bottom) + 76px);
   z-index:80;
-  background:rgba(255,255,255,0.92);
-  backdrop-filter:blur(20px) saturate(180%);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  border:1px solid var(--stroke);
+  background:rgba(24,24,27,0.88);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border:0.5px solid var(--stroke-strong);
   border-radius:16px; padding:10px 11px;
   display:flex; align-items:center; gap:11px;
-  box-shadow:0 14px 34px -10px rgba(236,72,153,0.15);
+  box-shadow:0 14px 34px -10px rgba(0,0,0,0.65);
 }
 .nm-art{
   width:44px; height:44px; border-radius:10px; flex-shrink:0;
-  background:radial-gradient(circle at 35% 30%, var(--core-light,var(--primary-lighter)), var(--core-dark,var(--primary)) 78%);
+  background:radial-gradient(circle at 35% 30%, var(--core-light,#4a1310), var(--core-dark,#170504) 78%);
   display:flex; align-items:center; justify-content:center;
-  border:1px solid #fff;
+  border:0.5px solid var(--stroke-strong);
 }
 .nm-art svg{width:20px; height:20px; color:var(--core-icon,#ff6b5e);}
 .nm-body{flex:1; min-width:0;}
@@ -320,16 +315,16 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 .tabbar{
   position:fixed; left:0; right:0; bottom:0; z-index:90;
   padding:9px 8px calc(env(safe-area-inset-bottom) + 8px);
-  background:rgba(250,249,248,0.95);
-  backdrop-filter:blur(20px) saturate(180%);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-top:1px solid var(--stroke);
+  background:rgba(8,8,10,0.88);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-top:0.5px solid var(--stroke);
   display:flex;
 }
 .tab-item{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:5px 0; color:var(--text-3); transition:color .15s ease, transform .15s ease;}
 .tab-item svg{width:24px; height:24px;}
 .tab-item span{font-size:10px; font-weight:700;}
-.tab-item.active{color:var(--primary); font-weight:800;}
+.tab-item.active{color:var(--danger-2);}
 .tab-item:active{transform:scale(0.9);}
 
 /* ===================== VIEWS ===================== */
@@ -348,10 +343,10 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 /* ===================== TOAST DE ALERTA — MÁXIMA URGENCIA ===================== */
 .toast-alert{
   position:fixed; top:calc(env(safe-area-inset-top) + 8px); left:12px; right:12px; z-index:200;
-  background:linear-gradient(135deg, var(--primary), #db2777);
+  background:linear-gradient(135deg, #ff2d20, #b80c0c);
   border-radius:18px; padding:16px 17px;
   display:flex; align-items:center; gap:13px;
-  box-shadow:0 20px 50px -12px rgba(236,72,153,0.7), 0 0 0 1px rgba(236,72,153,0.15);
+  box-shadow:0 20px 50px -12px rgba(255,45,32,0.7), 0 0 0 1px rgba(255,255,255,0.08);
   transform:translateY(-160%) scale(0.9); opacity:0;
   transition:transform .5s cubic-bezier(.17,.9,.24,1.2), opacity .3s ease;
 }
@@ -364,7 +359,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   60%{transform:translateY(0) translateX(-3px) scale(1);}
   80%{transform:translateY(0) translateX(3px) scale(1);}
 }
-@keyframes toastblink{0%,100%{box-shadow:0 20px 50px -12px rgba(236,72,153,0.7), 0 0 0 1px rgba(236,72,153,0.15);} 50%{box-shadow:0 20px 65px -6px rgba(236,72,153,1), 0 0 0 2px rgba(236,72,153,0.25);}}
+@keyframes toastblink{0%,100%{box-shadow:0 20px 50px -12px rgba(255,45,32,0.7), 0 0 0 1px rgba(255,255,255,0.08);} 50%{box-shadow:0 20px 65px -6px rgba(255,45,32,1), 0 0 0 2px rgba(255,255,255,0.25);}}
 .toast-alert .alert-icon{width:30px; height:30px; color:#fff; flex-shrink:0; animation:iconshake 0.6s ease-in-out infinite;}
 @keyframes iconshake{0%,100%{transform:rotate(0deg);} 25%{transform:rotate(-12deg);} 75%{transform:rotate(12deg);}}
 .toast-alert .txt{flex:1;}
@@ -380,14 +375,14 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 /* Overlay de pantalla completa cuando hay alerta crítica activa */
 .screen-flash{
   position:fixed; inset:0; z-index:150; pointer-events:none;
-  background:rgba(236,72,153,0.12);
+  background:rgba(255,45,32,0.16);
   opacity:0;
 }
 .screen-flash.active{animation:flashfull 0.5s ease-in-out 5;}
 @keyframes flashfull{0%,100%{opacity:0;} 50%{opacity:1;}}
 
 @media (min-width:640px){
-  body{max-width:520px; margin:0 auto; border-left:1px solid var(--stroke); border-right:1px solid var(--stroke);}
+  body{max-width:520px; margin:0 auto; border-left:0.5px solid var(--stroke); border-right:0.5px solid var(--stroke);}
   .now-monitoring, .tabbar{max-width:520px; left:50%; transform:translateX(-50%); right:auto;}
   .now-monitoring{width:calc(520px - 20px);}
   .tabbar{width:100%;}
@@ -418,7 +413,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
     Seismic Pulse
   </div>
   <div class="topbar-actions">
-    <div class="status-chip pulse" id="connStatus"><span class="dot"></span></div>
+    <div class="status-chip pulse" id="connStatus"><span class="dot"></span>Monitoreando</div>
     <button class="icon-btn" onclick="goToView('settings')" aria-label="Ajustes">
       <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -452,11 +447,11 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
       <div class="radar-core" id="radarCore">
         <svg class="icon core-icon spin" id="coreIconSvg" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
         <div class="mag" id="coreMag">—</div>
-        <div class="mag-label" id="coreLabel"></div>
+        <div class="mag-label" id="coreLabel">Escaneando</div>
       </div>
     </div>
-    <div class="hero-status-text" id="heroStatusText"></div>
-    <div class="hero-sub-text" id="heroSubText"></div>
+    <div class="hero-status-text" id="heroStatusText">Conectando con la red sísmica</div>
+    <div class="hero-sub-text" id="heroSubText">Sincronizando con la red global de sensores del USGS para calcular la actividad más cercana a tu posición.</div>
   </div>
 
   <!-- SISMO MÁS CERCANO -->
@@ -707,8 +702,8 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 <div class="now-monitoring" onclick="goToView('detail'); event.stopPropagation();">
   <div class="nm-art" id="nmArt"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg></div>
   <div class="nm-body">
-    <div class="nm-title" id="nmTitle"></div>
-    <div class="nm-sub" id="nmSub"></div>
+    <div class="nm-title" id="nmTitle">Monitoreo activo</div>
+    <div class="nm-sub" id="nmSub">Conectando con USGS…</div>
   </div>
   <div class="nm-actions">
     <button class="icon-btn" onclick="event.stopPropagation(); refreshAll();" aria-label="Actualizar">
@@ -869,11 +864,11 @@ async function loadQuakes(){
 function setConnStatus(mode){
   const chip = document.getElementById('connStatus');
   if(mode === 'loading'){
-    chip.className = 'status-chip'; chip.innerHTML = '<span class="dot"></span>';
+    chip.className = 'status-chip'; chip.innerHTML = '<span class="dot"></span>Sincronizando';
   }else if(mode === 'ok'){
-    chip.className = 'status-chip pulse'; chip.innerHTML = '<span class="dot"></span>';
+    chip.className = 'status-chip pulse'; chip.innerHTML = '<span class="dot"></span>Monitoreando';
   }else{
-    chip.className = 'status-chip danger'; chip.innerHTML = '<span class="dot"></span>';
+    chip.className = 'status-chip danger'; chip.innerHTML = '<span class="dot"></span>Sin conexión';
   }
 }
 
@@ -893,9 +888,9 @@ function renderRadar(){
   if(state.quakes.length === 0){
     document.getElementById('coreIconSvg').outerHTML = '<svg class="icon core-icon" id="coreIconSvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 15s1.5 2 3 2 3-2 3-2M9 9h.01M15 9h.01"/></svg>';
     document.getElementById('coreMag').textContent = '0';
-    document.getElementById('coreLabel').textContent = '';
-    document.getElementById('heroStatusText').textContent = '';
-    document.getElementById('heroSubText').textContent = '';
+    document.getElementById('coreLabel').textContent = 'Sin datos';
+    document.getElementById('heroStatusText').textContent = 'Todo en calma';
+    document.getElementById('heroSubText').textContent = 'No se registró actividad sísmica relevante en este rango de tiempo.';
     sweep.style.setProperty('--sweep-color', '#30d158');
     document.querySelectorAll('.radar-ring').forEach(r => r.style.setProperty('--ring-color', '#30d158'));
     return;
@@ -918,9 +913,13 @@ function renderRadar(){
   iconEl.outerHTML = '<svg class="icon filled core-icon" id="coreIconSvg" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z"/></svg>';
 
   document.getElementById('coreMag').textContent = nearest.mag.toFixed(1);
-  document.getElementById('coreLabel').textContent = '';
+  document.getElementById('coreLabel').textContent = 'Magnitud';
 
-  document.getElementById('heroStatusText').textContent = '';
+  if(nearest.mag >= state.magThreshold){
+    document.getElementById('heroStatusText').textContent = 'Sismo relevante cerca de ti';
+  }else{
+    document.getElementById('heroStatusText').textContent = 'Actividad detectada';
+  }
   document.getElementById('heroSubText').textContent =
     nearest.place + ' — a ' + Math.round(nearest.distance).toLocaleString('es-ES') + ' km. Sismo más fuerte del periodo: M ' + strongest.mag.toFixed(1) + '.';
 }
