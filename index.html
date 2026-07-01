@@ -172,6 +172,28 @@ svg.icon.filled *{fill:currentColor; stroke:none;}
 .nearest-info .meta svg{width:13px; height:13px;}
 .nearest-chevron{color:var(--text-3); width:16px; height:16px; flex-shrink:0;}
 
+/* ===================== SOUND SELECTOR ===================== */
+.sound-picker{display:flex; flex-direction:column; gap:8px;}
+.sound-option{
+  display:flex; align-items:center; gap:14px;
+  padding:13px 16px; border-radius:14px;
+  background:var(--surface); border:1.5px solid var(--stroke);
+  cursor:pointer; transition:border-color .2s ease, background .2s ease;
+}
+.sound-option.selected{border-color:var(--primary); background:rgba(254,44,85,0.05);}
+.sound-option .so-icon{width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; background:var(--surface-2);}
+.sound-option.selected .so-icon{background:rgba(254,44,85,0.12);}
+.sound-option .so-body{flex:1; min-width:0;}
+.sound-option .so-name{font-size:14.5px; font-weight:700;}
+.sound-option .so-desc{font-size:12px; color:var(--text-2); margin-top:1px;}
+.sound-option .so-play{width:32px; height:32px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s ease;}
+.sound-option.selected .so-play{background:rgba(254,44,85,0.15);}
+.sound-option .so-play svg{width:14px; height:14px; color:var(--primary);}
+.sound-check{width:20px; height:20px; border-radius:50%; border:2px solid var(--stroke); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:border-color .2s, background .2s;}
+.sound-option.selected .sound-check{border-color:var(--primary); background:var(--primary);}
+.sound-check svg{width:11px; height:11px; color:#fff; display:none;}
+.sound-option.selected .sound-check svg{display:block;}
+
 /* ===================== SECTION HEADERS ===================== */
 .section{padding:0 20px 8px;}
 .section-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
@@ -386,7 +408,6 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
     Seismic Pulse
   </div>
   <div class="topbar-actions">
-    <div class="status-chip pulse" id="connStatus"><span class="dot"></span></div>
     <button class="icon-btn" onclick="goToView('settings')" aria-label="Ajustes">
       <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -567,17 +588,78 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
   <div class="divider-lg"></div>
 
-  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Probar sirena de emergencia</p></div>
+  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Tipo de alerta sonora</p></div>
   <div class="section">
-    <button class="alarm-test-btn" id="testAlarmBtn" onclick="testAlarm()">
-      <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-      Activar sirena sísmica
-    </button>
+    <div class="sound-picker" id="soundPicker">
+      <div class="sound-option selected" data-sound="amber" onclick="selectSound('amber',this)">
+        <div class="so-icon">🚨</div>
+        <div class="so-body">
+          <div class="so-name">Alerta AMBER</div>
+          <div class="so-desc">Doble tono oficial EAS 853+960 Hz, como alerta real</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('amber');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="eas" onclick="selectSound('eas',this)">
+        <div class="so-icon">📢</div>
+        <div class="so-body">
+          <div class="so-name">Sirena EAS</div>
+          <div class="so-desc">Sirena agresiva de dos tonos, tipo alerta oficial</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('eas');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="pulse" onclick="selectSound('pulse',this)">
+        <div class="so-icon">⚡</div>
+        <div class="so-body">
+          <div class="so-name">Pulso Urgente</div>
+          <div class="so-desc">Pitidos rápidos de emergencia estilo defensa civil</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('pulse');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="siren" onclick="selectSound('siren',this)">
+        <div class="so-icon">🔊</div>
+        <div class="so-body">
+          <div class="so-name">Sirena Ascendente</div>
+          <div class="so-desc">Barrido ascendente tipo sirena de emergencias</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('siren');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="critical" onclick="selectSound('critical',this)">
+        <div class="so-icon">🌊</div>
+        <div class="so-body">
+          <div class="so-name">Alerta Crítica</div>
+          <div class="so-desc">Impacto profundo + sirena, máxima urgencia</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('critical');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+    </div>
   </div>
 
   <div class="divider-lg"></div>
 
+  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Probar alerta</p></div>
+  <div class="section">
+    <button class="alarm-test-btn" id="testAlarmBtn" onclick="testAlarm()">
+      <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+      Activar alerta de prueba
+    </button>
+  </div>
 
+  <div class="divider-lg"></div>
 
   <div class="divider-xl"></div>
 </div>
@@ -787,14 +869,7 @@ async function loadQuakes(){
 }
 
 function setConnStatus(mode){
-  const chip = document.getElementById('connStatus');
-  if(mode === 'loading'){
-    chip.className = 'status-chip'; chip.innerHTML = '<span class="dot"></span>';
-  }else if(mode === 'ok'){
-    chip.className = 'status-chip pulse'; chip.innerHTML = '<span class="dot"></span>';
-  }else{
-    chip.className = 'status-chip danger'; chip.innerHTML = '<span class="dot"></span>';
-  }
+  /* chip removed — status handled silently */
 }
 
 /* -------------------- RENDER GENERAL -------------------- */
@@ -1142,88 +1217,235 @@ function requestGeolocation(){
 }
 
 /* ============================================================
-   SIRENA DE EMERGENCIA SÍSMICA — Web Audio API, multicapa
-   Diseñada para sonar como una alerta oficial real: barrido de
-   sirena de dos tonos, golpe grave de impacto, y textura de
-   ruido de "temblor" de fondo. Sin dependencia de archivos de
-   audio externos: se sintetiza 100% en el navegador.
+   SISTEMA DE ALERTAS SONORAS — Web Audio API, 5 sonidos
+   Sintetizados 100% en el navegador sin archivos externos.
    ============================================================ */
 let audioCtx = null;
+let selectedSound = 'amber';
+
 function getAudioCtx(){
   if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
   if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
   return audioCtx;
 }
 
-function buildRumbleNoiseBuffer(ctx, duration){
-  const bufferSize = ctx.sampleRate * duration;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  let lastOut = 0;
-  for(let i=0;i<bufferSize;i++){
-    const white = Math.random() * 2 - 1;
-    lastOut = (lastOut + 0.02 * white) / 1.02;
-    data[i] = lastOut * 3.2;
-  }
-  return buffer;
+function selectSound(key, el){
+  selectedSound = key;
+  document.querySelectorAll('.sound-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
-function playSeismicSiren(){
+function previewSound(key){
+  playSoundByKey(key);
+}
+
+function playSoundByKey(key){
+  switch(key){
+    case 'amber':    return playAmberAlert();
+    case 'eas':      return playEASSiren();
+    case 'pulse':    return playUrgentPulse();
+    case 'siren':    return playRisingSiren();
+    case 'critical': return playCriticalAlert();
+    default:         return playAmberAlert();
+  }
+}
+
+/* ---- AMBER ALERT — doble tono EAS oficial 853 Hz + 960 Hz ---- */
+function playAmberAlert(){
   const ctx = getAudioCtx();
   const now = ctx.currentTime;
-  const duration = 2.0;
+  const duration = 3.2;
 
   const master = ctx.createGain();
   master.gain.value = 0.0001;
   master.connect(ctx.destination);
-  master.gain.exponentialRampToValueAtTime(0.3, now + 0.05);
+  master.gain.exponentialRampToValueAtTime(0.45, now + 0.04);
 
-  /* Sonido suave y melódico: tres notas ascendentes */
+  /* Tono 1: 853 Hz — uno de los dos tonos del EAS Attention Signal */
   const osc1 = ctx.createOscillator();
-  osc1.type = 'sine';
-  const gain1 = ctx.createGain();
-  gain1.gain.value = 0.3;
-  osc1.connect(gain1).connect(master);
+  osc1.type = 'square';
+  osc1.frequency.value = 853;
+  const g1 = ctx.createGain(); g1.gain.value = 0.5;
+  const f1 = ctx.createBiquadFilter(); f1.type = 'lowpass'; f1.frequency.value = 3200;
+  osc1.connect(f1).connect(g1).connect(master);
 
+  /* Tono 2: 960 Hz — segundo tono del EAS Attention Signal */
   const osc2 = ctx.createOscillator();
-  osc2.type = 'sine';
-  const gain2 = ctx.createGain();
-  gain2.gain.value = 0.2;
-  osc2.connect(gain2).connect(master);
+  osc2.type = 'square';
+  osc2.frequency.value = 960;
+  const g2 = ctx.createGain(); g2.gain.value = 0.4;
+  const f2 = ctx.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = 3200;
+  osc2.connect(f2).connect(g2).connect(master);
 
-  /* Nota 1: 523 Hz (Do5) durante 0.6s */
-  osc1.frequency.setValueAtTime(523, now);
-  osc1.frequency.setValueAtTime(523, now + 0.6);
-  
-  /* Nota 2: 659 Hz (Mi5) durante 0.6s */
-  osc1.frequency.setValueAtTime(659, now + 0.6);
-  osc1.frequency.setValueAtTime(659, now + 1.2);
-  
-  /* Nota 3: 784 Hz (Sol5) durante 0.8s */
-  osc1.frequency.setValueAtTime(784, now + 1.2);
-  osc1.frequency.setValueAtTime(784, now + duration);
+  /* Modulación AM que da el efecto pulsante característico del AMBER */
+  const lfo = ctx.createOscillator();
+  lfo.type = 'sine'; lfo.frequency.value = 2.4;
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.18;
+  lfo.connect(lfoGain).connect(master.gain);
 
-  /* Armonía complementaria */
-  osc2.frequency.setValueAtTime(392, now);
-  osc2.frequency.setValueAtTime(392, now + 0.6);
-  osc2.frequency.setValueAtTime(494, now + 0.6);
-  osc2.frequency.setValueAtTime(494, now + 1.2);
-  osc2.frequency.setValueAtTime(587, now + 1.2);
-  osc2.frequency.setValueAtTime(587, now + duration);
-
-  /* Fade out suave */
-  master.gain.setValueAtTime(0.3, now + duration - 0.3);
+  master.gain.setValueAtTime(0.45, now + duration - 0.25);
   master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
   osc1.start(now); osc1.stop(now + duration);
   osc2.start(now); osc2.stop(now + duration);
+  lfo.start(now);  lfo.stop(now + duration);
+  return duration;
+}
 
+/* ---- EAS SIREN — sirena agresiva de dos tonos sawtooth ---- */
+function playEASSiren(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 3.0;
+
+  const master = ctx.createGain();
+  master.gain.value = 0.0001;
+  master.connect(ctx.destination);
+  master.gain.exponentialRampToValueAtTime(0.38, now + 0.03);
+
+  const osc = ctx.createOscillator();
+  osc.type = 'sawtooth';
+  const filt = ctx.createBiquadFilter();
+  filt.type = 'bandpass'; filt.frequency.value = 1200; filt.Q.value = 0.8;
+  const g = ctx.createGain(); g.gain.value = 0.6;
+  osc.connect(filt).connect(g).connect(master);
+
+  /* Barrido ascendente-descendente tipo sirena real */
+  const step = 0.28;
+  for(let i = 0; i < duration / (step * 2); i++){
+    const t = now + i * step * 2;
+    osc.frequency.setValueAtTime(660, t);
+    osc.frequency.linearRampToValueAtTime(1320, t + step);
+    osc.frequency.linearRampToValueAtTime(660, t + step * 2);
+  }
+
+  master.gain.setValueAtTime(0.38, now + duration - 0.2);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  osc.start(now); osc.stop(now + duration);
+  return duration;
+}
+
+/* ---- PULSO URGENTE — pitidos rápidos estilo defensa civil ---- */
+function playUrgentPulse(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 2.8;
+  const beepDur = 0.12;
+  const beepGap = 0.09;
+  const beepCount = Math.floor(duration / (beepDur + beepGap));
+
+  const master = ctx.createGain();
+  master.gain.value = 0.35;
+  master.connect(ctx.destination);
+
+  for(let i = 0; i < beepCount; i++){
+    const t = now + i * (beepDur + beepGap);
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = i % 2 === 0 ? 1480 : 1760;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.5, t + 0.01);
+    env.gain.setValueAtTime(0.5, t + beepDur - 0.02);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + beepDur);
+    osc.connect(env).connect(master);
+    osc.start(t); osc.stop(t + beepDur);
+  }
+  return duration;
+}
+
+/* ---- SIRENA ASCENDENTE — barrido continuo de emergencia ---- */
+function playRisingSiren(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 3.0;
+
+  const master = ctx.createGain();
+  master.gain.value = 0.0001;
+  master.connect(ctx.destination);
+  master.gain.exponentialRampToValueAtTime(0.4, now + 0.06);
+
+  const osc = ctx.createOscillator();
+  osc.type = 'sawtooth';
+  const filt = ctx.createBiquadFilter();
+  filt.type = 'lowpass'; filt.frequency.value = 2800;
+  const g = ctx.createGain(); g.gain.value = 0.55;
+  osc.connect(filt).connect(g).connect(master);
+
+  /* Tres ciclos de subida completa */
+  const cycleT = duration / 3;
+  for(let i = 0; i < 3; i++){
+    const t = now + i * cycleT;
+    osc.frequency.setValueAtTime(300, t);
+    osc.frequency.exponentialRampToValueAtTime(1800, t + cycleT * 0.85);
+    osc.frequency.exponentialRampToValueAtTime(300, t + cycleT);
+  }
+
+  master.gain.setValueAtTime(0.4, now + duration - 0.3);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  osc.start(now); osc.stop(now + duration);
+  return duration;
+}
+
+/* ---- ALERTA CRÍTICA — impacto profundo + sirena dramática ---- */
+function playCriticalAlert(){
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const duration = 3.5;
+
+  const master = ctx.createGain();
+  master.gain.value = 0.35;
+  master.connect(ctx.destination);
+
+  /* Golpe de impacto grave inicial */
+  const boom = ctx.createOscillator();
+  boom.type = 'sine';
+  boom.frequency.setValueAtTime(80, now);
+  boom.frequency.exponentialRampToValueAtTime(25, now + 0.5);
+  const boomG = ctx.createGain();
+  boomG.gain.setValueAtTime(0.0001, now);
+  boomG.gain.exponentialRampToValueAtTime(0.7, now + 0.01);
+  boomG.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+  boom.connect(boomG).connect(master);
+  boom.start(now); boom.stop(now + 0.5);
+
+  /* Sirena sobre el impacto */
+  const siren = ctx.createOscillator();
+  siren.type = 'sawtooth';
+  const sf = ctx.createBiquadFilter();
+  sf.type = 'bandpass'; sf.frequency.value = 1000; sf.Q.value = 1;
+  const sg = ctx.createGain(); sg.gain.value = 0.45;
+  siren.connect(sf).connect(sg).connect(master);
+
+  const sirenStart = now + 0.3;
+  const cycles = 4;
+  const cDur = (duration - 0.3) / cycles;
+  for(let i = 0; i < cycles; i++){
+    const t = sirenStart + i * cDur;
+    siren.frequency.setValueAtTime(500, t);
+    siren.frequency.linearRampToValueAtTime(1400, t + cDur * 0.6);
+    siren.frequency.linearRampToValueAtTime(800, t + cDur);
+  }
+
+  /* Segundo boom en el medio */
+  const boom2 = ctx.createOscillator();
+  boom2.type = 'sine';
+  boom2.frequency.setValueAtTime(65, now + 1.6);
+  boom2.frequency.exponentialRampToValueAtTime(20, now + 2.1);
+  const b2g = ctx.createGain();
+  b2g.gain.setValueAtTime(0.0001, now + 1.6);
+  b2g.gain.exponentialRampToValueAtTime(0.6, now + 1.61);
+  b2g.gain.exponentialRampToValueAtTime(0.0001, now + 2.1);
+  boom2.connect(b2g).connect(master);
+  boom2.start(now + 1.6); boom2.stop(now + 2.1);
+
+  siren.start(sirenStart); siren.stop(now + duration);
   return duration;
 }
 
 function testAlarm(){
   const btn = document.getElementById('testAlarmBtn');
-  const dur = playSeismicSiren();
+  const dur = playSoundByKey(selectedSound);
   if(state.vibrateOn && navigator.vibrate){ navigator.vibrate([250,90,250,90,250,90,600]); }
   btn.classList.add('playing');
   flashScreen();
@@ -1253,7 +1475,7 @@ function checkForAlarm(){
 }
 
 function triggerAlert(q){
-  const dur = playSeismicSiren();
+  const dur = playSoundByKey(selectedSound);
   if(state.vibrateOn && navigator.vibrate){ navigator.vibrate([300,100,300,100,300,100,700]); }
   flashScreen();
   document.getElementById('toastTitle').textContent = 'M ' + q.mag.toFixed(1) + ' — ' + q.place;
