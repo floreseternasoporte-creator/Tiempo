@@ -37,7 +37,7 @@ body{
   min-height:100vh;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
-  padding-bottom:196px;
+  padding-bottom:96px;
 }
 ::-webkit-scrollbar{display:none;}
 *{scrollbar-width:none;}
@@ -274,31 +274,17 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 .alarm-test-btn.playing{animation:btnflash .5s ease-in-out infinite;}
 @keyframes btnflash{0%,100%{box-shadow:0 14px 34px -12px rgba(255,45,32,0.55);} 50%{box-shadow:0 14px 44px -8px rgba(255,45,32,0.95);}}
 
-/* ===================== NOW MONITORING ===================== */
-.now-monitoring{
-  position:fixed; left:10px; right:10px; bottom:calc(env(safe-area-inset-bottom) + 76px);
-  z-index:80;
-  background:rgba(255,255,255,0.95);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  border:1px solid var(--stroke);
-  border-radius:16px; padding:10px 11px;
-  display:flex; align-items:center; gap:11px;
-  box-shadow:0 14px 34px -10px rgba(254,44,85,0.18);
-}
-.nm-art{
-  width:44px; height:44px; border-radius:10px; flex-shrink:0;
-  background:radial-gradient(circle at 35% 30%, var(--core-light,var(--primary-lighter)), var(--core-dark,var(--primary)) 78%);
-  display:flex; align-items:center; justify-content:center;
-  border:1px solid #fff;
-}
-.nm-art svg{width:20px; height:20px; color:var(--core-icon,#ff6b5e);}
-.nm-body{flex:1; min-width:0;}
-.nm-title{font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.nm-sub{font-size:11.5px; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;}
-.nm-actions{display:flex; align-items:center; gap:5px; flex-shrink:0;}
-.nm-actions .icon-btn{width:34px; height:34px; background:transparent;}
-.nm-actions .icon-btn.play{background:var(--surface-hover);}
+/* ===================== COUNTRIES LIST ===================== */
+.country-row{display:flex; align-items:center; gap:14px; padding:12px 20px; transition:background .15s ease; cursor:pointer;}
+.country-row:active{background:var(--surface-2);}
+.country-flag{width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:22px; background:var(--surface-2); border:0.5px solid var(--stroke);}
+.country-info{flex:1; min-width:0;}
+.country-name{font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.country-meta{font-size:12.5px; color:var(--text-2); margin-top:2px;}
+.country-badge{flex-shrink:0; text-align:right;}
+.country-badge .cnt{font-size:17px; font-weight:800;}
+.country-badge .lbl{font-size:10px; color:var(--text-3); font-weight:700; text-transform:uppercase; letter-spacing:.03em;}
+.country-divider{height:0.5px; background:var(--stroke); margin-left:78px;}
 
 /* ===================== TAB BAR ===================== */
 .tabbar{
@@ -372,9 +358,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
 @media (min-width:640px){
   body{max-width:520px; margin:0 auto; border-left:1px solid var(--stroke); border-right:1px solid var(--stroke);}
-  .now-monitoring, .tabbar{max-width:520px; left:50%; transform:translateX(-50%); right:auto;}
-  .now-monitoring{width:calc(520px - 20px);}
-  .tabbar{width:100%;}
+  .tabbar{max-width:520px; left:50%; transform:translateX(-50%); right:auto; width:100%;}
 }
 </style>
 </head>
@@ -398,7 +382,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 <!-- ===================== TOP BAR ===================== -->
 <div class="topbar">
   <div class="topbar-title">
-    <svg class="icon brand-icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/><circle cx="19" cy="6" r="2" fill="currentColor" stroke="none"/></svg>
+    <svg class="icon brand-icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg>
     Seismic Pulse
   </div>
   <div class="topbar-actions">
@@ -459,14 +443,14 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
   <div class="divider-lg"></div>
 
-  <!-- ZONAS EN SEGUIMIENTO -->
+  <!-- PAÍSES -->
   <div class="section">
     <div class="section-head">
-      <h2>Zonas en seguimiento</h2>
-      <span class="see-all" onclick="goToView('zones')">Ver todas</span>
+      <h2>Países</h2>
+      <span class="see-all" onclick="goToView('countries')">Ver todos</span>
     </div>
   </div>
-  <div class="hscroll" id="zonesScroll"></div>
+  <div id="homeCountriesList"></div>
 
   <div class="divider-xl"></div>
 
@@ -528,16 +512,16 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   <div class="feed-list" id="fullFeedList"></div>
 </div>
 
-<!-- ===================== VIEW: ZONAS ===================== -->
-<div class="view" id="view-zones">
+<!-- ===================== VIEW: PAÍSES ===================== -->
+<div class="view" id="view-countries">
   <div class="segment-wrap" style="padding-top:16px;">
-    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Zonas en seguimiento</h2></div>
+    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Países afectados</h2></div>
   </div>
   <div class="section" style="padding-top:6px;">
-    <p style="font-size:13.5px; color:var(--text-2); line-height:1.5;">Regiones de alta actividad tectónica monitoreadas de forma constante, ordenadas por número de eventos recientes.</p>
+    <p style="font-size:13.5px; color:var(--text-2); line-height:1.5;">Países con actividad sísmica registrada en el periodo seleccionado, ordenados por número de eventos.</p>
   </div>
   <div class="divider-lg"></div>
-  <div class="section" id="zonesGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:14px;"></div>
+  <div id="countriesFullList"></div>
 </div>
 
 <!-- ===================== VIEW: AJUSTES ===================== -->
@@ -656,36 +640,19 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   <div class="divider-xl"></div>
 </div>
 
-<!-- ===================== NOW MONITORING ===================== -->
-<div class="now-monitoring" onclick="goToView('detail'); event.stopPropagation();">
-  <div class="nm-art" id="nmArt"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg></div>
-  <div class="nm-body">
-    <div class="nm-title" id="nmTitle"></div>
-    <div class="nm-sub" id="nmSub"></div>
-  </div>
-  <div class="nm-actions">
-    <button class="icon-btn" onclick="event.stopPropagation(); refreshAll();" aria-label="Actualizar">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
-    </button>
-    <button class="icon-btn play" id="nmPlayBtn" onclick="event.stopPropagation(); toggleMonitoring();" aria-label="Pausar monitoreo">
-      <svg class="icon filled" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-    </button>
-  </div>
-</div>
-
 <!-- ===================== TAB BAR ===================== -->
 <div class="tabbar">
   <div class="tab-item active" data-tab="home" onclick="goToView('home')">
-    <svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/><circle cx="19" cy="6" r="1.6" fill="currentColor" stroke="none"/></svg>
+    <svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg>
     <span>Radar</span>
   </div>
   <div class="tab-item" data-tab="feed" onclick="goToView('feed')">
     <svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
     <span>Actividad</span>
   </div>
-  <div class="tab-item" data-tab="zones" onclick="goToView('zones')">
+  <div class="tab-item" data-tab="countries" onclick="goToView('countries')">
     <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg>
-    <span>Zonas</span>
+    <span>Países</span>
   </div>
   <div class="tab-item" data-tab="settings" onclick="goToView('settings')">
     <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -834,11 +801,11 @@ function setConnStatus(mode){
 function renderAll(){
   renderRadar();
   renderNearest();
-  renderZonesScroll();
+  renderHomeCountries();
   renderHomeFeed();
   renderFullFeed();
   updateGlobePoints();
-  renderNowMonitoring();
+  renderCountriesFull();
 }
 
 function renderRadar(){
@@ -892,90 +859,137 @@ function renderNearest(){
   document.getElementById('nearestTime').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>' + timeAgo(q.time);
 }
 
-/* -------------------- ZONAS -------------------- */
-const ICON_MOUNTAIN = '<path d="m8 21 4-13 4 13M3 21h18M10 14l-2-2-3 5"/>';
-const ICON_BUILDING = '<rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M9 8h1M14 8h1M9 12h1M14 12h1"/>';
-const ICON_WAVE = '<path d="M2 12s2-3 5-3 5 3 8 3 5-3 5-3M2 18s2-3 5-3 5 3 8 3 5-3 5-3"/>';
-const ICON_TORII = '<path d="M3 6h18M5 6v14M19 6v14M8 6 7 3h10l-1 3M4 10h16"/>';
-const ICON_ANCHOR = '<circle cx="12" cy="5" r="2"/><path d="M12 7v14M5 12H2a10 10 0 0 0 20 0h-3M8 15l4 6 4-6"/>';
-const ICON_CACTUS = '<path d="M12 22V8a2 2 0 0 1 4 0v3M12 22V8a2 2 0 0 0-4 0v3M8 11H6a2 2 0 0 0-2 2v3M16 11h2a2 2 0 0 1 2 2v3"/>';
-const ICON_COLUMNS = '<path d="M4 22V9M9 22V9M15 22V9M20 22V9M2 9h20L12 3z"/>';
-const ICON_PALM = '<path d="M12 22V10M12 10c-3-4-8-4-9-1 3 1 5 0 9 1zM12 10c3-4 8-4 9-1-3 1-5 0-9 1zM12 10c-1-4 1-8 4-9-1 3-1 5-4 9z"/>';
-const ICON_PEAK = '<path d="m12 3 9 18H3L12 3z"/><path d="m12 3 4 13H8L12 3z"/>';
-const ICON_SAIL = '<path d="M4 21h16M6 21V4l10 8H6M18 21c0-3 2-4 2-7"/>';
+/* -------------------- PAÍSES -------------------- */
+const COUNTRY_FLAGS = {
+  'Alaska':'🇺🇸','California':'🇺🇸','Hawaii':'🇺🇸','Nevada':'🇺🇸','Oregon':'🇺🇸','Washington':'🇺🇸',
+  'Chile':'🇨🇱','Argentina':'🇦🇷','Peru':'🇵🇪','Bolivia':'🇧🇴','Colombia':'🇨🇴','Ecuador':'🇪🇨','Venezuela':'🇻🇪',
+  'Mexico':'🇲🇽','Guatemala':'🇬🇹','Honduras':'🇭🇳','El Salvador':'🇸🇻','Nicaragua':'🇳🇮','Costa Rica':'🇨🇷','Panama':'🇵🇦',
+  'Japan':'🇯🇵','China':'🇨🇳','Philippines':'🇵🇭','Indonesia':'🇮🇩','Papua New Guinea':'🇵🇬','Vanuatu':'🇻🇺','Tonga':'🇹🇴','Fiji':'🇫🇯',
+  'New Zealand':'🇳🇿','Australia':'🇦🇺',
+  'Turkey':'🇹🇷','Iran':'🇮🇷','Afghanistan':'🇦🇫','Pakistan':'🇵🇰','India':'🇮🇳','Nepal':'🇳🇵',
+  'Greece':'🇬🇷','Italy':'🇮🇹','Romania':'🇷🇴','Russia':'🇷🇺',
+  'Taiwan':'🇹🇼','South Korea':'🇰🇷','Myanmar':'🇲🇲','Vietnam':'🇻🇳',
+  'Solomon Islands':'🇸🇧','Tonga':'🇹🇴','Samoa':'🇼🇸','Palau':'🇵🇼'
+};
 
-const ZONE_DEFS = [
-  {key:'Alaska', icon:ICON_MOUNTAIN, a:'#1c3d5a', b:'#0a1c2e'},
-  {key:'California', icon:ICON_BUILDING, a:'#4a2d1c', b:'#241208'},
-  {key:'Chile', icon:ICON_WAVE, a:'#1c4a3d', b:'#081f18'},
-  {key:'Japan', icon:ICON_TORII, a:'#4a1c2d', b:'#240a12'},
-  {key:'Indonesia', icon:ICON_ANCHOR, a:'#3d1c4a', b:'#1a0824'},
-  {key:'Mexico', icon:ICON_CACTUS, a:'#4a3d1c', b:'#241e08'},
-  {key:'Turkey', icon:ICON_COLUMNS, a:'#1c2d4a', b:'#080f24'},
-  {key:'Philippines', icon:ICON_PALM, a:'#1c4a2d', b:'#082412'},
-  {key:'Peru', icon:ICON_PEAK, a:'#4a1c1c', b:'#240808'},
-  {key:'New Zealand', icon:ICON_SAIL, a:'#2d4a1c', b:'#122408'}
-];
-const ZONE_LABELS = {'New Zealand':'Nueva Zelanda', 'Mexico':'México', 'Turkey':'Turquía', 'Japan':'Japón'};
+const COUNTRY_ES = {
+  'Alaska':'Alaska (EE.UU.)','California':'California (EE.UU.)','Hawaii':'Hawái (EE.UU.)','Nevada':'Nevada (EE.UU.)',
+  'Oregon':'Oregón (EE.UU.)','Washington':'Washington (EE.UU.)',
+  'Chile':'Chile','Argentina':'Argentina','Peru':'Perú','Bolivia':'Bolivia','Colombia':'Colombia',
+  'Ecuador':'Ecuador','Venezuela':'Venezuela','Mexico':'México','Guatemala':'Guatemala',
+  'Honduras':'Honduras','El Salvador':'El Salvador','Nicaragua':'Nicaragua',
+  'Costa Rica':'Costa Rica','Panama':'Panamá','Japan':'Japón','China':'China',
+  'Philippines':'Filipinas','Indonesia':'Indonesia','Papua New Guinea':'Papúa Nueva Guinea',
+  'Vanuatu':'Vanuatu','Tonga':'Tonga','Fiji':'Fiyi','New Zealand':'Nueva Zelanda',
+  'Australia':'Australia','Turkey':'Turquía','Iran':'Irán','Afghanistan':'Afganistán',
+  'Pakistan':'Pakistán','India':'India','Nepal':'Nepal','Greece':'Grecia','Italy':'Italia',
+  'Romania':'Rumanía','Russia':'Rusia','Taiwan':'Taiwán','South Korea':'Corea del Sur',
+  'Myanmar':'Myanmar','Vietnam':'Vietnam','Solomon Islands':'Islas Salomón','Samoa':'Samoa'
+};
 
-function renderZonesScroll(){
-  const zoneStats = computeZoneStats();
-  const wrap = document.getElementById('zonesScroll');
-  wrap.innerHTML = '';
-  zoneStats.slice(0,6).forEach(z => {
-    const el = document.createElement('div');
-    el.className = 'zone-card';
-    el.onclick = () => filterByZone(z.key);
-    el.innerHTML =
-      '<div class="zone-art" style="--art-a:' + z.def.a + '; --art-b:' + z.def.b + ';">' +
-        '<div class="zone-mag-tag">' + z.count + '</div>' +
-        '<svg class="icon" viewBox="0 0 24 24">' + z.def.icon + '</svg>' +
-      '</div>' +
-      '<div class="zone-title">' + z.label + '</div>' +
-      '<div class="zone-sub">Máx. M ' + z.maxMag.toFixed(1) + '</div>';
-    wrap.appendChild(el);
-  });
+function extractCountry(place){
+  if(!place) return 'Desconocido';
+  const parts = place.split(',');
+  const last = parts[parts.length - 1].trim();
+  if(last.length > 1 && last.length < 40) return last;
+  return parts[0].trim();
 }
 
-function computeZoneStats(){
+function computeCountryStats(){
   const stats = {};
-  ZONE_DEFS.forEach(def => stats[def.key] = {def, key:def.key, label: ZONE_LABELS[def.key] || def.key, count:0, maxMag:0});
   state.quakes.forEach(q => {
-    ZONE_DEFS.forEach(def => {
-      if(q.place.includes(def.key)){
-        stats[def.key].count++;
-        if(q.mag > stats[def.key].maxMag) stats[def.key].maxMag = q.mag;
-      }
-    });
+    const raw = extractCountry(q.place);
+    const key = raw;
+    if(!stats[key]) stats[key] = {key, count:0, maxMag:0, totalMag:0};
+    stats[key].count++;
+    stats[key].totalMag += q.mag;
+    if(q.mag > stats[key].maxMag) stats[key].maxMag = q.mag;
   });
-  return Object.values(stats).filter(z => z.count > 0).sort((a,b) => b.count - a.count);
+  return Object.values(stats).sort((a,b) => b.count - a.count);
 }
 
-function renderZonesGrid(){
-  const zoneStats = computeZoneStats();
-  const grid = document.getElementById('zonesGrid');
-  if(zoneStats.length === 0){
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><path d="m4 4 16 16"/></svg><p>No hay zonas con actividad suficiente en este rango.</p></div>';
+function getFlag(key){
+  for(const k of Object.keys(COUNTRY_FLAGS)){
+    if(key.includes(k)) return COUNTRY_FLAGS[k];
+  }
+  return '🌍';
+}
+
+function getLabel(key){
+  for(const k of Object.keys(COUNTRY_ES)){
+    if(key.includes(k)) return COUNTRY_ES[k];
+  }
+  return key;
+}
+
+function renderHomeCountries(){
+  const stats = computeCountryStats().slice(0, 5);
+  const wrap = document.getElementById('homeCountriesList');
+  wrap.innerHTML = '';
+  if(stats.length === 0){
+    wrap.innerHTML = '<div class="empty-state"><p>Sin datos de países para este periodo.</p></div>';
     return;
   }
-  grid.innerHTML = '';
-  zoneStats.forEach(z => {
-    const el = document.createElement('div');
-    el.onclick = () => { filterByZone(z.key); };
-    el.innerHTML =
-      '<div class="zone-art" style="--art-a:' + z.def.a + '; --art-b:' + z.def.b + '; width:100%; height:130px;">' +
-        '<div class="zone-mag-tag">' + z.count + ' eventos</div>' +
-        '<svg class="icon" viewBox="0 0 24 24" style="width:28px;height:28px;">' + z.def.icon + '</svg>' +
+  const maxCount = stats[0].count;
+  stats.forEach((c, idx) => {
+    const c2 = magColor(c.maxMag);
+    const pct = Math.round((c.count / maxCount) * 100);
+    const row = document.createElement('div');
+    row.className = 'country-row';
+    row.onclick = () => filterByCountry(c.key);
+    row.innerHTML =
+      '<div class="country-flag">' + getFlag(c.key) + '</div>' +
+      '<div class="country-info">' +
+        '<div class="country-name">' + getLabel(c.key) + '</div>' +
+        '<div class="country-meta">Máx. M ' + c.maxMag.toFixed(1) + ' · ' + c.count + ' evento' + (c.count !== 1 ? 's' : '') + '</div>' +
+        '<div style="margin-top:5px; height:3px; border-radius:2px; background:var(--surface-2);"><div style="height:3px; border-radius:2px; background:' + c2.numBg + '; width:' + pct + '%;"></div></div>' +
       '</div>' +
-      '<div class="zone-title" style="margin-top:8px;">' + z.label + '</div>' +
-      '<div class="zone-sub">Máx. M ' + z.maxMag.toFixed(1) + '</div>';
-    grid.appendChild(el);
+      '<div class="country-badge"><div class="cnt" style="color:' + c2.numBg + ';">' + c.count + '</div><div class="lbl">eventos</div></div>';
+    wrap.appendChild(row);
+    if(idx < stats.length - 1){
+      const div = document.createElement('div');
+      div.className = 'country-divider';
+      wrap.appendChild(div);
+    }
   });
 }
 
-function filterByZone(key){
+function renderCountriesFull(){
+  const stats = computeCountryStats();
+  const list = document.getElementById('countriesFullList');
+  list.innerHTML = '';
+  if(stats.length === 0){
+    list.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg><p>Sin datos de países para este periodo.</p></div>';
+    return;
+  }
+  const maxCount = stats[0].count;
+  stats.forEach((c, idx) => {
+    const c2 = magColor(c.maxMag);
+    const pct = Math.round((c.count / maxCount) * 100);
+    const row = document.createElement('div');
+    row.className = 'country-row';
+    row.onclick = () => filterByCountry(c.key);
+    row.innerHTML =
+      '<div class="country-flag" style="width:48px;height:48px;font-size:24px;">' + getFlag(c.key) + '</div>' +
+      '<div class="country-info">' +
+        '<div class="country-name" style="font-size:16px;">' + getLabel(c.key) + '</div>' +
+        '<div class="country-meta">Máx. M ' + c.maxMag.toFixed(1) + ' · Prom. M ' + (c.totalMag/c.count).toFixed(1) + '</div>' +
+        '<div style="margin-top:6px; height:3px; border-radius:2px; background:var(--surface-2);"><div style="height:3px; border-radius:2px; background:' + c2.numBg + '; width:' + pct + '%;"></div></div>' +
+      '</div>' +
+      '<div class="country-badge"><div class="cnt" style="color:' + c2.numBg + '; font-size:20px;">' + c.count + '</div><div class="lbl">eventos</div></div>';
+    list.appendChild(row);
+    if(idx < stats.length - 1){
+      const div = document.createElement('div');
+      div.className = 'country-divider';
+      list.appendChild(div);
+    }
+  });
+}
+
+function filterByCountry(key){
   goToView('feed');
-  state.zoneFilter = key;
+  state.countryFilter = key;
+  state.zoneFilter = null;
   renderFullFeed();
 }
 
@@ -991,6 +1005,9 @@ function renderFullFeed(){
   let filtered = state.quakes.filter(q => q.mag >= state.magFilter);
   if(state.zoneFilter){
     filtered = filtered.filter(q => q.place.includes(state.zoneFilter));
+  }
+  if(state.countryFilter){
+    filtered = filtered.filter(q => extractCountry(q.place) === state.countryFilter);
   }
   filtered = filtered.sort((a,b) => b.time - a.time);
   renderFeedInto(list, filtered, true);
@@ -1045,26 +1062,6 @@ function openDetail(q){
   goToView('detail');
 }
 
-/* -------------------- NOW MONITORING -------------------- */
-function renderNowMonitoring(){
-  if(!currentNearest) return;
-  const c = magColor(currentNearest.mag);
-  const art = document.getElementById('nmArt');
-  art.style.setProperty('--core-light', c.light);
-  art.style.setProperty('--core-dark', c.dark);
-  art.style.setProperty('--core-icon', c.badgeFg);
-  document.getElementById('nmTitle').textContent = currentNearest.place;
-  document.getElementById('nmSub').textContent = 'M ' + currentNearest.mag.toFixed(1) + ' · ' + Math.round(currentNearest.distance).toLocaleString('es-ES') + ' km · ' + timeAgo(currentNearest.time);
-}
-
-function toggleMonitoring(){
-  state.monitoring = !state.monitoring;
-  const btn = document.getElementById('nmPlayBtn');
-  btn.innerHTML = state.monitoring
-    ? '<svg class="icon filled" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
-    : '<svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>';
-  if(state.monitoring){ startPolling(); } else { stopPolling(); }
-}
 
 /* -------------------- CLIMA (Open-Meteo) -------------------- */
 async function loadWeather(){
@@ -1077,6 +1074,7 @@ async function loadWeather(){
     const cur = data.current;
 
     const grid = document.getElementById('weatherGrid');
+    if(!grid) return;
     grid.innerHTML =
       metricHtml('<path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>', Math.round(cur.temperature_2m) + '°C', 'Temp.') +
       metricHtml('<path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/>', Math.round(cur.pressure_msl) + ' hPa', 'Presión') +
