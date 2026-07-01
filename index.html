@@ -291,31 +291,61 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
 /* ===================== TOAST DE ALERTA — MÁXIMA URGENCIA ===================== */
 .toast-alert{
-  position:fixed; top:calc(env(safe-area-inset-top) + 8px); left:12px; right:12px; z-index:200;
-  background:linear-gradient(135deg, var(--primary), #ff1744);
-  border-radius:18px; padding:16px 17px;
-  display:flex; align-items:center; gap:13px;
-  box-shadow:0 20px 50px -12px rgba(254,44,85,0.8), 0 0 0 1px rgba(254,44,85,0.2);
-  transform:translateY(-160%) scale(0.9); opacity:0;
-  transition:transform .5s cubic-bezier(.17,.9,.24,1.2), opacity .3s ease;
+  position:fixed; inset:0; z-index:200;
+  background:linear-gradient(170deg, #c0001a 0%, #FE2C55 45%, #ff1744 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:0; padding:0 28px;
+  opacity:0; pointer-events:none;
+  transition:opacity .25s ease;
 }
-.toast-alert.show{transform:translateY(0) scale(1); opacity:1; animation:toastshake .4s ease 1;}
-.toast-alert.blinking{animation:toastblink 0.9s ease-in-out infinite;}
-@keyframes toastshake{
-  0%,100%{transform:translateY(0) translateX(0) scale(1);}
-  20%{transform:translateY(0) translateX(-4px) scale(1);}
-  40%{transform:translateY(0) translateX(4px) scale(1);}
-  60%{transform:translateY(0) translateX(-3px) scale(1);}
-  80%{transform:translateY(0) translateX(3px) scale(1);}
+.toast-alert.show{opacity:1; pointer-events:all; animation:amberblink 1s ease-in-out infinite;}
+.toast-alert.blinking{animation:amberblink 0.6s ease-in-out infinite;}
+@keyframes amberblink{
+  0%,100%{background:linear-gradient(170deg,#c0001a 0%,#FE2C55 45%,#ff1744 100%);}
+  50%{background:linear-gradient(170deg,#a30016 0%,#e0002e 45%,#c0001a 100%);}
 }
-@keyframes toastblink{0%,100%{box-shadow:0 20px 50px -12px rgba(254,44,85,0.8), 0 0 0 1px rgba(254,44,85,0.2);} 50%{box-shadow:0 20px 65px -6px rgba(254,44,85,1), 0 0 0 2px rgba(254,44,85,0.3);}}
-.toast-alert .alert-icon{width:30px; height:30px; color:#fff; flex-shrink:0; animation:iconshake 0.6s ease-in-out infinite;}
-@keyframes iconshake{0%,100%{transform:rotate(0deg);} 25%{transform:rotate(-12deg);} 75%{transform:rotate(12deg);}}
-.toast-alert .txt{flex:1;}
-.toast-alert .txt .t0{font-size:10px; font-weight:800; color:rgba(255,255,255,0.75); text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px;}
-.toast-alert .txt .t1{font-size:15px; font-weight:800; color:#fff;}
-.toast-alert .txt .t2{font-size:12.5px; color:rgba(255,255,255,0.88); margin-top:1px; font-weight:600;}
-.toast-alert .close{color:#fff; width:20px; height:20px; opacity:.9; flex-shrink:0;}
+.toast-alert .amber-stripe{
+  width:100%; padding:14px 0 12px;
+  background:rgba(0,0,0,0.28);
+  text-align:center;
+  font-size:11px; font-weight:900; color:rgba(255,255,255,0.92);
+  letter-spacing:.22em; text-transform:uppercase;
+  position:absolute; top:0; left:0; right:0;
+  border-bottom:1px solid rgba(255,255,255,0.15);
+}
+.toast-alert .amber-icon{
+  width:72px; height:72px; color:#fff; margin-bottom:22px;
+  animation:iconpulse 0.8s ease-in-out infinite;
+  filter:drop-shadow(0 0 18px rgba(255,255,255,0.5));
+}
+@keyframes iconpulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.12);}}
+.toast-alert .amber-mag{
+  font-size:88px; font-weight:900; color:#fff; line-height:1;
+  letter-spacing:-.03em;
+  text-shadow:0 0 40px rgba(255,255,255,0.35);
+  margin-bottom:6px;
+}
+.toast-alert .amber-label{
+  font-size:13px; font-weight:800; color:rgba(255,255,255,0.7);
+  text-transform:uppercase; letter-spacing:.12em; margin-bottom:28px;
+}
+.toast-alert .amber-place{
+  font-size:22px; font-weight:800; color:#fff; text-align:center;
+  line-height:1.25; margin-bottom:10px;
+  text-shadow:0 2px 12px rgba(0,0,0,0.25);
+}
+.toast-alert .amber-sub{
+  font-size:14px; color:rgba(255,255,255,0.82); text-align:center;
+  font-weight:600; line-height:1.5; margin-bottom:44px;
+}
+.toast-alert .amber-dismiss{
+  background:rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.4);
+  color:#fff; border-radius:50px; padding:14px 48px;
+  font-size:15px; font-weight:800; letter-spacing:.04em;
+  cursor:pointer; transition:background .2s;
+  position:absolute; bottom:calc(env(safe-area-inset-bottom) + 36px);
+}
+.toast-alert .amber-dismiss:active{background:rgba(0,0,0,0.5);}
 
 .brand-footer{padding:26px 20px 10px; text-align:center;}
 .brand-footer svg{width:22px; height:22px; color:var(--text-3); margin-bottom:9px;}
@@ -342,15 +372,13 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
 <!-- ===================== TOAST DE ALERTA ===================== -->
 <div class="toast-alert" id="toastAlert">
-  <svg class="icon filled alert-icon" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v6m0 3.2h.01"/></svg>
-  <div class="txt">
-    <div class="t0">Alerta sísmica</div>
-    <div class="t1" id="toastTitle">Actividad detectada</div>
-    <div class="t2" id="toastSub">M 4.5 · a 320 km</div>
-  </div>
-  <button class="close" onclick="dismissToast()" aria-label="Cerrar">
-    <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-  </button>
+  <div class="amber-stripe">Alerta&nbsp;&nbsp;Sísmica</div>
+  <svg class="amber-icon icon filled" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v6m0 3.2h.01"/></svg>
+  <div class="amber-mag" id="toastMag">5.5</div>
+  <div class="amber-label" id="toastType">Magnitud</div>
+  <div class="amber-place" id="toastTitle">Actividad detectada</div>
+  <div class="amber-sub" id="toastSub">A 320 km de ti · 10 km de profundidad</div>
+  <button class="amber-dismiss" onclick="dismissToast()">Descartar</button>
 </div>
 
 <!-- ===================== TOP BAR ===================== -->
@@ -1539,8 +1567,10 @@ function triggerAlert(q){
   const dur = playSoundByKey(selectedSound);
   if(state.vibrateOn && navigator.vibrate){ navigator.vibrate([300,100,300,100,300,100,700]); }
   flashScreen();
-  document.getElementById('toastTitle').textContent = 'M ' + q.mag.toFixed(1) + ' — ' + q.place;
-  document.getElementById('toastSub').textContent = 'A ' + Math.round(q.distance).toLocaleString('es-ES') + ' km de ti · ' + q.depth.toFixed(0) + ' km de profundidad';
+  document.getElementById('toastMag').textContent = q.mag.toFixed(1);
+  document.getElementById('toastType').textContent = q.mag >= 6 ? 'Sismo mayor' : q.mag >= 4.5 ? 'Sismo moderado' : 'Sismo leve';
+  document.getElementById('toastTitle').textContent = q.place;
+  document.getElementById('toastSub').innerHTML = 'A ' + Math.round(q.distance).toLocaleString('es-ES') + ' km de ti&nbsp;&nbsp;·&nbsp;&nbsp;' + q.depth.toFixed(0) + ' km de profundidad';
   const toast = document.getElementById('toastAlert');
   toast.classList.add('show');
   if(q.mag >= 6){ toast.classList.add('blinking'); } else { toast.classList.remove('blinking'); }
