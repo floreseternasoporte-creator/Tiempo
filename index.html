@@ -953,8 +953,6 @@ const FIREBASE_CONFIG = {
 /* Emails con acceso de administrador */
 const ADMIN_EMAILS = ['zam.contact@yahoo.com'];
 
-/* VAPID key — obtener de Firebase Console → Cloud Messaging → Web configuration */
-const VAPID_KEY = "";
 
 const USGS_FEEDS = {
   hour:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
@@ -1042,9 +1040,6 @@ function enterApp(user) {
   loadQuakes();
   startPolling();
   setupFCMForeground();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
-  }
   document.body.addEventListener('click', () => getAudioCtx(), {once:true});
 }
 
