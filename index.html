@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ce1126">
-<title>Seismic Pulse — Alerta Sísmica</title>
+<title>SismoCuba — Alerta Sísmica</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
@@ -263,18 +263,6 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 .alarm-test-btn.playing{animation:btnflash .5s ease-in-out infinite;}
 @keyframes btnflash{0%,100%{box-shadow:0 14px 34px -12px rgba(225,6,0,0.55);} 50%{box-shadow:0 14px 44px -8px rgba(225,6,0,0.95);}}
 
-/* ===================== COUNTRIES LIST ===================== */
-.country-row{display:flex; align-items:center; gap:14px; padding:12px 20px; transition:background .15s ease; cursor:pointer;}
-.country-row:active{background:var(--surface-2);}
-.country-flag{width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:22px; background:var(--surface-2); border:0.5px solid var(--stroke);}
-.country-info{flex:1; min-width:0;}
-.country-name{font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.country-meta{font-size:12.5px; color:var(--text-2); margin-top:2px;}
-.country-badge{flex-shrink:0; text-align:right;}
-.country-badge .cnt{font-size:17px; font-weight:800;}
-.country-badge .lbl{font-size:10px; color:var(--text-3); font-weight:700; text-transform:uppercase; letter-spacing:.03em;}
-.country-divider{height:0.5px; background:var(--stroke); margin-left:78px;}
-
 /* ===================== TAB BAR ===================== */
 .tabbar{
   position:fixed; left:0; right:0; bottom:0; z-index:90;
@@ -404,7 +392,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 <div class="topbar">
   <div class="topbar-title">
     <svg class="icon brand-icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg>
-    Seismic Pulse
+    SismoCuba
   </div>
   <div class="topbar-actions">
     <button class="icon-btn" onclick="goToView('settings')" aria-label="Ajustes">
@@ -441,19 +429,6 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
   <div class="divider-lg"></div>
 
-  <!-- PAÍSES -->
-  <div class="section">
-    <div class="section-head">
-      <h2>Países</h2>
-      <span class="see-all" onclick="goToView('countries')">Ver todos</span>
-    </div>
-  </div>
-  <div id="homeCountriesList"></div>
-
-  <div class="divider-xl"></div>
-
-
-
   <div class="divider-xl"></div>
 
   <!-- FEED RECIENTE -->
@@ -483,18 +458,6 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   </div>
   <div class="divider-lg"></div>
   <div class="feed-list" id="fullFeedList"></div>
-</div>
-
-<!-- ===================== VIEW: PAÍSES ===================== -->
-<div class="view" id="view-countries">
-  <div class="segment-wrap" style="padding-top:16px;">
-    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Países afectados</h2></div>
-  </div>
-  <div class="section" style="padding-top:6px;">
-    <p style="font-size:13.5px; color:var(--text-2); line-height:1.5;">Países con actividad sísmica registrada en el periodo seleccionado, ordenados por número de eventos.</p>
-  </div>
-  <div class="divider-lg"></div>
-  <div id="countriesFullList"></div>
 </div>
 
 <!-- ===================== VIEW: AJUSTES ===================== -->
@@ -543,90 +506,13 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Tipo de alerta sonora</p></div>
   <div class="section">
     <div class="sound-picker" id="soundPicker">
-      <div class="sound-option selected" data-sound="amber" onclick="selectSound('amber',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Alerta AMBER</div>
-          <div class="so-desc">Doble tono oficial EAS 853+960 Hz, como alerta real</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('amber');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="eas" onclick="selectSound('eas',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger-2);"><path d="M11 5 6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Sirena EAS</div>
-          <div class="so-desc">Sirena agresiva de dos tonos, tipo alerta oficial</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('eas');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="pulse" onclick="selectSound('pulse',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--warning);"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Pulso Urgente</div>
-          <div class="so-desc">Pitidos rápidos de emergencia estilo defensa civil</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('pulse');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="siren" onclick="selectSound('siren',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Sirena Ascendente</div>
-          <div class="so-desc">Barrido ascendente tipo sirena de emergencias</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('siren');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="critical" onclick="selectSound('critical',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger);"><path d="M12 2 1 21h22L12 2zm0 6v6m0 3.2h.01"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Alerta Crítica</div>
-          <div class="so-desc">Impacto profundo + sirena, máxima urgencia</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('critical');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="seismic" onclick="selectSound('seismic',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--warning);"><path d="M2 6h2l2 12 2-9 2 6 2-14 2 9 2-4h4"/></svg></div>
+      <div class="sound-option selected" data-sound="seismic" onclick="selectSound('seismic',this)">
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M2 6h2l2 12 2-9 2 6 2-14 2 9 2-4h4"/></svg></div>
         <div class="so-body">
           <div class="so-name">Alerta Sísmica</div>
           <div class="so-desc">Patrón de onda sísmica — tono grave con pulsos crecientes</div>
         </div>
         <button class="so-play" onclick="event.stopPropagation(); previewSound('seismic');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="bell" onclick="selectSound('bell',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary-light);"><path d="M6 6a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Campana de Crisis</div>
-          <div class="so-desc">Repique de campana grave — tipo iglesia en emergencia</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('bell');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="sos" onclick="selectSound('sos',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.88 11.9a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6 6l1.06-1.06a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">SOS Morse</div>
-          <div class="so-desc">Señal SOS internacional en código Morse (· · · — — — · · ·)</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('sos');" aria-label="Probar">
           <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
         </button>
         <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
@@ -638,6 +524,17 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
           <div class="so-desc">Sirena clásica de defensa civil — subida y bajada lenta</div>
         </div>
         <button class="so-play" onclick="event.stopPropagation(); previewSound('civildef');" aria-label="Probar">
+          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
+        </button>
+        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="sound-option" data-sound="eas" onclick="selectSound('eas',this)">
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger-2);"><path d="M11 5 6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
+        <div class="so-body">
+          <div class="so-name">Sirena EAS</div>
+          <div class="so-desc">Sirena agresiva de dos tonos, tipo alerta oficial</div>
+        </div>
+        <button class="so-play" onclick="event.stopPropagation(); previewSound('eas');" aria-label="Probar">
           <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
         </button>
         <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
@@ -723,10 +620,6 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
     <svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
     <span>Actividad</span>
   </div>
-  <div class="tab-item" data-tab="countries" onclick="goToView('countries')">
-    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg>
-    <span>Países</span>
-  </div>
   <div class="tab-item" data-tab="settings" onclick="goToView('settings')">
     <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>Ajustes</span>
@@ -735,7 +628,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
 <script>
 /* ============================================================
-   SEISMIC PULSE — Lógica principal
+   SISMOCUBA — Lógica principal
    Fuentes de datos reales:
    - USGS Earthquake Hazards Program (GeoJSON feed, sin API key)
    - Open-Meteo (clima y presión atmosférica, sin API key)
@@ -845,6 +738,7 @@ async function loadQuakes(){
         depth: f.geometry.coordinates[2]
       }))
       .filter(q => typeof q.mag === 'number')
+      .filter(q => /cuba/i.test(q.place))
       .sort((a,b) => b.time - a.time);
 
     state.quakes.forEach(q => q.distance = haversine(state.userLat, state.userLon, q.lat, q.lon));
@@ -865,10 +759,8 @@ function setConnStatus(mode){
 /* -------------------- RENDER GENERAL -------------------- */
 function renderAll(){
   renderNearest();
-  renderHomeCountries();
   renderHomeFeed();
   renderFullFeed();
-  renderCountriesFull();
 }
 
 
@@ -887,140 +779,6 @@ function renderNearest(){
   document.getElementById('nearestTime').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>' + timeAgo(q.time);
 }
 
-/* -------------------- PAÍSES -------------------- */
-const COUNTRY_FLAGS = {
-  'Alaska':'🇺🇸','California':'🇺🇸','Hawaii':'🇺🇸','Nevada':'🇺🇸','Oregon':'🇺🇸','Washington':'🇺🇸',
-  'Chile':'🇨🇱','Argentina':'🇦🇷','Peru':'🇵🇪','Bolivia':'🇧🇴','Colombia':'🇨🇴','Ecuador':'🇪🇨','Venezuela':'🇻🇪',
-  'Mexico':'🇲🇽','Cuba':'🇨🇺','Guatemala':'🇬🇹','Honduras':'🇭🇳','El Salvador':'🇸🇻','Nicaragua':'🇳🇮','Costa Rica':'🇨🇷','Panama':'🇵🇦',
-  'Japan':'🇯🇵','China':'🇨🇳','Philippines':'🇵🇭','Indonesia':'🇮🇩','Papua New Guinea':'🇵🇬','Vanuatu':'🇻🇺','Tonga':'🇹🇴','Fiji':'🇫🇯',
-  'New Zealand':'🇳🇿','Australia':'🇦🇺',
-  'Turkey':'🇹🇷','Iran':'🇮🇷','Afghanistan':'🇦🇫','Pakistan':'🇵🇰','India':'🇮🇳','Nepal':'🇳🇵',
-  'Greece':'🇬🇷','Italy':'🇮🇹','Romania':'🇷🇴','Russia':'🇷🇺',
-  'Taiwan':'🇹🇼','South Korea':'🇰🇷','Myanmar':'🇲🇲','Vietnam':'🇻🇳',
-  'Solomon Islands':'🇸🇧','Tonga':'🇹🇴','Samoa':'🇼🇸','Palau':'🇵🇼'
-};
-
-const COUNTRY_ES = {
-  'Alaska':'Alaska (EE.UU.)','California':'California (EE.UU.)','Hawaii':'Hawái (EE.UU.)','Nevada':'Nevada (EE.UU.)',
-  'Oregon':'Oregón (EE.UU.)','Washington':'Washington (EE.UU.)',
-  'Chile':'Chile','Argentina':'Argentina','Peru':'Perú','Bolivia':'Bolivia','Colombia':'Colombia',
-  'Ecuador':'Ecuador','Venezuela':'Venezuela','Mexico':'México','Cuba':'Cuba','Guatemala':'Guatemala',
-  'Honduras':'Honduras','El Salvador':'El Salvador','Nicaragua':'Nicaragua',
-  'Costa Rica':'Costa Rica','Panama':'Panamá','Japan':'Japón','China':'China',
-  'Philippines':'Filipinas','Indonesia':'Indonesia','Papua New Guinea':'Papúa Nueva Guinea',
-  'Vanuatu':'Vanuatu','Tonga':'Tonga','Fiji':'Fiyi','New Zealand':'Nueva Zelanda',
-  'Australia':'Australia','Turkey':'Turquía','Iran':'Irán','Afghanistan':'Afganistán',
-  'Pakistan':'Pakistán','India':'India','Nepal':'Nepal','Greece':'Grecia','Italy':'Italia',
-  'Romania':'Rumanía','Russia':'Rusia','Taiwan':'Taiwán','South Korea':'Corea del Sur',
-  'Myanmar':'Myanmar','Vietnam':'Vietnam','Solomon Islands':'Islas Salomón','Samoa':'Samoa'
-};
-
-function extractCountry(place){
-  if(!place) return 'Desconocido';
-  const parts = place.split(',');
-  const last = parts[parts.length - 1].trim();
-  if(last.length > 1 && last.length < 40) return last;
-  return parts[0].trim();
-}
-
-function computeCountryStats(){
-  const stats = {};
-  state.quakes.forEach(q => {
-    const raw = extractCountry(q.place);
-    const key = raw;
-    if(!stats[key]) stats[key] = {key, count:0, maxMag:0, totalMag:0};
-    stats[key].count++;
-    stats[key].totalMag += q.mag;
-    if(q.mag > stats[key].maxMag) stats[key].maxMag = q.mag;
-  });
-  return Object.values(stats).sort((a,b) => b.count - a.count);
-}
-
-function getFlag(key){
-  for(const k of Object.keys(COUNTRY_FLAGS)){
-    if(key.includes(k)) return COUNTRY_FLAGS[k];
-  }
-  return '🌍';
-}
-
-function getLabel(key){
-  for(const k of Object.keys(COUNTRY_ES)){
-    if(key.includes(k)) return COUNTRY_ES[k];
-  }
-  return key;
-}
-
-function renderHomeCountries(){
-  const stats = computeCountryStats().slice(0, 5);
-  const wrap = document.getElementById('homeCountriesList');
-  wrap.innerHTML = '';
-  if(stats.length === 0){
-    wrap.innerHTML = '<div class="empty-state"><p>Sin datos de países para este periodo.</p></div>';
-    return;
-  }
-  const maxCount = stats[0].count;
-  stats.forEach((c, idx) => {
-    const c2 = magColor(c.maxMag);
-    const pct = Math.round((c.count / maxCount) * 100);
-    const row = document.createElement('div');
-    row.className = 'country-row';
-    row.onclick = () => filterByCountry(c.key);
-    row.innerHTML =
-      '<div class="country-flag">' + getFlag(c.key) + '</div>' +
-      '<div class="country-info">' +
-        '<div class="country-name">' + getLabel(c.key) + '</div>' +
-        '<div class="country-meta">Máx. M ' + c.maxMag.toFixed(1) + ' · ' + c.count + ' evento' + (c.count !== 1 ? 's' : '') + '</div>' +
-        '<div style="margin-top:5px; height:3px; border-radius:2px; background:var(--surface-2);"><div style="height:3px; border-radius:2px; background:' + c2.numBg + '; width:' + pct + '%;"></div></div>' +
-      '</div>' +
-      '<div class="country-badge"><div class="cnt" style="color:' + c2.numBg + ';">' + c.count + '</div><div class="lbl">eventos</div></div>';
-    wrap.appendChild(row);
-    if(idx < stats.length - 1){
-      const div = document.createElement('div');
-      div.className = 'country-divider';
-      wrap.appendChild(div);
-    }
-  });
-}
-
-function renderCountriesFull(){
-  const stats = computeCountryStats();
-  const list = document.getElementById('countriesFullList');
-  list.innerHTML = '';
-  if(stats.length === 0){
-    list.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg><p>Sin datos de países para este periodo.</p></div>';
-    return;
-  }
-  const maxCount = stats[0].count;
-  stats.forEach((c, idx) => {
-    const c2 = magColor(c.maxMag);
-    const pct = Math.round((c.count / maxCount) * 100);
-    const row = document.createElement('div');
-    row.className = 'country-row';
-    row.onclick = () => filterByCountry(c.key);
-    row.innerHTML =
-      '<div class="country-flag" style="width:48px;height:48px;font-size:24px;">' + getFlag(c.key) + '</div>' +
-      '<div class="country-info">' +
-        '<div class="country-name" style="font-size:16px;">' + getLabel(c.key) + '</div>' +
-        '<div class="country-meta">Máx. M ' + c.maxMag.toFixed(1) + ' · Prom. M ' + (c.totalMag/c.count).toFixed(1) + '</div>' +
-        '<div style="margin-top:6px; height:3px; border-radius:2px; background:var(--surface-2);"><div style="height:3px; border-radius:2px; background:' + c2.numBg + '; width:' + pct + '%;"></div></div>' +
-      '</div>' +
-      '<div class="country-badge"><div class="cnt" style="color:' + c2.numBg + '; font-size:20px;">' + c.count + '</div><div class="lbl">eventos</div></div>';
-    list.appendChild(row);
-    if(idx < stats.length - 1){
-      const div = document.createElement('div');
-      div.className = 'country-divider';
-      list.appendChild(div);
-    }
-  });
-}
-
-function filterByCountry(key){
-  goToView('feed');
-  state.countryFilter = key;
-  state.zoneFilter = null;
-  renderFullFeed();
-}
-
 /* -------------------- FEEDS -------------------- */
 function renderHomeFeed(){
   const list = document.getElementById('homeFeedList');
@@ -1031,12 +789,6 @@ function renderHomeFeed(){
 function renderFullFeed(){
   const list = document.getElementById('fullFeedList');
   let filtered = state.quakes.filter(q => q.mag >= state.magFilter);
-  if(state.zoneFilter){
-    filtered = filtered.filter(q => q.place.includes(state.zoneFilter));
-  }
-  if(state.countryFilter){
-    filtered = filtered.filter(q => extractCountry(q.place) === state.countryFilter);
-  }
   filtered = filtered.sort((a,b) => b.time - a.time);
   renderFeedInto(list, filtered, true);
 }
@@ -1167,11 +919,11 @@ function requestGeolocation(){
 }
 
 /* ============================================================
-   SISTEMA DE ALERTAS SONORAS — Web Audio API, 5 sonidos
+   SISTEMA DE ALERTAS SONORAS — Web Audio API, 3 sonidos
    Sintetizados 100% en el navegador sin archivos externos.
    ============================================================ */
 let audioCtx = null;
-let selectedSound = 'amber';
+let selectedSound = 'seismic';
 
 function getAudioCtx(){
   if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -1191,49 +943,11 @@ function previewSound(key){
 
 function playSoundByKey(key){
   switch(key){
-    case 'amber':    return playAmberAlert();
     case 'eas':      return playEASSiren();
-    case 'pulse':    return playUrgentPulse();
-    case 'siren':    return playRisingSiren();
-    case 'critical':   return playCriticalAlert();
     case 'seismic':    return playSeismicAlert();
-    case 'bell':       return playCrisisBell();
-    case 'sos':        return playSOS();
     case 'civildef':   return playCivilDefense();
-    default:           return playAmberAlert();
+    default:           return playSeismicAlert();
   }
-}
-
-/* ---- AMBER ALERT — tono EAS Attention Signal auténtico 853 Hz + 960 Hz ---- */
-function playAmberAlert(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 8.0;
-
-  const master = ctx.createGain();
-  master.gain.setValueAtTime(0.0001, now);
-  master.gain.linearRampToValueAtTime(0.55, now + 0.015);
-  master.gain.setValueAtTime(0.55, now + duration - 0.04);
-  master.gain.linearRampToValueAtTime(0.0001, now + duration);
-  master.connect(ctx.destination);
-
-  /* Tono 1: 853 Hz — señal continua sin modulación */
-  const osc1 = ctx.createOscillator();
-  osc1.type = 'square';
-  osc1.frequency.value = 853;
-  const g1 = ctx.createGain(); g1.gain.value = 0.5;
-  osc1.connect(g1).connect(master);
-
-  /* Tono 2: 960 Hz — señal continua simultánea */
-  const osc2 = ctx.createOscillator();
-  osc2.type = 'square';
-  osc2.frequency.value = 960;
-  const g2 = ctx.createGain(); g2.gain.value = 0.5;
-  osc2.connect(g2).connect(master);
-
-  osc1.start(now); osc1.stop(now + duration);
-  osc2.start(now); osc2.stop(now + duration);
-  return duration;
 }
 
 /* ---- EAS SIREN — sirena agresiva de dos tonos sawtooth ---- */
@@ -1266,124 +980,6 @@ function playEASSiren(){
   master.gain.setValueAtTime(0.38, now + duration - 0.2);
   master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
   osc.start(now); osc.stop(now + duration);
-  return duration;
-}
-
-/* ---- PULSO URGENTE — pitidos rápidos estilo defensa civil ---- */
-function playUrgentPulse(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 2.8;
-  const beepDur = 0.12;
-  const beepGap = 0.09;
-  const beepCount = Math.floor(duration / (beepDur + beepGap));
-
-  const master = ctx.createGain();
-  master.gain.value = 0.35;
-  master.connect(ctx.destination);
-
-  for(let i = 0; i < beepCount; i++){
-    const t = now + i * (beepDur + beepGap);
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = i % 2 === 0 ? 1480 : 1760;
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0.0001, t);
-    env.gain.exponentialRampToValueAtTime(0.5, t + 0.01);
-    env.gain.setValueAtTime(0.5, t + beepDur - 0.02);
-    env.gain.exponentialRampToValueAtTime(0.0001, t + beepDur);
-    osc.connect(env).connect(master);
-    osc.start(t); osc.stop(t + beepDur);
-  }
-  return duration;
-}
-
-/* ---- SIRENA ASCENDENTE — barrido continuo de emergencia ---- */
-function playRisingSiren(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 3.0;
-
-  const master = ctx.createGain();
-  master.gain.value = 0.0001;
-  master.connect(ctx.destination);
-  master.gain.exponentialRampToValueAtTime(0.4, now + 0.06);
-
-  const osc = ctx.createOscillator();
-  osc.type = 'sawtooth';
-  const filt = ctx.createBiquadFilter();
-  filt.type = 'lowpass'; filt.frequency.value = 2800;
-  const g = ctx.createGain(); g.gain.value = 0.55;
-  osc.connect(filt).connect(g).connect(master);
-
-  /* Tres ciclos de subida completa */
-  const cycleT = duration / 3;
-  for(let i = 0; i < 3; i++){
-    const t = now + i * cycleT;
-    osc.frequency.setValueAtTime(300, t);
-    osc.frequency.exponentialRampToValueAtTime(1800, t + cycleT * 0.85);
-    osc.frequency.exponentialRampToValueAtTime(300, t + cycleT);
-  }
-
-  master.gain.setValueAtTime(0.4, now + duration - 0.3);
-  master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-  osc.start(now); osc.stop(now + duration);
-  return duration;
-}
-
-/* ---- ALERTA CRÍTICA — impacto profundo + sirena dramática ---- */
-function playCriticalAlert(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 3.5;
-
-  const master = ctx.createGain();
-  master.gain.value = 0.35;
-  master.connect(ctx.destination);
-
-  /* Golpe de impacto grave inicial */
-  const boom = ctx.createOscillator();
-  boom.type = 'sine';
-  boom.frequency.setValueAtTime(80, now);
-  boom.frequency.exponentialRampToValueAtTime(25, now + 0.5);
-  const boomG = ctx.createGain();
-  boomG.gain.setValueAtTime(0.0001, now);
-  boomG.gain.exponentialRampToValueAtTime(0.7, now + 0.01);
-  boomG.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-  boom.connect(boomG).connect(master);
-  boom.start(now); boom.stop(now + 0.5);
-
-  /* Sirena sobre el impacto */
-  const siren = ctx.createOscillator();
-  siren.type = 'sawtooth';
-  const sf = ctx.createBiquadFilter();
-  sf.type = 'bandpass'; sf.frequency.value = 1000; sf.Q.value = 1;
-  const sg = ctx.createGain(); sg.gain.value = 0.45;
-  siren.connect(sf).connect(sg).connect(master);
-
-  const sirenStart = now + 0.3;
-  const cycles = 4;
-  const cDur = (duration - 0.3) / cycles;
-  for(let i = 0; i < cycles; i++){
-    const t = sirenStart + i * cDur;
-    siren.frequency.setValueAtTime(500, t);
-    siren.frequency.linearRampToValueAtTime(1400, t + cDur * 0.6);
-    siren.frequency.linearRampToValueAtTime(800, t + cDur);
-  }
-
-  /* Segundo boom en el medio */
-  const boom2 = ctx.createOscillator();
-  boom2.type = 'sine';
-  boom2.frequency.setValueAtTime(65, now + 1.6);
-  boom2.frequency.exponentialRampToValueAtTime(20, now + 2.1);
-  const b2g = ctx.createGain();
-  b2g.gain.setValueAtTime(0.0001, now + 1.6);
-  b2g.gain.exponentialRampToValueAtTime(0.6, now + 1.61);
-  b2g.gain.exponentialRampToValueAtTime(0.0001, now + 2.1);
-  boom2.connect(b2g).connect(master);
-  boom2.start(now + 1.6); boom2.stop(now + 2.1);
-
-  siren.start(sirenStart); siren.stop(now + duration);
   return duration;
 }
 
@@ -1427,94 +1023,6 @@ function playSeismicAlert(){
   });
 
   return duration;
-}
-
-/* ---- CAMPANA DE CRISIS — tañido resonante grave ---- */
-function playCrisisBell(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 5.0;
-
-  const master = ctx.createGain();
-  master.gain.value = 0.38;
-  master.connect(ctx.destination);
-
-  const strikes = [0, 1.5, 2.8, 3.9];
-  strikes.forEach(offset => {
-    const t = now + offset;
-
-    /* Tono fundamental de campana */
-    const f = ctx.createOscillator();
-    f.type = 'sine'; f.frequency.value = 180;
-    const fg = ctx.createGain();
-    fg.gain.setValueAtTime(0.0001, t);
-    fg.gain.linearRampToValueAtTime(0.7, t + 0.005);
-    fg.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
-    f.connect(fg).connect(master);
-    f.start(t); f.stop(t + 1.15);
-
-    /* Armónico superior */
-    const h = ctx.createOscillator();
-    h.type = 'sine'; h.frequency.value = 540;
-    const hg = ctx.createGain();
-    hg.gain.setValueAtTime(0.0001, t);
-    hg.gain.linearRampToValueAtTime(0.35, t + 0.004);
-    hg.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
-    h.connect(hg).connect(master);
-    h.start(t); h.stop(t + 0.75);
-
-    /* Golpe de percusión inicial */
-    const click = ctx.createOscillator();
-    click.type = 'sine'; click.frequency.value = 900;
-    const cg = ctx.createGain();
-    cg.gain.setValueAtTime(0.0001, t);
-    cg.gain.linearRampToValueAtTime(0.5, t + 0.002);
-    cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
-    click.connect(cg).connect(master);
-    click.start(t); click.stop(t + 0.05);
-  });
-
-  return duration;
-}
-
-/* ---- SOS MORSE — · · · — — — · · · ---- */
-function playSOS(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const freq = 800;
-  const dot = 0.10;
-  const dash = 0.30;
-  const gap = 0.08;
-  const charGap = 0.20;
-
-  const master = ctx.createGain();
-  master.gain.value = 0.38;
-  master.connect(ctx.destination);
-
-  function beep(t, len){
-    const o = ctx.createOscillator();
-    o.type = 'sine'; o.frequency.value = freq;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.6, t + 0.005);
-    g.gain.setValueAtTime(0.6, t + len - 0.01);
-    g.gain.linearRampToValueAtTime(0.0001, t + len);
-    o.connect(g).connect(master);
-    o.start(t); o.stop(t + len + 0.01);
-    return t + len + gap;
-  }
-
-  let t = now;
-  /* S: · · · */
-  t = beep(t, dot); t = beep(t, dot); t = beep(t, dot);
-  t += charGap;
-  /* O: — — — */
-  t = beep(t, dash); t = beep(t, dash); t = beep(t, dash);
-  t += charGap;
-  /* S: · · · */
-  t = beep(t, dot); t = beep(t, dot); t = beep(t, dot);
-
-  return t - now + 0.15;
 }
 
 /* ---- DEFENSA CIVIL — sirena wail clásica subida/bajada lenta ---- */
