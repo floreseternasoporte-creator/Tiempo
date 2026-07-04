@@ -728,10 +728,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <span style="color:var(--primary);">Alerta</span><span class="brand-wordmark">Cuba</span>
       </div>
       <div class="topbar-actions">
-        <div class="status-chip pulse"><div class="dot"></div><span>En vivo</span></div>
-        <button class="icon-btn" onclick="requestPushPermission()" title="Notificaciones">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
         <button class="icon-btn" onclick="goToView('settings')">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
@@ -807,12 +803,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     <!-- VIEW: AJUSTES -->
     <div class="view" id="view-settings">
       <div class="segment-wrap" style="padding-top:16px;"><div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes</h2></div></div>
-      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Notificaciones</p></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Alertas</p></div>
       <div class="section">
-        <div class="setting-row">
-          <div class="left"><div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="label">Notificaciones push</div><div class="desc" id="pushPermStatus">Recibe alertas aunque la app esté cerrada</div></div></div>
-          <button class="icon-btn" onclick="requestPushPermission()"><svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-        </div>
         <div class="setting-row">
           <div class="left"><div class="ico-badge" style="background:var(--danger);"><svg class="icon filled" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="label">Alarma sonora</div><div class="desc">Sirena al recibir alerta</div></div></div>
           <div class="switch on" id="switchAlarm" onclick="toggleSwitch(this,'alarm')"><div class="knob"></div></div>
@@ -1690,14 +1682,6 @@ async function sendAlert() {
 /* ================================================================
    PUSH NOTIFICATIONS
    ================================================================ */
-async function requestPushPermission() {
-  if(!('Notification' in window)){return;}
-  const perm=await Notification.requestPermission();
-  const statusEl=document.getElementById('pushPermStatus');
-  if(perm==='granted'){ if(statusEl) statusEl.textContent='Notificaciones activadas ✓'; }
-  else { if(statusEl) statusEl.textContent='Notificaciones no permitidas'; }
-}
-
 function setupFCMForeground() {
   if(!messaging) return;
   messaging.onMessage(payload => {
