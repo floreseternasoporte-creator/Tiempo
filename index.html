@@ -99,7 +99,11 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .form-title{font-family:var(--font-display);font-size:28px;letter-spacing:.03em;}
 
 /* form fields */
-.form-body{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;}
+.form-body{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;}
+.form-actions{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:12px;}
+.form-actions .form-submit{margin-top:0;}
+.form-actions .form-note{margin-top:0;}
+.form-fields{display:flex;flex-direction:column;gap:14px;}
 .field-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:5px;display:block;}
 .field-input{
   width:100%;padding:14px 16px;border:1.5px solid var(--stroke-strong);border-radius:14px;
@@ -166,7 +170,9 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .welcome-sub{font-size:15px;color:var(--text-2);text-align:center;line-height:1.55;max-width:300px;margin-bottom:40px;}
 
 /* ID verification */
-.id-section{padding:28px 24px;display:flex;flex-direction:column;gap:16px;flex:1;}
+.id-screen{display:flex;flex-direction:column;min-height:100%;background:#fff;}
+.id-header{padding:calc(env(safe-area-inset-top)+28px) 24px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.id-section{padding:12px 24px 16px;display:flex;flex-direction:column;gap:16px;flex:1;width:100%;max-width:520px;margin:0 auto;}
 .id-card-btn{
   background:var(--surface);border:1.5px solid var(--stroke-strong);border-radius:18px;
   padding:20px 18px;display:flex;align-items:center;gap:16px;
@@ -188,7 +194,7 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .id-card-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
 .id-card-btn.done .id-card-status{color:#22c55e;}
 .id-submit{
-  margin:16px 24px;border-radius:16px;padding:17px;
+  margin:auto 24px calc(env(safe-area-inset-bottom) + 20px);border-radius:16px;padding:17px;
   font-size:15.5px;font-weight:800;color:#fff;
   background:linear-gradient(135deg,var(--primary),#f2542d);
   box-shadow:0 12px 28px -10px rgba(206,17,38,0.5);
@@ -509,9 +515,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <input class="field-input" type="password" id="loginPwd" placeholder="Tu contraseña" autocomplete="current-password"
           onkeydown="if(event.key==='Enter') doLogin()">
       </div>
-      <p class="form-error" id="loginError"></p>
-      <button class="form-submit" id="loginBtn" onclick="doLogin()">Entrar</button>
-      <p class="form-note">¿No tienes cuenta? <span class="form-link" onclick="showScreen('screen-register')">Regístrate</span></p>
+      <div class="form-actions">
+        <p class="form-error" id="loginError"></p>
+        <button class="form-submit" id="loginBtn" onclick="doLogin()">Entrar</button>
+        <p class="form-note">¿No tienes cuenta? <span class="form-link" onclick="showScreen('screen-register')">Regístrate</span></p>
+      </div>
     </div>
   </div>
 </div>
@@ -541,9 +549,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <input class="field-input" type="password" id="regPwd2" placeholder="Repite la contraseña" autocomplete="new-password"
           onkeydown="if(event.key==='Enter') doRegister()">
       </div>
-      <p class="form-error" id="regError"></p>
-      <button class="form-submit" id="regBtn" onclick="doRegister()">Verificar número</button>
-      <p class="form-note">Al registrarte aceptas los términos del servicio de AlertaCuba.</p>
+      <div class="form-actions">
+        <p class="form-error" id="regError"></p>
+        <button class="form-submit" id="regBtn" onclick="doRegister()">Crear cuenta</button>
+        <p class="form-note">Al registrarte aceptas los términos del servicio de AlertaCuba.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -560,9 +570,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
       <div id="captchaContainer" style="background:var(--surface-2);border-radius:14px;padding:20px;margin:16px 0;border:1.5px solid var(--stroke-strong);">
         <div id="captchaContent"></div>
       </div>
-      <p class="form-error" id="captchaError"></p>
-      <button class="form-submit" id="captchaBtn" onclick="verifyCaptcha()" disabled>Verificar</button>
-      <p class="form-note"><span class="form-link" onclick="refreshCaptcha()">Generar nuevo desafío</span></p>
+      <div class="form-actions">
+        <p class="form-error" id="captchaError"></p>
+        <button class="form-submit" id="captchaBtn" onclick="verifyCaptcha()" disabled>Verificar</button>
+        <p class="form-note"><span class="form-link" onclick="refreshCaptcha()">Generar nuevo desafío</span></p>
+      </div>
     </div>
   </div>
 </div>
@@ -581,7 +593,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 
 <!-- ===== ID VERIFICATION ===== -->
 <div class="screen" id="screen-id">
-  <div style="padding:calc(env(safe-area-inset-top)+28px) 24px 16px;display:flex;align-items:center;gap:10px;">
+  <div class="id-screen">
+  <div class="id-header">
     <div>
       <div style="font-family:var(--font-display);font-size:26px;letter-spacing:.02em;">Verifica tu Carné</div>
       <div style="font-size:13px;color:var(--text-2);margin-top:2px;">Escanea ambos lados de tu carnet de identidad</div>
@@ -615,6 +628,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </p>
   </div>
   <button class="id-submit" id="idSubmitBtn" onclick="completeIdVerification()">Continuar a AlertaCuba</button>
+  </div>
 </div>
 
 <!-- ===== CAMERA OVERLAY ===== -->
@@ -714,10 +728,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <span style="color:var(--primary);">Alerta</span><span class="brand-wordmark">Cuba</span>
       </div>
       <div class="topbar-actions">
-        <div class="status-chip pulse"><div class="dot"></div><span>En vivo</span></div>
-        <button class="icon-btn" onclick="requestPushPermission()" title="Notificaciones">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
         <button class="icon-btn" onclick="goToView('settings')">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
@@ -793,12 +803,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     <!-- VIEW: AJUSTES -->
     <div class="view" id="view-settings">
       <div class="segment-wrap" style="padding-top:16px;"><div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes</h2></div></div>
-      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Notificaciones</p></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Alertas</p></div>
       <div class="section">
-        <div class="setting-row">
-          <div class="left"><div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="label">Notificaciones push</div><div class="desc" id="pushPermStatus">Recibe alertas aunque la app esté cerrada</div></div></div>
-          <button class="icon-btn" onclick="requestPushPermission()"><svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-        </div>
         <div class="setting-row">
           <div class="left"><div class="ico-badge" style="background:var(--danger);"><svg class="icon filled" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="label">Alarma sonora</div><div class="desc">Sirena al recibir alerta</div></div></div>
           <div class="switch on" id="switchAlarm" onclick="toggleSwitch(this,'alarm')"><div class="knob"></div></div>
@@ -943,8 +949,6 @@ const FIREBASE_CONFIG = {
 /* Emails con acceso de administrador */
 const ADMIN_EMAILS = ['zam.contact@yahoo.com'];
 
-/* VAPID key — obtener de Firebase Console → Cloud Messaging → Web configuration */
-const VAPID_KEY = "";
 
 const USGS_FEEDS = {
   hour:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
@@ -1032,9 +1036,6 @@ function enterApp(user) {
   loadQuakes();
   startPolling();
   setupFCMForeground();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
-  }
   document.body.addEventListener('click', () => getAudioCtx(), {once:true});
 }
 
@@ -1080,7 +1081,7 @@ async function doRegister() {
     const internalEmail = normalizePhoneEmail(_regPhone);
     const emailCred = firebase.auth.EmailAuthProvider.credential(internalEmail, _regPassword);
     const result = await auth.signInWithCredential(emailCred).catch(err => {
-      if (err.code === 'auth/user-not-found') {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
         return firebase.auth().createUserWithEmailAndPassword(internalEmail, _regPassword);
       }
       throw err;
@@ -1139,7 +1140,7 @@ function generateMathCaptcha() {
     type: 'math',
     question: `¿Cuál es el resultado de ${a} ${op} ${b}?`,
     answer: result.toString(),
-    display: `<div class="captcha-puzzle"><div class="captcha-question">¿Cuál es el resultado?</div><div class="captcha-math">${a} ${op} ${b} = ?</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric"></div></div>`
+    display: `<div class="captcha-puzzle"><div class="captcha-question">¿Cuál es el resultado?</div><div class="captcha-math">${a} ${op} ${b} = ?</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric" oninput="syncCaptchaButton()" onkeydown="if(event.key==='Enter') verifyCaptcha()"></div></div>`
   };
   return _currentCaptcha.display;
 }
@@ -1175,25 +1176,39 @@ function generateSequenceCaptcha() {
     type: 'sequence',
     question: s.q,
     answer: s.next.toString(),
-    display: `<div class="captcha-puzzle"><div class="captcha-question">${s.seq.join(', ')}, ?</div><div class="captcha-question" style="font-size:13px;color:var(--text-2);margin-top:-8px;">${s.q}</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric"></div></div>`
+    display: `<div class="captcha-puzzle"><div class="captcha-question">${s.seq.join(', ')}, ?</div><div class="captcha-question" style="font-size:13px;color:var(--text-2);margin-top:-8px;">${s.q}</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric" oninput="syncCaptchaButton()" onkeydown="if(event.key==='Enter') verifyCaptcha()"></div></div>`
   };
   return _currentCaptcha.display;
+}
+
+function syncCaptchaButton() {
+  const btn = document.getElementById('captchaBtn');
+  if (!btn || !_currentCaptcha) return;
+  if (_currentCaptcha.type === 'select') {
+    btn.disabled = !document.querySelector('.captcha-option.selected');
+    return;
+  }
+  const input = document.getElementById('captchaAnswer');
+  btn.disabled = !(input && input.value.trim());
 }
 
 function selectCaptchaOption(el, value) {
   document.querySelectorAll('.captcha-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   el.dataset.selected = value;
-  document.getElementById('captchaBtn').disabled = false;
+  syncCaptchaButton();
 }
 
 function refreshCaptcha() {
   document.getElementById('captchaError').textContent = '';
   const content = generateCaptcha();
   document.getElementById('captchaContent').innerHTML = content;
-  document.getElementById('captchaBtn').disabled = true;
+  syncCaptchaButton();
   const input = document.getElementById('captchaAnswer');
-  if (input) input.focus();
+  if (input) {
+    input.addEventListener('input', syncCaptchaButton);
+    input.focus();
+  }
 }
 
 function verifyCaptcha() {
@@ -1261,16 +1276,20 @@ let _camStream = null;
 let _camAnimFrame = null;
 let _detectionTimer = null;
 let _detectionProgress = 0;
+let _idCaptures = {front: null, back: null};
+let _barcodeDetector = null;
 
-document.getElementById('idFrontBtn').addEventListener('click', () => openCamera('front'));
-document.getElementById('idBackBtn').addEventListener('click', () => openCamera('back'));
-document.getElementById('linkEmailRow').addEventListener('click', toggleLinkEmail);
+const linkEmailRow = document.getElementById('linkEmailRow');
+if (linkEmailRow) linkEmailRow.addEventListener('click', toggleLinkEmail);
 
 async function openCamera(mode) {
   _camMode = mode;
   const overlay = document.getElementById('cam-overlay');
   const title = document.getElementById('camTitle');
   title.textContent = mode === 'front' ? 'Parte delantera del carnet' : 'Reverso del carnet';
+  document.getElementById('camStatus').textContent = 'Coloca tu carnet dentro del recuadro';
+  document.getElementById('camProgressBar').style.width = '0%';
+  document.getElementById(mode === 'front' ? 'idFrontBtn' : 'idBackBtn').classList.add('active');
   overlay.classList.add('active');
 
   try {
@@ -1280,16 +1299,26 @@ async function openCamera(mode) {
     const video = document.getElementById('cam-video');
     video.srcObject = _camStream;
     await video.play();
+    if (mode === 'back' && 'BarcodeDetector' in window) {
+      _barcodeDetector = new BarcodeDetector({formats: ['code_128', 'code_39', 'codabar', 'ean_13', 'pdf417', 'qr_code']});
+    } else {
+      _barcodeDetector = null;
+    }
     startScanLoop();
   } catch(err) {
     console.warn('[Camera]', err);
-    // Simulate scan if camera not available
-    simulateScan();
+    const status = document.getElementById('camStatus');
+    const progressBar = document.getElementById('camProgressBar');
+    if (progressBar) progressBar.style.width = '0%';
+    if (status) status.textContent = 'No se pudo abrir la cámara. Activa permisos y usa HTTPS.';
+    document.getElementById(mode === 'front' ? 'idFrontBtn' : 'idBackBtn').classList.remove('active');
   }
 }
 
 function closeCamera() {
   stopCamera();
+  document.getElementById('idFrontBtn').classList.remove('active');
+  document.getElementById('idBackBtn').classList.remove('active');
   document.getElementById('cam-overlay').classList.remove('active');
 }
 
@@ -1297,6 +1326,8 @@ function stopCamera() {
   cancelAnimationFrame(_camAnimFrame);
   clearTimeout(_detectionTimer);
   _detectionProgress = 0;
+  const progressBar = document.getElementById('camProgressBar');
+  if (progressBar) progressBar.style.width = '0%';
   if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
 }
 
@@ -1372,6 +1403,12 @@ function startScanLoop() {
     const variance = analyze() || 0;
     let detected = false;
 
+    if (_camMode === 'back' && _barcodeDetector) {
+      _barcodeDetector.detect(video).then(codes => {
+        if (codes && codes.length) stableFrames = Math.max(stableFrames, NEEDED_FRAMES);
+      }).catch(() => { _barcodeDetector = null; });
+    }
+
     if (variance < 80) {
       status.textContent = 'Coloca tu carnet en el recuadro';
       stableFrames = 0;
@@ -1406,25 +1443,15 @@ function startScanLoop() {
   setTimeout(loop, 300);
 }
 
-function simulateScan() {
-  // Fallback when camera is unavailable (HTTP context)
-  const status = document.getElementById('camStatus');
-  const progressBar = document.getElementById('camProgressBar');
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 5;
-    progressBar.style.width = progress + '%';
-    if (progress < 60) status.textContent = 'Simulando escaneo...';
-    else status.textContent = 'Detectando carnet...';
-    if (progress >= 100) {
-      clearInterval(interval);
-      status.textContent = '✓ Detectado — procesando...';
-      setTimeout(() => captureScan(), 500);
-    }
-  }, 120);
-}
-
 function captureScan() {
+  const video = document.getElementById('cam-video');
+  if (video && video.videoWidth && video.videoHeight) {
+    const snap = document.createElement('canvas');
+    snap.width = video.videoWidth;
+    snap.height = video.videoHeight;
+    snap.getContext('2d').drawImage(video, 0, 0, snap.width, snap.height);
+    _idCaptures[_camMode] = snap.toDataURL('image/jpeg', 0.82);
+  }
   stopCamera();
   _idScanned[_camMode] = true;
 
@@ -1433,7 +1460,7 @@ function captureScan() {
   const btn = document.getElementById(btnId);
   btn.classList.add('done');
   btn.classList.remove('active');
-  document.getElementById(statusId).textContent = '✓ Escaneado correctamente';
+  document.getElementById(statusId).textContent = '✓ Escaneado real completado';
   document.getElementById('cam-overlay').classList.remove('active');
 
   if (_idScanned.front && _idScanned.back) {
@@ -1655,14 +1682,6 @@ async function sendAlert() {
 /* ================================================================
    PUSH NOTIFICATIONS
    ================================================================ */
-async function requestPushPermission() {
-  if(!('Notification' in window)){return;}
-  const perm=await Notification.requestPermission();
-  const statusEl=document.getElementById('pushPermStatus');
-  if(perm==='granted'){ if(statusEl) statusEl.textContent='Notificaciones activadas ✓'; }
-  else { if(statusEl) statusEl.textContent='Notificaciones no permitidas'; }
-}
-
 function setupFCMForeground() {
   if(!messaging) return;
   messaging.onMessage(payload => {
@@ -1743,7 +1762,7 @@ function magColor(mag){if(mag>=6) return{badgeBg:'rgba(225,6,0,0.15)',badgeFg:'#
 function timeAgo(ts){if(!ts) return'—';const diff=Date.now()-ts,min=Math.floor(diff/60000);if(min<1) return'ahora';if(min<60) return min+' min';const h=Math.floor(min/60);if(h<24) return h+' h';return Math.floor(h/24)+' d';}
 function fmtDate(ts){return new Date(ts).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function errorMsg(code){const m={'auth/invalid-phone-number':'Número de teléfono inválido.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
+function errorMsg(code){const m={'auth/invalid-credential':'Credenciales incorrectas. Revisa el teléfono/correo y la contraseña, o crea una cuenta nueva.','auth/invalid-phone-number':'Número de teléfono inválido.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
 
 /* ================================================================
    USGS — SISMOS
