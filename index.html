@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ce1126">
-<title>SismoCuba — Alerta Sísmica</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AlertaCuba — Sistema de Alerta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
@@ -29,11 +31,11 @@
   --primary-light:#f2542d;
   --primary-lighter:#fbe0de;
   --accent:#f5b700;
-  --font: 'Poppins', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
-  --font-display: 'Bebas Neue', var(--font);
+  --font:'Poppins',-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+  --font-display:'Bebas Neue',var(--font);
 }
 
-*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{background:var(--bg);}
 body{
   font-family:var(--font);
@@ -46,355 +48,648 @@ body{
 }
 ::-webkit-scrollbar{display:none;}
 *{scrollbar-width:none;}
-button{font-family:inherit; border:none; background:none; color:inherit; cursor:pointer;}
-input{font-family:inherit;}
+button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
 
-/* ============ SISTEMA DE ÍCONOS SVG INLINE (sin dependencia de red) ============ */
-svg.icon{width:1em; height:1em; display:inline-block; vertical-align:-0.15em; flex-shrink:0;}
-svg.icon *{fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
-svg.icon.filled *{fill:currentColor; stroke:none;}
+svg.icon{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;flex-shrink:0;}
+svg.icon *{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+svg.icon.filled *{fill:currentColor;stroke:none;}
 
 /* ===================== TOP BAR ===================== */
 .topbar{
-  position:sticky; top:0; z-index:50;
+  position:sticky;top:0;z-index:50;
   padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
   background:rgba(255,255,255,0.98);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid var(--stroke);
-  display:flex; align-items:center; justify-content:space-between;
+  display:flex;align-items:center;justify-content:space-between;
 }
 .topbar::before{
   content:'';
-  position:absolute; top:0; left:0; right:0; height:3px;
+  position:absolute;top:0;left:0;right:0;height:3px;
   background:linear-gradient(90deg,
-    var(--primary) 0%, var(--primary) 33.33%,
-    #ffffff 33.33%, #ffffff 66.66%,
-    var(--info) 66.66%, var(--info) 100%);
+    var(--primary) 0%,var(--primary) 33.33%,
+    #ffffff 33.33%,#ffffff 66.66%,
+    var(--info) 66.66%,var(--info) 100%);
 }
 .topbar-title{
   font-family:var(--font-display);
-  font-size:24px; font-weight:400; letter-spacing:0.03em;
-  display:flex; align-items:center; gap:9px;
+  font-size:24px;font-weight:400;letter-spacing:0.04em;
+  display:flex;align-items:center;gap:9px;
+  color:var(--primary);
 }
-.topbar-title .brand-icon{width:24px; height:24px; color:var(--primary);}
-.topbar-actions{display:flex; align-items:center; gap:12px;}
+.brand-wordmark{color:var(--text-1);}
+.topbar-title .brand-icon{width:26px;height:26px;color:var(--primary);}
+.topbar-actions{display:flex;align-items:center;gap:10px;}
 .icon-btn{
-  width:36px; height:36px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--surface-2); font-size:16px; color:var(--text-1);
-  transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface-2);font-size:16px;color:var(--text-1);
+  transition:transform .15s ease,background .15s ease;
 }
-.icon-btn:active{transform:scale(0.88); background:var(--surface-hover); box-shadow:0 0 0 3px rgba(206,17,38,0.15);}
+.icon-btn:active{transform:scale(0.88);background:var(--surface-hover);}
+.notif-btn{position:relative;}
+.notif-btn .badge{
+  position:absolute;top:4px;right:4px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--danger);border:1.5px solid #fff;
+  display:none;
+}
+.notif-btn.has-badge .badge{display:block;}
+
 .status-chip{
-  display:flex; align-items:center; gap:6px;
-  font-size:11.5px; font-weight:700; color:var(--primary);
-  background:rgba(206,17,38,0.1);
-  border:1px solid var(--primary);
-  padding:6px 11px 6px 9px; border-radius:20px;
-  text-transform:uppercase; letter-spacing:.03em;
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;color:var(--primary);
+  background:rgba(206,17,38,0.09);
+  border:1px solid rgba(206,17,38,0.22);
+  padding:5px 10px 5px 8px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.04em;
 }
-.status-chip .dot{width:6px; height:6px; border-radius:50%; background:var(--primary); box-shadow:0 0 8px var(--primary);}
-.status-chip.warn{color:var(--warning); background:rgba(245,183,0,0.13); border-color:rgba(245,183,0,0.32);}
-.status-chip.warn .dot{background:var(--warning); box-shadow:0 0 7px var(--warning);}
-.status-chip.danger{color:var(--danger-2); background:rgba(225,6,0,0.16); border-color:rgba(225,6,0,0.42);}
-.status-chip.danger .dot{background:var(--danger); box-shadow:0 0 9px var(--danger);}
-.status-chip.pulse .dot{animation:dotpulse 1.3s ease-in-out infinite;}
-@keyframes dotpulse{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.45; transform:scale(1.4);}}
+.status-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);box-shadow:0 0 8px var(--primary);}
+.status-chip.pulse .dot{animation:dotpulse 1.4s ease-in-out infinite;}
+@keyframes dotpulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.5);}}
+
+/* ===================== HERO ESTADO ===================== */
+.hero-status{
+  margin:16px 20px 0;
+  border-radius:20px;
+  padding:22px 20px;
+  background:linear-gradient(140deg,#f9f0ee 0%,#fbe0de 100%);
+  border:1px solid rgba(206,17,38,0.12);
+  display:flex;align-items:center;gap:16px;
+}
+.hero-status.ok{background:linear-gradient(140deg,#eef4fc 0%,#ddeafb 100%);border-color:rgba(0,87,184,0.14);}
+.hero-status.warn{background:linear-gradient(140deg,#fdf7e3 0%,#faeec8 100%);border-color:rgba(245,183,0,0.22);}
+.hero-status.danger{background:linear-gradient(140deg,#fdecea 0%,#fbd8d5 100%);border-color:rgba(225,6,0,0.2);}
+.hero-pulse-ring{
+  position:relative;width:52px;height:52px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-pulse-ring .ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:2px solid var(--primary);opacity:0;
+  animation:heroRing 2.4s ease-out infinite;
+}
+.hero-pulse-ring .ring:nth-child(2){animation-delay:.8s;}
+.hero-pulse-ring .ring:nth-child(3){animation-delay:1.6s;}
+@keyframes heroRing{0%{transform:scale(0.5);opacity:.6;}100%{transform:scale(1.6);opacity:0;}}
+.hero-pulse-ring .dot-center{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--primary);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:1;
+  box-shadow:0 3px 10px rgba(206,17,38,0.4);
+}
+.hero-pulse-ring .dot-center svg{width:12px;height:12px;color:#fff;}
+.hero-status.ok .ring{border-color:var(--info);}
+.hero-status.ok .dot-center{background:var(--info);box-shadow:0 3px 10px rgba(0,87,184,0.35);}
+.hero-status.warn .ring{border-color:var(--warning);}
+.hero-status.warn .dot-center{background:var(--warning);box-shadow:0 3px 10px rgba(245,183,0,0.4);}
+.hero-status.danger .ring{border-color:var(--danger);}
+.hero-status.danger .dot-center{background:var(--danger);box-shadow:0 3px 10px rgba(225,6,0,0.45);}
+.hero-text .title{font-size:15px;font-weight:800;line-height:1.2;}
+.hero-text .sub{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.4;}
+.hero-text .since{font-size:11.5px;color:var(--text-3);margin-top:5px;font-weight:600;}
 
 /* ===================== SEGMENT TABS ===================== */
-.segment-wrap{padding:14px 20px 6px; overflow-x:auto;}
+.segment-wrap{padding:14px 20px 6px;overflow-x:auto;}
 .segment{
-  display:inline-flex; background:transparent; border-radius:11px; padding:3px;
+  display:inline-flex;background:transparent;border-radius:12px;padding:3px;
   border:1px solid var(--stroke);
 }
 .segment button{
-  padding:8px 17px; font-size:13px; font-weight:700; color:var(--text-2);
-  border-radius:9px; transition:background .2s ease, color .2s ease;
+  padding:8px 16px;font-size:13px;font-weight:700;color:var(--text-2);
+  border-radius:10px;transition:background .2s,color .2s;
   white-space:nowrap;
 }
-.segment button.active{background:var(--primary); color:#fff; font-weight:800;}
-
-/* ===================== DETAIL MAG BANNER ===================== */
-.detail-mag-banner{
-  margin:20px 20px 4px;
-  border-radius:20px;
-  padding:28px 24px;
-  background:var(--detail-banner-bg, linear-gradient(135deg, var(--primary-lighter), var(--primary)));
-  display:flex; align-items:center; gap:20px;
-  transition:background .5s ease;
-}
-.detail-mag-num{
-  font-family:var(--font-display);
-  font-size:80px; font-weight:400; letter-spacing:-0.01em; line-height:1;
-  color:var(--detail-banner-fg, #fff);
-  flex-shrink:0;
-}
-.detail-mag-type{
-  font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
-  color:var(--detail-banner-fg, rgba(255,255,255,0.8));
-  opacity:.85;
-}
+.segment button.active{background:var(--primary);color:#fff;font-weight:800;}
 
 /* ===================== NEAREST CARD ===================== */
 .nearest-card{
-  margin:0 20px 24px;
-  background:var(--surface); border:1px solid var(--stroke); border-radius:16px;
+  margin:12px 20px;
+  background:var(--surface);border:1px solid var(--stroke);border-radius:18px;
   padding:16px;
-  display:flex; align-items:center; gap:14px;
-  transition:transform .12s ease, box-shadow .12s ease;
-  box-shadow:0 2px 8px rgba(206,17,38,0.08);
+  display:flex;align-items:center;gap:14px;
+  box-shadow:0 2px 12px rgba(206,17,38,0.07);
+  cursor:pointer;
+  transition:transform .12s ease,box-shadow .12s ease;
 }
-.nearest-card:active{transform:scale(0.98); box-shadow:0 4px 16px rgba(206,17,38,0.15);}
+.nearest-card:active{transform:scale(0.98);}
 .nearest-badge{
-  width:54px; height:54px; border-radius:15px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  font-size:17px; font-weight:800;
-  background:var(--badge-bg, rgba(245,183,0,0.15)); color:var(--badge-fg, var(--warning));
+  width:52px;height:52px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;font-weight:800;
 }
-.nearest-info{flex:1; min-width:0;}
-.nearest-info .place{font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.nearest-info .meta{font-size:12.5px; color:var(--text-2); margin-top:3px; display:flex; gap:10px; flex-wrap:wrap;}
-.nearest-info .meta span{display:inline-flex; align-items:center; gap:4px;}
-.nearest-info .meta svg{width:13px; height:13px;}
-.nearest-chevron{color:var(--text-3); width:16px; height:16px; flex-shrink:0;}
-
-/* ===================== SOUND SELECTOR ===================== */
-.sound-picker{display:flex; flex-direction:column; gap:8px;}
-.sound-option{
-  display:flex; align-items:center; gap:14px;
-  padding:13px 16px; border-radius:14px;
-  background:var(--surface); border:1.5px solid var(--stroke);
-  cursor:pointer; transition:border-color .2s ease, background .2s ease;
-}
-.sound-option.selected{border-color:var(--primary); background:rgba(206,17,38,0.05);}
-.sound-option .so-icon{width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; background:var(--surface-2);}
-.sound-option.selected .so-icon{background:rgba(206,17,38,0.12);}
-.sound-option .so-body{flex:1; min-width:0;}
-.sound-option .so-name{font-size:14.5px; font-weight:700;}
-.sound-option .so-desc{font-size:12px; color:var(--text-2); margin-top:1px;}
-.sound-option .so-play{width:32px; height:32px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s ease;}
-.sound-option.selected .so-play{background:rgba(206,17,38,0.15);}
-.sound-option .so-play svg{width:14px; height:14px; color:var(--primary);}
-.sound-check{width:20px; height:20px; border-radius:50%; border:2px solid var(--stroke); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:border-color .2s, background .2s;}
-.sound-option.selected .sound-check{border-color:var(--primary); background:var(--primary);}
-.sound-check svg{width:11px; height:11px; color:#fff; display:none;}
-.sound-option.selected .sound-check svg{display:block;}
+.nearest-info{flex:1;min-width:0;}
+.nearest-info .place{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nearest-info .meta{font-size:12px;color:var(--text-2);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+.nearest-info .meta span{display:inline-flex;align-items:center;gap:4px;}
+.nearest-info .meta svg{width:13px;height:13px;}
+.nearest-chevron{color:var(--text-3);width:16px;height:16px;flex-shrink:0;}
 
 /* ===================== SECTION HEADERS ===================== */
 .section{padding:0 20px 8px;}
-.section-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
-.section-head h2{font-family:var(--font-display); font-size:23px; font-weight:400; letter-spacing:0.01em;}
-.section-head .see-all{font-size:13px; color:var(--info); font-weight:700;}
-
-/* ===================== HORIZONTAL SCROLLERS ===================== */
-.hscroll{display:flex; gap:8px; overflow-x:auto; padding:2px 20px 6px; margin:0 -20px; scroll-snap-type:x proximity; scroll-behavior:smooth;}
-.zone-card{scroll-snap-align:start; flex-shrink:0; width:90px; display:flex; flex-direction:column; gap:4px;}
-.zone-art{
-  width:90px; height:90px; border-radius:10px;
-  background:linear-gradient(155deg, var(--art-a), var(--art-b));
-  display:flex; align-items:flex-end; padding:11px;
-  position:relative; overflow:hidden;
-  border:1px solid var(--stroke);
-  box-shadow:0 4px 12px rgba(206,17,38,0.12);
-}
-.zone-art::after{content:''; position:absolute; inset:0; background:radial-gradient(circle at 75% 18%, rgba(206,17,38,0.12), transparent 60%);}
-.zone-art svg{position:relative; width:16px; height:16px; color:rgba(255,255,255,0.95);}
-.zone-mag-tag{position:absolute; top:4px; right:4px; font-size:8px; font-weight:800; padding:2px 4px; border-radius:4px; background:rgba(0,0,0,0.6); color:#fff; backdrop-filter:blur(6px);}
-.zone-title{font-size:10px; font-weight:700; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.zone-sub{font-size:9px; color:var(--text-2);}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-head h2{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:0.01em;}
+.section-head .see-all{font-size:13px;color:var(--info);font-weight:700;}
 
 /* ===================== FEED LIST ===================== */
-.feed-list{display:flex; flex-direction:column;}
-.feed-row{display:flex; align-items:center; gap:12px; padding:11px 20px; transition:background .15s ease;}
+.feed-list{display:flex;flex-direction:column;}
+.feed-row{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;transition:background .15s;}
 .feed-row:active{background:var(--surface-2);}
-.feed-num{width:40px; height:40px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff;}
-.feed-body{flex:1; min-width:0;}
-.feed-title{font-size:14.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.feed-meta{font-size:12.5px; color:var(--text-2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.feed-time{font-size:12px; color:var(--text-3); flex-shrink:0; text-align:right; min-width:44px; font-weight:600;}
-.feed-divider{height:0.5px; background:var(--stroke); margin-left:71px;}
+.feed-num{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;}
+.feed-body{flex:1;min-width:0;}
+.feed-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-meta{font-size:12px;color:var(--text-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-time{font-size:11.5px;color:var(--text-3);flex-shrink:0;text-align:right;min-width:44px;font-weight:600;}
+.feed-divider{height:0.5px;background:var(--stroke);margin-left:73px;}
+.empty-state{padding:44px 20px;text-align:center;color:var(--text-2);}
+.empty-state svg{width:36px;height:36px;color:var(--text-3);margin-bottom:10px;}
+.empty-state p{font-size:13.5px;line-height:1.5;}
 
-/* ===================== WEATHER STRIP ===================== */
-.weather-strip{margin:0 20px 4px; background:var(--surface); border:1px solid var(--stroke); border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(206,17,38,0.08);}
-.weather-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
-.weather-head .loc{font-size:13px; font-weight:700; color:var(--text-2); display:flex; align-items:center; gap:6px;}
-.weather-head .loc svg{width:14px; height:14px;}
-.weather-head .risk-tag{font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px;}
-.weather-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;}
-.weather-metric{background:var(--surface-2); border-radius:13px; padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center; border:0.5px solid var(--stroke);}
-.weather-metric svg{width:19px; height:19px; color:var(--info);}
-.weather-metric .val{font-size:15px; font-weight:800;}
-.weather-metric .lbl{font-size:10px; color:var(--text-3); text-transform:uppercase; letter-spacing:.04em; font-weight:700;}
-
+/* ===================== DETAIL MAG BANNER ===================== */
+.detail-mag-banner{
+  margin:16px 20px 4px;
+  border-radius:20px;padding:28px 24px;
+  background:linear-gradient(135deg,var(--primary-lighter),var(--primary));
+  display:flex;align-items:center;gap:20px;
+}
+.detail-mag-num{font-family:var(--font-display);font-size:80px;font-weight:400;line-height:1;color:#fff;flex-shrink:0;}
+.detail-mag-type{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.85);}
+.weather-metric{background:var(--surface-2);border-radius:14px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;border:0.5px solid var(--stroke);}
+.weather-metric svg{width:19px;height:19px;color:var(--info);}
+.weather-metric .val{font-size:15px;font-weight:800;}
+.weather-metric .lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
 
 /* ===================== SETTINGS ===================== */
-.setting-row{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--surface); border-bottom:0.5px solid var(--stroke);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:0.5px solid var(--stroke);}
 .setting-row:first-child{border-radius:16px 16px 0 0;}
-.setting-row:last-child{border-radius:0 0 16px 16px; border-bottom:none;}
-.setting-row .left{display:flex; align-items:center; gap:12px;}
-.setting-row .left .ico-badge{width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0;}
-.setting-row .left .ico-badge svg{width:16px; height:16px;}
-.setting-row .label{font-size:14.5px; font-weight:600;}
-.setting-row .desc{font-size:12px; color:var(--text-2); margin-top:1px;}
-
-.switch{width:48px; height:28px; border-radius:16px; background:var(--surface-2); position:relative; flex-shrink:0; transition:background .2s ease; border:0.5px solid var(--stroke);}
-.switch.on{background:var(--safe); border-color:var(--safe);}
-.switch .knob{position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%; background:#fff; transition:transform .2s ease; box-shadow:0 1px 3px rgba(0,0,0,0.4);}
+.setting-row:last-child{border-radius:0 0 16px 16px;border-bottom:none;}
+.setting-row .left{display:flex;align-items:center;gap:12px;}
+.setting-row .left .ico-badge{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+.setting-row .left .ico-badge svg{width:16px;height:16px;}
+.setting-row .label{font-size:14.5px;font-weight:600;}
+.setting-row .desc{font-size:12px;color:var(--text-2);margin-top:1px;}
+.switch{width:48px;height:28px;border-radius:16px;background:var(--surface-2);position:relative;flex-shrink:0;transition:background .2s;border:0.5px solid var(--stroke);cursor:pointer;}
+.switch.on{background:var(--safe);border-color:var(--safe);}
+.switch .knob{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.4);}
 .switch.on .knob{transform:translateX(20px);}
-
-.slider-row{padding:14px 16px; background:var(--surface);}
-.slider-row .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
-.slider-row .top .label{font-size:14.5px; font-weight:600;}
-.slider-row .top .value{font-size:14px; font-weight:800; color:var(--danger-2);}
-input[type=range]{-webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--surface-2); outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.5); cursor:pointer; border:0.5px solid var(--stroke);}
-input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; background:#fff; border:none; cursor:pointer;}
-
+.slider-row{padding:14px 16px;background:var(--surface);}
+.slider-row .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.slider-row .top .label{font-size:14.5px;font-weight:600;}
+.slider-row .top .value{font-size:14px;font-weight:800;color:var(--danger-2);}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--surface-2);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.5);cursor:pointer;border:0.5px solid var(--stroke);}
 .alarm-test-btn{
-  width:100%; border-radius:16px; padding:18px; display:flex; align-items:center; justify-content:center; gap:10px;
-  font-size:15px; font-weight:800; color:#fff;
-  background:linear-gradient(135deg, var(--primary), #f2542d);
-  box-shadow:0 14px 34px -12px rgba(206,17,38,0.65);
+  width:100%;border-radius:16px;padding:18px;display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:15px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--primary),#f2542d);
+  box-shadow:0 14px 34px -12px rgba(206,17,38,0.55);
   transition:transform .12s ease;
 }
 .alarm-test-btn:active{transform:scale(0.97);}
-.alarm-test-btn svg{width:20px; height:20px;}
 .alarm-test-btn.playing{animation:btnflash .5s ease-in-out infinite;}
-@keyframes btnflash{0%,100%{box-shadow:0 14px 34px -12px rgba(225,6,0,0.55);} 50%{box-shadow:0 14px 44px -8px rgba(225,6,0,0.95);}}
+@keyframes btnflash{0%,100%{box-shadow:0 14px 34px -12px rgba(225,6,0,0.45);}50%{box-shadow:0 14px 44px -8px rgba(225,6,0,0.9);}}
+
+.sound-picker{display:flex;flex-direction:column;gap:8px;}
+.sound-option{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 16px;border-radius:14px;
+  background:var(--surface);border:1.5px solid var(--stroke);
+  cursor:pointer;transition:border-color .2s,background .2s;
+}
+.sound-option.selected{border-color:var(--primary);background:rgba(206,17,38,0.04);}
+.sound-option .so-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--surface-2);}
+.sound-option.selected .so-icon{background:rgba(206,17,38,0.12);}
+.sound-option .so-body{flex:1;min-width:0;}
+.sound-option .so-name{font-size:14.5px;font-weight:700;}
+.sound-option .so-desc{font-size:12px;color:var(--text-2);margin-top:1px;}
+.sound-option .so-play{width:32px;height:32px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sound-option.selected .so-play{background:rgba(206,17,38,0.15);}
+.sound-option .so-play svg{width:14px;height:14px;color:var(--primary);}
+.sound-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--stroke);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.sound-option.selected .sound-check{border-color:var(--primary);background:var(--primary);}
+.sound-check svg{width:11px;height:11px;color:#fff;display:none;}
+.sound-option.selected .sound-check svg{display:block;}
 
 /* ===================== TAB BAR ===================== */
 .tabbar{
-  position:fixed; left:0; right:0; bottom:0; z-index:90;
+  position:fixed;left:0;right:0;bottom:0;z-index:90;
   padding:9px 8px calc(env(safe-area-inset-bottom) + 8px);
   background:rgba(255,255,255,0.98);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-top:1px solid var(--stroke);
   display:flex;
 }
-.tab-item{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:5px 0; color:var(--text-3); transition:color .15s ease, transform .15s ease;}
-.tab-item svg{width:24px; height:24px;}
-.tab-item span{font-size:10px; font-weight:700;}
-.tab-item.active{color:var(--primary); font-weight:800;}
-.tab-item:active{transform:scale(0.9);}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 0;color:var(--text-3);cursor:pointer;transition:color .15s,transform .15s;}
+.tab-item svg{width:24px;height:24px;}
+.tab-item span{font-size:10px;font-weight:700;}
+.tab-item.active{color:var(--primary);}
+.tab-item:active{transform:scale(0.88);}
 
 /* ===================== VIEWS ===================== */
 .view{display:none;}
 .view.active{display:block;}
-
 .divider-lg{height:8px;}
 .divider-xl{height:26px;}
-.empty-state{padding:44px 20px; text-align:center; color:var(--text-2);}
-.empty-state svg{width:36px; height:36px; color:var(--text-3); margin-bottom:10px;}
-.empty-state p{font-size:13.5px; line-height:1.5;}
 
-.skeleton{background:linear-gradient(90deg, var(--surface-2) 25%, var(--surface-hover) 37%, var(--surface-2) 63%); background-size:400% 100%; animation:sk 1.4s ease infinite;}
-@keyframes sk{0%{background-position:100% 50%;} 100%{background-position:0 50%;}}
+/* ===================== ALERTA FULLSCREEN — NUEVA VERSIÓN ===================== */
+.alert-overlay{
+  position:fixed;inset:0;z-index:200;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+  overflow:hidden;
+}
+.alert-overlay.show{opacity:1;pointer-events:all;}
 
-/* ===================== TOAST DE ALERTA — MÁXIMA URGENCIA ===================== */
-.toast-alert{
-  position:fixed; inset:0; z-index:200;
-  background:linear-gradient(170deg, #8c0e1f 0%, #ce1126 45%, #f2542d 100%);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:0; padding:0 28px;
-  opacity:0; pointer-events:none;
-  transition:opacity .25s ease;
+/* Fondo animado por severidad */
+.alert-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(160deg,#3a0810 0%,#7a0e1d 40%,#ce1126 80%,#f2542d 100%);
+  transition:background 1s ease;
 }
-.toast-alert.show{opacity:1; pointer-events:all; animation:amberblink 1s ease-in-out infinite;}
-.toast-alert.blinking{animation:amberblink 0.6s ease-in-out infinite;}
-@keyframes amberblink{
-  0%,100%{background:linear-gradient(170deg,#8c0e1f 0%,#ce1126 45%,#f2542d 100%);}
-  50%{background:linear-gradient(170deg,#4a0810 0%,#7a0e1d 45%,#8c0e1f 100%);}
+.alert-overlay.warn .alert-bg{background:linear-gradient(160deg,#3a2800 0%,#7a5500 40%,#c89000 80%,#f5b700 100%);}
+.alert-overlay.info .alert-bg{background:linear-gradient(160deg,#001a3d 0%,#003a8c 40%,#0057b8 80%,#2c7be5 100%);}
+
+/* Partículas de fondo */
+.alert-bg::after{
+  content:'';
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.04) 0%, transparent 50%);
 }
-.toast-alert .amber-stripe{
-  width:100%; padding:14px 0 12px;
-  background:rgba(0,0,0,0.28);
-  text-align:center;
-  font-size:11px; font-weight:900; color:rgba(255,255,255,0.92);
-  letter-spacing:.22em; text-transform:uppercase;
-  position:absolute; top:0; left:0; right:0;
-  border-bottom:1px solid rgba(255,255,255,0.15);
+
+/* Pulso de onda sísmica — icono central */
+.alert-wave-wrap{
+  position:relative;
+  width:100px;height:100px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:28px;
+  z-index:1;
 }
-.toast-alert .amber-icon{
-  width:72px; height:72px; color:#fff; margin-bottom:22px;
-  animation:iconpulse 0.8s ease-in-out infinite;
-  filter:drop-shadow(0 0 18px rgba(255,255,255,0.5));
+.alert-wave-wrap .wave-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.5);
+  animation:waveOut 1.8s ease-out infinite;
 }
-@keyframes iconpulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.12);}}
-.toast-alert .amber-mag{
+.alert-wave-wrap .wave-ring:nth-child(2){animation-delay:.6s;}
+.alert-wave-wrap .wave-ring:nth-child(3){animation-delay:1.2s;}
+@keyframes waveOut{
+  0%{transform:scale(.3);opacity:.9;}
+  100%{transform:scale(1.8);opacity:0;}
+}
+.alert-wave-wrap .wave-core{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  border:2px solid rgba(255,255,255,0.6);
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+  position:relative;z-index:1;
+}
+.alert-wave-wrap .wave-core svg{width:28px;height:28px;color:#fff;}
+
+/* Ticker en la parte superior */
+.alert-ticker{
+  position:absolute;top:0;left:0;right:0;
+  padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,0,0,0.25);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid rgba(255,255,255,0.12);
+  z-index:2;
+}
+.alert-ticker .ticker-brand{
   font-family:var(--font-display);
-  font-size:104px; font-weight:400; color:#fff; line-height:1;
+  font-size:20px;letter-spacing:.06em;color:#fff;opacity:.9;
+}
+.alert-ticker .ticker-label{
+  font-size:11px;font-weight:800;color:rgba(255,255,255,0.8);
+  text-transform:uppercase;letter-spacing:.16em;
+  background:rgba(255,255,255,0.15);
+  padding:4px 10px;border-radius:20px;
+  border:1px solid rgba(255,255,255,0.2);
+  animation:tickerPulse 1.4s ease-in-out infinite;
+}
+@keyframes tickerPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+/* Cuerpo de la alerta */
+.alert-body{
+  display:flex;flex-direction:column;align-items:center;
+  z-index:1;padding:0 28px;width:100%;
+}
+.alert-type-tag{
+  font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;
+  color:rgba(255,255,255,0.7);margin-bottom:10px;
+}
+.alert-mag{
+  font-family:var(--font-display);
+  font-size:108px;font-weight:400;color:#fff;line-height:1;
   letter-spacing:-.01em;
-  text-shadow:0 0 40px rgba(255,255,255,0.35);
-  margin-bottom:6px;
+  text-shadow:0 0 60px rgba(255,255,255,0.3);
+  margin-bottom:0;
 }
-.toast-alert .amber-label{
-  font-size:13px; font-weight:800; color:rgba(255,255,255,0.7);
-  text-transform:uppercase; letter-spacing:.12em; margin-bottom:28px;
+.alert-mag-label{
+  font-size:14px;font-weight:700;color:rgba(255,255,255,0.6);
+  text-transform:uppercase;letter-spacing:.1em;
+  margin-bottom:20px;
 }
-.toast-alert .amber-place{
-  font-size:22px; font-weight:800; color:#fff; text-align:center;
-  line-height:1.25; margin-bottom:10px;
-  text-shadow:0 2px 12px rgba(0,0,0,0.25);
+.alert-title{
+  font-size:22px;font-weight:800;color:#fff;
+  text-align:center;line-height:1.25;margin-bottom:8px;
+  text-shadow:0 2px 16px rgba(0,0,0,0.3);
 }
-.toast-alert .amber-sub{
-  font-size:14px; color:rgba(255,255,255,0.82); text-align:center;
-  font-weight:600; line-height:1.5; margin-bottom:44px;
+.alert-message{
+  font-size:14px;color:rgba(255,255,255,0.82);
+  text-align:center;font-weight:600;line-height:1.55;
+  max-width:320px;margin-bottom:10px;
 }
-.toast-alert .amber-dismiss{
-  background:rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.4);
-  color:#fff; border-radius:50px; padding:14px 48px;
-  font-size:15px; font-weight:800; letter-spacing:.04em;
-  cursor:pointer; transition:background .2s, opacity .2s;
-  position:absolute; bottom:calc(env(safe-area-inset-bottom) + 36px);
-}
-.toast-alert .amber-dismiss:active{background:rgba(0,0,0,0.5);}
-.toast-alert .amber-dismiss:disabled{
-  opacity:0.45; cursor:not-allowed; pointer-events:none;
+.alert-source{
+  font-size:12px;color:rgba(255,255,255,0.5);
+  text-align:center;font-weight:600;
+  margin-bottom:40px;
 }
 
-.brand-footer{padding:26px 20px 10px; text-align:center;}
-.brand-footer svg{width:22px; height:22px; color:var(--text-3); margin-bottom:9px;}
-.brand-footer p{font-size:11.5px; color:var(--text-3); line-height:1.55;}
+/* Botón descartar */
+.alert-dismiss{
+  position:absolute;bottom:calc(env(safe-area-inset-bottom) + 32px);
+  left:28px;right:28px;
+  background:rgba(255,255,255,0.18);
+  border:2px solid rgba(255,255,255,0.35);
+  color:#fff;border-radius:50px;
+  padding:16px 48px;
+  font-size:15px;font-weight:800;letter-spacing:.04em;
+  cursor:pointer;transition:background .2s;
+  backdrop-filter:blur(8px);
+  z-index:2;
+}
+.alert-dismiss:active{background:rgba(255,255,255,0.3);}
+.alert-dismiss:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none;}
 
-/* Overlay de pantalla completa cuando hay alerta crítica activa */
+/* Flash de pantalla */
 .screen-flash{
-  position:fixed; inset:0; z-index:150; pointer-events:none;
-  background:rgba(206,17,38,0.15);
-  opacity:0;
+  position:fixed;inset:0;z-index:150;pointer-events:none;
+  background:rgba(206,17,38,0.18);opacity:0;
 }
-.screen-flash.active{animation:flashfull 0.5s ease-in-out 5;}
-@keyframes flashfull{0%,100%{opacity:0;} 50%{opacity:1;}}
+.screen-flash.active{animation:flashfull .5s ease-in-out 5;}
+@keyframes flashfull{0%,100%{opacity:0;}50%{opacity:1;}}
 
-@media (min-width:640px){
-  body{max-width:520px; margin:0 auto; border-left:1px solid var(--stroke); border-right:1px solid var(--stroke);}
-  .tabbar{max-width:520px; left:50%; transform:translateX(-50%); right:auto; width:100%;}
+/* ===================== ADMIN PANEL ===================== */
+.admin-panel{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(8px);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
 }
+.admin-panel.show{opacity:1;pointer-events:all;}
+.admin-sheet{
+  background:#fff;border-radius:24px 24px 0 0;
+  padding:24px 20px calc(env(safe-area-inset-bottom) + 32px);
+  width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;
+}
+.admin-sheet h3{
+  font-family:var(--font-display);font-size:24px;letter-spacing:.03em;
+  margin-bottom:4px;color:var(--primary);
+}
+.admin-sheet .sub{font-size:12.5px;color:var(--text-2);margin-bottom:20px;}
+.admin-field{margin-bottom:14px;}
+.admin-field label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px;}
+.admin-field input,
+.admin-field select,
+.admin-field textarea{
+  width:100%;padding:12px 14px;border:1.5px solid var(--stroke);border-radius:12px;
+  font-size:14.5px;font-weight:600;color:var(--text-1);
+  background:var(--surface-2);
+  transition:border-color .2s;outline:none;
+}
+.admin-field input:focus,
+.admin-field select:focus,
+.admin-field textarea:focus{border-color:var(--primary);}
+.admin-field textarea{resize:vertical;min-height:80px;}
+.admin-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.admin-send-btn{
+  width:100%;border-radius:14px;padding:16px;
+  font-size:15px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--primary),#f2542d);
+  box-shadow:0 10px 28px -8px rgba(206,17,38,0.5);
+  margin-top:8px;transition:transform .12s,opacity .2s;
+}
+.admin-send-btn:active{transform:scale(0.97);}
+.admin-send-btn:disabled{opacity:.5;}
+.admin-cancel{
+  width:100%;margin-top:10px;padding:14px;
+  font-size:14px;font-weight:700;color:var(--text-2);
+  border-radius:14px;background:var(--surface-2);
+}
+.admin-close-btn{
+  position:absolute;top:20px;right:20px;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--surface-2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--text-2);
+}
+
+/* ===================== NOTIF BANNER (in-app) ===================== */
+.notif-banner{
+  position:fixed;top:calc(env(safe-area-inset-top) + 60px);left:16px;right:16px;
+  z-index:100;
+  background:#fff;border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+  transform:translateY(-120px);opacity:0;
+  transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),opacity .4s ease;
+  border:1px solid var(--stroke);
+}
+.notif-banner.show{transform:translateY(0);opacity:1;}
+.notif-banner .nb-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);flex-shrink:0;box-shadow:0 0 8px var(--danger);}
+.notif-banner .nb-body{flex:1;min-width:0;}
+.notif-banner .nb-title{font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notif-banner .nb-sub{font-size:12px;color:var(--text-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notif-banner .nb-close{width:24px;height:24px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--text-3);}
+
+/* ===================== MISC ===================== */
+@media (min-width:640px){
+  body{max-width:520px;margin:0 auto;border-left:1px solid var(--stroke);border-right:1px solid var(--stroke);}
+  .tabbar{max-width:520px;left:50%;transform:translateX(-50%);right:auto;width:100%;}
+  .notif-banner{max-width:520px;left:50%;transform:translateY(-120px) translateX(-50%);}
+  .notif-banner.show{transform:translateY(0) translateX(-50%);}
+}
+
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;margin:0 20px 12px;}
+.chip{font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;border:1.5px solid;text-transform:uppercase;letter-spacing:.05em;}
+.chip.red{color:var(--danger);border-color:rgba(225,6,0,0.3);background:rgba(225,6,0,0.07);}
+.chip.yellow{color:#b58500;border-color:rgba(245,183,0,0.35);background:rgba(245,183,0,0.1);}
+.chip.blue{color:var(--info);border-color:rgba(0,87,184,0.25);background:rgba(0,87,184,0.07);}
+.chip.gray{color:var(--text-3);border-color:rgba(0,0,0,0.12);background:rgba(0,0,0,0.04);}
+.skeleton{background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-hover) 37%,var(--surface-2) 63%);background-size:400% 100%;animation:sk 1.4s ease infinite;border-radius:12px;}
+@keyframes sk{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
+
+/* Historial de alertas Firebase */
+.fb-alert-card{
+  margin:0 20px 12px;
+  background:var(--surface);border:1px solid var(--stroke);border-radius:16px;
+  padding:14px 16px;display:flex;gap:14px;align-items:flex-start;
+  box-shadow:0 1px 6px rgba(206,17,38,0.05);
+}
+.fb-alert-card .fb-icon{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.fb-alert-card .fb-icon svg{width:20px;height:20px;}
+.fb-alert-card .fb-body{flex:1;min-width:0;}
+.fb-alert-card .fb-title{font-size:14px;font-weight:800;line-height:1.25;}
+.fb-alert-card .fb-msg{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.4;}
+.fb-alert-card .fb-footer{display:flex;justify-content:space-between;align-items:center;margin-top:7px;}
+.fb-alert-card .fb-source{font-size:11px;color:var(--text-3);font-weight:600;}
+.fb-alert-card .fb-time{font-size:11px;color:var(--text-3);font-weight:600;}
+
+/* Indicador de conexión Firebase */
+.fb-status{
+  display:flex;align-items:center;gap:7px;
+  padding:0 20px;margin-bottom:6px;
+}
+.fb-status .fb-dot{width:7px;height:7px;border-radius:50%;background:#ccc;}
+.fb-status.connected .fb-dot{background:#22c55e;box-shadow:0 0 6px #22c55e;}
+.fb-status.disconnected .fb-dot{background:#e10600;}
+.fb-status span{font-size:11.5px;color:var(--text-3);font-weight:600;}
 </style>
 </head>
 <body>
 
 <div class="screen-flash" id="screenFlash"></div>
 
-<!-- ===================== TOAST DE ALERTA ===================== -->
-<div class="toast-alert" id="toastAlert">
-  <div class="amber-stripe">Alerta&nbsp;&nbsp;Sísmica</div>
-  <svg class="amber-icon icon filled" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm0 6v6m0 3.2h.01"/></svg>
-  <div class="amber-mag" id="toastMag">5.5</div>
-  <div class="amber-label" id="toastType">Magnitud</div>
-  <div class="amber-place" id="toastTitle">Actividad detectada</div>
-  <div class="amber-sub" id="toastSub">A 320 km de ti · 10 km de profundidad</div>
-  <button class="amber-dismiss" id="dismissBtn" onclick="dismissToast()">Descartar</button>
+<!-- ===================== ALERTA FULLSCREEN ===================== -->
+<div class="alert-overlay" id="alertOverlay">
+  <div class="alert-bg"></div>
+  <div class="alert-ticker">
+    <div class="ticker-brand">AlertaCuba</div>
+    <div class="ticker-label" id="alertTickerLabel">Alerta activa</div>
+  </div>
+  <div class="alert-wave-wrap">
+    <div class="wave-ring"></div>
+    <div class="wave-ring"></div>
+    <div class="wave-ring"></div>
+    <div class="wave-core">
+      <!-- Icono de onda sísmica / señal -->
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/>
+      </svg>
+    </div>
+  </div>
+  <div class="alert-body">
+    <div class="alert-type-tag" id="alertTypeTag">Alerta</div>
+    <div class="alert-mag" id="alertMag" style="display:none;"></div>
+    <div class="alert-mag-label" id="alertMagLabel" style="display:none;">Magnitud</div>
+    <div class="alert-title" id="alertTitle">Alerta emitida</div>
+    <div class="alert-message" id="alertMessage"></div>
+    <div class="alert-source" id="alertSource"></div>
+  </div>
+  <button class="alert-dismiss" id="alertDismissBtn" onclick="dismissAlert()">Descartar</button>
+</div>
+
+<!-- ===================== PANEL ADMIN ===================== -->
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-sheet">
+    <!-- PIN gate -->
+    <div id="adminPinGate">
+      <h3>Acceso de administrador</h3>
+      <p class="sub">Introduce el PIN para acceder al panel de emisión de alertas.</p>
+      <div class="admin-field">
+        <label>PIN de administrador</label>
+        <input type="password" id="adminPinInput" placeholder="••••••" maxlength="12"
+          onkeydown="if(event.key==='Enter')verifyAdminPin()">
+      </div>
+      <button class="admin-send-btn" onclick="verifyAdminPin()">Acceder</button>
+      <button class="admin-cancel" onclick="closeAdmin()">Cancelar</button>
+    </div>
+    <!-- Formulario de alerta (oculto hasta autenticar) -->
+    <div id="adminForm" style="display:none;">
+    <h3>Emitir Alerta</h3>
+    <p class="sub">Escribe una alerta para todos los usuarios de AlertaCuba en Cuba.</p>
+    <div class="admin-row">
+      <div class="admin-field">
+        <label>Tipo de alerta</label>
+        <select id="adminTipo">
+          <option value="sismo">🌊 Sismo / Terremoto</option>
+          <option value="tsunami">🌊 Tsunami</option>
+          <option value="ciclon">🌀 Ciclón / Huracán</option>
+          <option value="general">📢 Alerta general</option>
+          <option value="aviso">ℹ️ Aviso informativo</option>
+        </select>
+      </div>
+      <div class="admin-field">
+        <label>Severidad</label>
+        <select id="adminSeveridad">
+          <option value="critica">🔴 Emergencia crítica</option>
+          <option value="alta">🟡 Alerta alta</option>
+          <option value="media">🔵 Aviso</option>
+          <option value="info">⚪ Informativo</option>
+        </select>
+      </div>
+    </div>
+    <div class="admin-field">
+      <label>Título</label>
+      <input type="text" id="adminTitulo" placeholder="Ej: Sismo detectado en Santiago de Cuba" maxlength="80">
+    </div>
+    <div class="admin-field">
+      <label>Mensaje / descripción</label>
+      <textarea id="adminMensaje" placeholder="Detalles de la alerta para la ciudadanía..."></textarea>
+    </div>
+    <div class="admin-row">
+      <div class="admin-field">
+        <label>Magnitud (opcional)</label>
+        <input type="number" id="adminMagnitud" placeholder="Ej: 5.5" step="0.1" min="1" max="10">
+      </div>
+      <div class="admin-field">
+        <label>Lugar</label>
+        <input type="text" id="adminLugar" placeholder="Ej: Santiago de Cuba">
+      </div>
+    </div>
+    <div class="admin-field">
+      <label>Emitida por</label>
+      <input type="text" id="adminEmitidaPor" placeholder="Ej: Defensa Civil Cuba" value="Defensa Civil Cuba">
+    </div>
+    <button class="admin-send-btn" id="adminSendBtn" onclick="sendAlert()">
+      🚨 Emitir alerta ahora
+    </button>
+    <button class="admin-cancel" onclick="closeAdmin()">Cancelar</button>
+    </div><!-- /adminForm -->
+  </div>
+</div>
+
+<!-- ===================== NOTIF BANNER IN-APP ===================== -->
+<div class="notif-banner" id="notifBanner">
+  <div class="nb-dot"></div>
+  <div class="nb-body">
+    <div class="nb-title" id="nbTitle">Nueva alerta</div>
+    <div class="nb-sub" id="nbSub"></div>
+  </div>
+  <button class="nb-close" onclick="closeNotifBanner()">✕</button>
 </div>
 
 <!-- ===================== TOP BAR ===================== -->
 <div class="topbar">
   <div class="topbar-title">
-    <svg class="icon brand-icon" viewBox="0 0 24 24"><path d="M2 12h4l2-8 4 16 2-8h4"/></svg>
-    SismoCuba
+    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2a1 1 0 0 1 0 4M12 18a1 1 0 0 1 0 4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke-width="1.8"/>
+    </svg>
+    <span style="color:var(--primary);">Alerta</span><span class="brand-wordmark">Cuba</span>
   </div>
   <div class="topbar-actions">
+    <div class="status-chip pulse" id="topStatusChip">
+      <div class="dot"></div>
+      <span id="topStatusText">En vivo</span>
+    </div>
+    <button class="icon-btn notif-btn" id="notifToggleBtn" onclick="requestPushPermission()" title="Notificaciones">
+      <div class="badge"></div>
+      <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
     <button class="icon-btn" onclick="goToView('settings')" aria-label="Ajustes">
       <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -404,16 +699,41 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 <!-- ===================== VIEW: INICIO ===================== -->
 <div class="view active" id="view-home">
 
-  <div class="segment-wrap">
-    <div class="segment" role="tablist">
-      <button class="active" data-range="hour" onclick="setRange('hour', this)">Última hora</button>
-      <button data-range="day" onclick="setRange('day', this)">Hoy</button>
-      <button data-range="week" onclick="setRange('week', this)">Semana</button>
+  <!-- Estado del sistema -->
+  <div class="hero-status ok" id="heroStatus">
+    <div class="hero-pulse-ring">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="dot-center">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+    </div>
+    <div class="hero-text">
+      <div class="title" id="heroTitle">Conectado — Sin alertas activas</div>
+      <div class="sub" id="heroSub">Sistema monitoreando Cuba en tiempo real</div>
+      <div class="since" id="heroSince">Última actualización: ahora</div>
     </div>
   </div>
 
+  <!-- Estado Firebase -->
+  <div class="fb-status" id="fbStatus" style="margin-top:10px;">
+    <div class="fb-dot"></div>
+    <span id="fbStatusText">Conectando a Firebase...</span>
+  </div>
 
-  <!-- SISMO MÁS CERCANO -->
+  <div class="divider-lg"></div>
+
+  <!-- Alerta activa Firebase (si existe) -->
+  <div id="activeAlertSection" style="display:none;">
+    <div class="section-head" style="padding:0 20px 10px;">
+      <h2 style="color:var(--danger);">🚨 Alerta activa</h2>
+    </div>
+    <div id="activeAlertCard"></div>
+    <div class="divider-lg"></div>
+  </div>
+
+  <!-- Sismo más cercano -->
   <div class="nearest-card" id="nearestCard" style="display:none;" onclick="openDetail(currentNearest)">
     <div class="nearest-badge" id="nearestBadge">—</div>
     <div class="nearest-info">
@@ -429,31 +749,44 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 
   <div class="divider-lg"></div>
 
-  <div class="divider-xl"></div>
-
-  <!-- FEED RECIENTE -->
+  <!-- Alertas recientes emitidas -->
   <div class="section">
     <div class="section-head">
-      <h2>Actividad reciente</h2>
+      <h2>Alertas emitidas</h2>
       <span class="see-all" onclick="goToView('feed')">Ver todo</span>
+    </div>
+  </div>
+  <div id="fbAlertsHome"></div>
+
+  <div class="divider-lg"></div>
+
+  <!-- Actividad sísmica reciente (USGS) -->
+  <div class="section">
+    <div class="section-head">
+      <h2>Actividad sísmica</h2>
+      <div class="segment" style="border:none;padding:0;">
+        <button class="active" data-range="hour" onclick="setRange('hour',this)" style="padding:5px 10px;font-size:12px;">1h</button>
+        <button data-range="day" onclick="setRange('day',this)" style="padding:5px 10px;font-size:12px;">Hoy</button>
+        <button data-range="week" onclick="setRange('week',this)" style="padding:5px 10px;font-size:12px;">Semana</button>
+      </div>
     </div>
   </div>
   <div class="feed-list" id="homeFeedList"></div>
 
-
+  <div class="divider-xl"></div>
 </div>
 
-<!-- ===================== VIEW: FEED COMPLETO ===================== -->
+<!-- ===================== VIEW: ACTIVIDAD COMPLETA ===================== -->
 <div class="view" id="view-feed">
   <div class="segment-wrap" style="padding-top:16px;">
     <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Toda la actividad</h2></div>
   </div>
   <div class="segment-wrap">
     <div class="segment">
-      <button class="active" data-mag="0" onclick="setMagFilter(0, this)">Todo</button>
-      <button data-mag="3" onclick="setMagFilter(3, this)">M3+</button>
-      <button data-mag="4.5" onclick="setMagFilter(4.5, this)">M4.5+</button>
-      <button data-mag="6" onclick="setMagFilter(6, this)">M6+</button>
+      <button class="active" data-mag="0" onclick="setMagFilter(0,this)">Todo</button>
+      <button data-mag="3" onclick="setMagFilter(3,this)">M3+</button>
+      <button data-mag="4.5" onclick="setMagFilter(4.5,this)">M4.5+</button>
+      <button data-mag="6" onclick="setMagFilter(6,this)">M6+</button>
     </div>
   </div>
   <div class="divider-lg"></div>
@@ -463,15 +796,24 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
 <!-- ===================== VIEW: AJUSTES ===================== -->
 <div class="view" id="view-settings">
   <div class="segment-wrap" style="padding-top:16px;">
-    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes de alerta</h2></div>
+    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes</h2></div>
   </div>
 
-  <div class="section" style="padding-top:10px;"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Alarma sísmica</p></div>
+  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Notificaciones</p></div>
   <div class="section">
     <div class="setting-row">
       <div class="left">
+        <div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div><div class="label">Notificaciones push</div><div class="desc" id="pushPermStatus">Recibe alertas aunque la app esté cerrada</div></div>
+      </div>
+      <button class="icon-btn" onclick="requestPushPermission()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="setting-row">
+      <div class="left">
         <div class="ico-badge" style="background:var(--danger);"><svg class="icon filled" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-        <div><div class="label">Alarma sonora</div><div class="desc">Sirena de emergencia al detectar un sismo relevante</div></div>
+        <div><div class="label">Alarma sonora</div><div class="desc">Sirena de emergencia al recibir alerta</div></div>
       </div>
       <div class="switch on" id="switchAlarm" onclick="toggleSwitch(this,'alarm')"><div class="knob"></div></div>
     </div>
@@ -492,8 +834,7 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   </div>
 
   <div class="divider-lg"></div>
-
-  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Umbral de sensibilidad</p></div>
+  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Umbral de alerta sísmica</p></div>
   <div class="section">
     <div class="slider-row" style="border-radius:16px;">
       <div class="top"><span class="label">Magnitud mínima para alertar</span><span class="value" id="magThreshVal">M 4.5</span></div>
@@ -502,49 +843,32 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   </div>
 
   <div class="divider-lg"></div>
-
-  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Tipo de alerta sonora</p></div>
+  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tipo de alerta sonora</p></div>
   <div class="section">
     <div class="sound-picker" id="soundPicker">
       <div class="sound-option selected" data-sound="seismic" onclick="selectSound('seismic',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M2 6h2l2 12 2-9 2 6 2-14 2 9 2-4h4"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Alerta Sísmica</div>
-          <div class="so-desc">Patrón de onda sísmica — tono grave con pulsos crecientes</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('seismic');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
+        <div class="so-body"><div class="so-name">Alerta Sísmica</div><div class="so-desc">Onda grave con pulsos crecientes</div></div>
+        <button class="so-play" onclick="event.stopPropagation();previewSound('seismic');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
         <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
       </div>
       <div class="sound-option" data-sound="civildef" onclick="selectSound('civildef',this)">
         <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger-2);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Defensa Civil</div>
-          <div class="so-desc">Sirena clásica de defensa civil — subida y bajada lenta</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('civildef');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
+        <div class="so-body"><div class="so-name">Defensa Civil</div><div class="so-desc">Sirena clásica — subida y bajada lenta</div></div>
+        <button class="so-play" onclick="event.stopPropagation();previewSound('civildef');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
         <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
       </div>
       <div class="sound-option" data-sound="eas" onclick="selectSound('eas',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger-2);"><path d="M11 5 6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
-        <div class="so-body">
-          <div class="so-name">Sirena EAS</div>
-          <div class="so-desc">Sirena agresiva de dos tonos, tipo alerta oficial</div>
-        </div>
-        <button class="so-play" onclick="event.stopPropagation(); previewSound('eas');" aria-label="Probar">
-          <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-        </button>
+        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--warning);"><path d="M11 5 6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
+        <div class="so-body"><div class="so-name">Sirena EAS</div><div class="so-desc">Sirena agresiva de dos tonos</div></div>
+        <button class="so-play" onclick="event.stopPropagation();previewSound('eas');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
         <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
       </div>
     </div>
   </div>
 
   <div class="divider-lg"></div>
-
-  <div class="section"><p style="font-size:12px; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Probar alerta</p></div>
+  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Probar alerta</p></div>
   <div class="section">
     <button class="alarm-test-btn" id="testAlarmBtn" onclick="testAlarm()">
       <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
@@ -553,58 +877,46 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   </div>
 
   <div class="divider-lg"></div>
+  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Panel de emisión</p></div>
+  <div class="section">
+    <div class="setting-row" style="border-radius:16px;cursor:pointer;" onclick="openAdmin()">
+      <div class="left">
+        <div class="ico-badge" style="background:#7c3aed;"><svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.67a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div>
+        <div><div class="label">Emitir alerta oficial</div><div class="desc">Panel de administrador — emitir alertas a todos los usuarios</div></div>
+      </div>
+      <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+  </div>
 
   <div class="divider-xl"></div>
 </div>
 
 <!-- ===================== VIEW: DETALLE ===================== -->
 <div class="view" id="view-detail">
-  <div class="segment-wrap" style="padding-top:16px; display:flex; align-items:center; gap:12px;">
-    <button class="icon-btn" onclick="goToView('home')" aria-label="Volver"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
-    <div style="font-size:16px; font-weight:800;">Detalle del evento</div>
+  <div class="segment-wrap" style="padding-top:16px;display:flex;align-items:center;gap:12px;">
+    <button class="icon-btn" onclick="goToView('home')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div style="font-size:16px;font-weight:800;">Detalle del evento</div>
   </div>
-
   <div class="detail-mag-banner" id="detailMagBanner">
     <div class="detail-mag-num" id="detailMag">—</div>
     <div class="detail-mag-type" id="detailMagType">—</div>
   </div>
-
   <div class="section" style="text-align:center;">
-    <div style="font-size:19px; font-weight:800; margin-bottom:4px;" id="detailPlace">—</div>
-    <div style="font-size:13.5px; color:var(--text-2); font-weight:600;" id="detailDate">—</div>
+    <div style="font-size:19px;font-weight:800;margin-bottom:4px;" id="detailPlace">—</div>
+    <div style="font-size:13.5px;color:var(--text-2);font-weight:600;" id="detailDate">—</div>
   </div>
-
   <div class="divider-lg"></div>
-
-  <div class="section" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
-      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M12 3v14M6 13l6 6 6-6"/></svg>
-      <div class="val" id="detailDepth" style="font-size:17px;">—</div>
-      <div class="lbl">Profundidad</div>
-    </div>
-    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
-      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
-      <div class="val" id="detailDistance" style="font-size:17px;">—</div>
-      <div class="lbl">Distancia</div>
-    </div>
-    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
-      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M12 2 1 21h22L12 2zm0 6v6m0 3.2h.01"/></svg>
-      <div class="val" id="detailTsunami" style="font-size:17px;">—</div>
-      <div class="lbl">Riesgo tsunami</div>
-    </div>
-    <div class="weather-metric" style="background:var(--surface); border:0.5px solid var(--stroke); padding:15px;">
-      <svg class="icon" viewBox="0 0 24 24" style="width:21px;height:21px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      <div class="val" id="detailSig" style="font-size:17px;">—</div>
-      <div class="lbl">Índice de impacto</div>
-    </div>
+  <div class="section" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg><div class="val" id="detailDepth">—</div><div class="lbl">Profundidad</div></div>
+    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg><div class="val" id="detailDistance">—</div><div class="lbl">Distancia</div></div>
+    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 2-5h4"/></svg><div class="val" id="detailTsunami">—</div><div class="lbl">Riesgo tsunami</div></div>
+    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><div class="val" id="detailSig">—</div><div class="lbl">Índice de impacto</div></div>
   </div>
-
   <div class="divider-lg"></div>
-
   <div class="section">
-    <button id="detailLinkBtn" onclick="window.open(currentDetailUrl,'_blank')" style="width:100%; background:var(--surface); border:0.5px solid var(--stroke); border-radius:16px; padding:16px; display:flex; align-items:center; justify-content:center; gap:9px; font-size:14.5px; font-weight:700;">
+    <button id="detailLinkBtn" onclick="window.open(currentDetailUrl,'_blank')" style="width:100%;background:var(--surface);border:0.5px solid var(--stroke);border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14.5px;font-weight:700;">
       <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
-      Ver informe completo en USGS
+      Ver informe en USGS
     </button>
   </div>
   <div class="divider-xl"></div>
@@ -626,101 +938,568 @@ input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; 
   </div>
 </div>
 
-<script>
-/* ============================================================
-   SISMOCUBA — Lógica principal
-   Fuentes de datos reales:
-   - USGS Earthquake Hazards Program (GeoJSON feed, sin API key)
-   - Open-Meteo (clima y presión atmosférica, sin API key)
-   ============================================================ */
+<!-- ===================== FIREBASE SDK ===================== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 
+<script>
+'use strict';
+/* ================================================================
+   AlertaCuba — Sistema de Alerta en Tiempo Real para Cuba
+   Firebase Realtime DB + FCM + USGS
+   ================================================================ */
+
+/* -------- CONFIGURACIÓN FIREBASE -------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC9v2qp6zGtmvsFiOknlmTHnN6zZY1RLcI",
+  authDomain: "ggggg-f2508.firebaseapp.com",
+  databaseURL: "https://ggggg-f2508-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ggggg-f2508",
+  storageBucket: "ggggg-f2508.firebasestorage.app",
+  messagingSenderId: "120837533638",
+  appId: "1:120837533638:web:6720ebd1367f3acf9f4cc7",
+  measurementId: "G-E2JX3ZGG5K"
+};
+
+/* ⚠️  VAPID KEY: Debes obtener tu clave VAPID pública desde:
+   Firebase Console → Configuración del proyecto → Cloud Messaging
+   → Configuración web → Generar par de claves.
+   Pégala aquí para que las notificaciones push funcionen en segundo plano. */
+const VAPID_KEY = ""; // <- pega tu clave pública VAPID aquí
+
+/* -------- FUENTES USGS -------- */
 const USGS_FEEDS = {
   hour: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
   day:  'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson',
   week: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson'
 };
 
+/* -------- ESTADO GLOBAL -------- */
 let state = {
   range: 'day',
   quakes: [],
   userLat: 23.1136,
   userLon: -82.3666,
   hasRealGeo: false,
-  monitoring: true,
   alarmOn: true,
   vibrateOn: true,
   geoOn: false,
   magThreshold: 4.5,
   lastAlertedId: null,
   magFilter: 0,
-  currentDetail: null
+  fbAlerts: [],
+  activeAlert: null,
+  fbConnected: false,
 };
 
 let currentNearest = null;
 let currentDetailUrl = '#';
+let app, db, messaging;
 
-/* -------------------- NAVEGACIÓN -------------------- */
-function goToView(name){
+/* ================================================================
+   FIREBASE INIT
+   ================================================================ */
+function initFirebase() {
+  try {
+    app = firebase.initializeApp(FIREBASE_CONFIG);
+    db  = firebase.database();
+    try {
+      messaging = firebase.messaging();
+    } catch(e) {
+      console.warn('[FCM] No soportado en este navegador:', e.message);
+    }
+
+    listenFirebaseConnection();
+    listenActiveAlert();
+    listenAlertHistory();
+  } catch(err) {
+    console.error('[Firebase] Error al inicializar:', err);
+    setFbStatus(false);
+  }
+}
+
+/* Monitorear conexión */
+function listenFirebaseConnection() {
+  const connRef = db.ref('.info/connected');
+  connRef.on('value', snap => {
+    const connected = snap.val() === true;
+    state.fbConnected = connected;
+    setFbStatus(connected);
+  });
+}
+
+function setFbStatus(connected) {
+  const el = document.getElementById('fbStatus');
+  const txt = document.getElementById('fbStatusText');
+  if (!el) return;
+  el.className = 'fb-status ' + (connected ? 'connected' : 'disconnected');
+  txt.textContent = connected ? 'Firebase conectado — recibiendo alertas en vivo' : 'Desconectado de Firebase';
+}
+
+/* ----------------------------------------------------------------
+   ALERTAS EN TIEMPO REAL (nodo: /alertas/activa)
+   Estructura que el admin escribe:
+   {
+     activa: true,
+     id: "unique",
+     tipo: "sismo",
+     titulo: "Sismo en Santiago",
+     cuerpo: "...",
+     magnitud: 5.5,
+     lugar: "Santiago de Cuba",
+     profundidad: 10,
+     severidad: "alta",   // info|media|alta|critica
+     timestamp: Date.now(),
+     emitidaPor: "Defensa Civil Cuba"
+   }
+   ---------------------------------------------------------------- */
+function listenActiveAlert() {
+  const ref = db.ref('alertas/activa');
+  ref.on('value', snap => {
+    const data = snap.val();
+    if (data && data.activa === true) {
+      if (!state.activeAlert || state.activeAlert.id !== data.id) {
+        state.activeAlert = data;
+        onNewActiveAlert(data);
+      }
+    } else {
+      state.activeAlert = null;
+      dismissAlert();
+      document.getElementById('activeAlertSection').style.display = 'none';
+    }
+  });
+}
+
+/* Escuchar historial de alertas (nodo: /alertas/historial) */
+function listenAlertHistory() {
+  const ref = db.ref('alertas/historial');
+  ref.orderByChild('timestamp').limitToLast(20).on('value', snap => {
+    const items = [];
+    snap.forEach(child => { items.push(child.val()); });
+    items.reverse();
+    state.fbAlerts = items;
+    renderFbAlerts();
+  });
+}
+
+/* Alerta nueva recibida */
+function onNewActiveAlert(data) {
+  // Mostrar overlay fullscreen
+  triggerOverlayAlert(data);
+
+  // Banner in-app
+  showNotifBanner(data.titulo, data.cuerpo || data.lugar || '');
+
+  // Render card en inicio
+  renderActiveAlertCard(data);
+
+  // Actualizar hero
+  updateHeroStatus('danger', '🚨 ' + data.titulo, data.cuerpo || '', '');
+
+  // Sonido y vibración
+  if (state.alarmOn) playSoundByKey(selectedSound);
+  if (state.vibrateOn && navigator.vibrate) {
+    const pat = data.severidad === 'critica'
+      ? [500,150,500,150,500,150,1000]
+      : [300,100,300,100,600];
+    navigator.vibrate(pat);
+  }
+  flashScreen();
+
+  // Notificación nativa si app en segundo plano
+  sendNativeNotification(data);
+}
+
+function triggerOverlayAlert(data) {
+  const overlay = document.getElementById('alertOverlay');
+  const severidad = data.severidad || 'alta';
+
+  // Color por severidad
+  overlay.className = 'alert-overlay';
+  if (severidad === 'info' || severidad === 'media') overlay.classList.add('info');
+  else if (severidad === 'alta') overlay.classList.add('warn');
+
+  // Tipo
+  const typeLabels = {
+    sismo:'Sismo / Terremoto', tsunami:'Alerta de Tsunami',
+    ciclon:'Ciclón / Huracán', general:'Alerta General', aviso:'Aviso'
+  };
+  document.getElementById('alertTickerLabel').textContent =
+    severidad === 'critica' ? '🚨 Emergencia' :
+    severidad === 'alta'    ? '⚠️ Alerta'    : 'ℹ️ Aviso';
+
+  document.getElementById('alertTypeTag').textContent = typeLabels[data.tipo] || 'Alerta';
+
+  // Magnitud (solo si es sismo)
+  const magEl = document.getElementById('alertMag');
+  const magLbl = document.getElementById('alertMagLabel');
+  if (data.magnitud && data.tipo === 'sismo') {
+    magEl.textContent = parseFloat(data.magnitud).toFixed(1);
+    magEl.style.display = 'block';
+    magLbl.style.display = 'block';
+  } else {
+    magEl.style.display = 'none';
+    magLbl.style.display = 'none';
+  }
+
+  document.getElementById('alertTitle').textContent = data.titulo || 'Alerta emitida';
+  document.getElementById('alertMessage').textContent = data.cuerpo || '';
+  document.getElementById('alertSource').textContent = data.emitidaPor ? 'Emitida por ' + data.emitidaPor : '';
+
+  overlay.classList.add('show');
+  startDismissCountdown();
+}
+
+function dismissAlert() {
+  clearInterval(_dismissCountdown);
+  const overlay = document.getElementById('alertOverlay');
+  overlay.classList.remove('show');
+  const btn = document.getElementById('alertDismissBtn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Descartar'; }
+}
+
+let _dismissCountdown = null;
+function startDismissCountdown() {
+  const btn = document.getElementById('alertDismissBtn');
+  if (!btn) return;
+  const data = state.activeAlert;
+  const severidad = data ? data.severidad : 'alta';
+  const wait = severidad === 'critica' ? 8 : 5;
+  btn.disabled = true;
+  let secs = wait;
+  btn.textContent = 'Descartar (' + secs + ')';
+  clearInterval(_dismissCountdown);
+  _dismissCountdown = setInterval(() => {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(_dismissCountdown);
+      btn.disabled = false;
+      btn.textContent = 'Descartar alerta';
+    } else {
+      btn.textContent = 'Descartar (' + secs + ')';
+    }
+  }, 1000);
+}
+
+function renderActiveAlertCard(data) {
+  const section = document.getElementById('activeAlertSection');
+  const card = document.getElementById('activeAlertCard');
+  const colors = severityColors(data.severidad);
+  let details = '';
+  if (data.magnitud) details += 'M ' + parseFloat(data.magnitud).toFixed(1) + ' · ';
+  if (data.lugar) details += data.lugar + ' · ';
+  if (data.profundidad) details += data.profundidad + ' km prof.';
+
+  card.innerHTML = `<div class="fb-alert-card" style="border-color:${colors.border};background:${colors.bg};">
+    <div class="fb-icon" style="background:${colors.iconBg};">
+      <svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};">
+        <path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/>
+      </svg>
+    </div>
+    <div class="fb-body">
+      <div class="fb-title" style="color:${colors.fg};">${esc(data.titulo)}</div>
+      <div class="fb-msg">${esc(data.cuerpo || '')}</div>
+      ${details ? `<div class="fb-msg" style="margin-top:4px;font-weight:700;">${esc(details)}</div>` : ''}
+      <div class="fb-footer">
+        <div class="fb-source">${esc(data.emitidaPor || 'AlertaCuba')}</div>
+        <div class="fb-time">${timeAgo(data.timestamp)}</div>
+      </div>
+    </div>
+  </div>`;
+  section.style.display = 'block';
+}
+
+function renderFbAlerts() {
+  const container = document.getElementById('fbAlertsHome');
+  if (!container) return;
+  if (state.fbAlerts.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>No hay alertas emitidas aún. El sistema está monitoreando Cuba.</p></div>';
+    return;
+  }
+  container.innerHTML = state.fbAlerts.map(a => {
+    const colors = severityColors(a.severidad);
+    let meta = [];
+    if (a.magnitud) meta.push('M' + parseFloat(a.magnitud).toFixed(1));
+    if (a.lugar) meta.push(a.lugar);
+    return `<div class="fb-alert-card" style="border-color:${colors.border};background:${colors.bg};">
+      <div class="fb-icon" style="background:${colors.iconBg};">
+        <svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};">
+          <path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/>
+        </svg>
+      </div>
+      <div class="fb-body">
+        <div class="fb-title">${esc(a.titulo)}</div>
+        <div class="fb-msg">${esc(a.cuerpo || '')}</div>
+        ${meta.length ? `<div class="fb-msg" style="margin-top:3px;font-weight:700;font-size:11.5px;">${esc(meta.join(' · '))}</div>` : ''}
+        <div class="fb-footer">
+          <div class="fb-source">${esc(a.emitidaPor || 'AlertaCuba')}</div>
+          <div class="fb-time">${timeAgo(a.timestamp)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function severityColors(severidad) {
+  const map = {
+    critica: {bg:'rgba(225,6,0,0.06)',border:'rgba(225,6,0,0.25)',iconBg:'rgba(225,6,0,0.12)',fg:'#e10600'},
+    alta:    {bg:'rgba(245,183,0,0.06)',border:'rgba(245,183,0,0.28)',iconBg:'rgba(245,183,0,0.13)',fg:'#b58500'},
+    media:   {bg:'rgba(0,87,184,0.05)',border:'rgba(0,87,184,0.2)',iconBg:'rgba(0,87,184,0.1)',fg:'#0057b8'},
+    info:    {bg:'rgba(0,0,0,0.02)',border:'rgba(0,0,0,0.08)',iconBg:'rgba(0,0,0,0.06)',fg:'#555'},
+  };
+  return map[severidad] || map.media;
+}
+
+/* ================================================================
+   ADMIN PANEL — emitir alertas a Firebase
+   PIN default: 1234  (cámbialo en Firebase Console → RTDB → /config/adminPin)
+   ================================================================ */
+let _adminUnlocked = false;
+
+function openAdmin() {
+  _adminUnlocked = false;
+  document.getElementById('adminPinGate').style.display = 'block';
+  document.getElementById('adminForm').style.display = 'none';
+  document.getElementById('adminPinInput').value = '';
+  document.getElementById('adminPanel').classList.add('show');
+  setTimeout(() => document.getElementById('adminPinInput').focus(), 300);
+}
+function closeAdmin() {
+  document.getElementById('adminPanel').classList.remove('show');
+  _adminUnlocked = false;
+}
+
+async function verifyAdminPin() {
+  const entered = document.getElementById('adminPinInput').value;
+  if (!entered) return;
+
+  // Leer PIN desde Firebase (nodo /config/adminPin), fallback a '1234'
+  let correctPin = '1234';
+  try {
+    const snap = await db.ref('config/adminPin').get();
+    if (snap.exists()) correctPin = String(snap.val());
+  } catch(e) { /* usar default */ }
+
+  if (entered === correctPin) {
+    _adminUnlocked = true;
+    document.getElementById('adminPinGate').style.display = 'none';
+    document.getElementById('adminForm').style.display = 'block';
+  } else {
+    document.getElementById('adminPinInput').value = '';
+    document.getElementById('adminPinInput').placeholder = 'PIN incorrecto — intenta de nuevo';
+    setTimeout(() => {
+      document.getElementById('adminPinInput').placeholder = '••••••';
+    }, 2000);
+  }
+}
+
+async function sendAlert() {
+  if (!_adminUnlocked) { closeAdmin(); return; }
+  const btn = document.getElementById('adminSendBtn');
+  const titulo = document.getElementById('adminTitulo').value.trim();
+  const cuerpo = document.getElementById('adminMensaje').value.trim();
+  const tipo = document.getElementById('adminTipo').value;
+  const severidad = document.getElementById('adminSeveridad').value;
+  const magnitud = document.getElementById('adminMagnitud').value;
+  const lugar = document.getElementById('adminLugar').value.trim();
+  const emitidaPor = document.getElementById('adminEmitidaPor').value.trim() || 'AlertaCuba';
+
+  if (!titulo) { alert('Escribe un título para la alerta.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const alertData = {
+    activa: true,
+    id: 'alerta-' + Date.now(),
+    tipo, titulo, cuerpo, severidad, lugar, emitidaPor,
+    timestamp: Date.now(),
+    ...(magnitud ? { magnitud: parseFloat(magnitud) } : {})
+  };
+
+  try {
+    // Escribir en /alertas/activa (todos los clientes la reciben al instante)
+    await db.ref('alertas/activa').set(alertData);
+
+    // También guardar en historial
+    const histRef = db.ref('alertas/historial/' + alertData.id);
+    await histRef.set(alertData);
+
+    closeAdmin();
+    // Limpiar form
+    document.getElementById('adminTitulo').value = '';
+    document.getElementById('adminMensaje').value = '';
+    document.getElementById('adminMagnitud').value = '';
+    document.getElementById('adminLugar').value = '';
+  } catch(err) {
+    console.error('[Admin] Error al enviar alerta:', err);
+    alert('Error al enviar: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚨 Emitir alerta ahora';
+  }
+}
+
+/* ================================================================
+   NOTIFICACIONES PUSH (FCM)
+   ================================================================ */
+async function requestPushPermission() {
+  if (!('Notification' in window)) {
+    alert('Este navegador no soporta notificaciones.');
+    return;
+  }
+
+  const btn = document.getElementById('notifToggleBtn');
+  const statusEl = document.getElementById('pushPermStatus');
+
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') {
+      statusEl.textContent = 'Notificaciones no permitidas — actívalas desde ajustes del navegador';
+      return;
+    }
+
+    statusEl.textContent = 'Notificaciones activadas ✓';
+    btn.classList.add('has-badge');
+
+    // Registrar token FCM si hay clave VAPID
+    if (messaging && VAPID_KEY) {
+      try {
+        const token = await messaging.getToken({ vapidKey: VAPID_KEY });
+        if (token) {
+          console.log('[FCM] Token registrado:', token.substring(0,20) + '...');
+          // Guardar token en Firebase para que el admin pueda enviar push
+          const tokenRef = db.ref('tokens/' + token.substring(0,20));
+          await tokenRef.set({ token, ts: Date.now() });
+        }
+      } catch(err) {
+        console.warn('[FCM] No se pudo obtener token:', err.message);
+        statusEl.textContent = 'Notificaciones en app activadas (configura VAPID para push completo)';
+      }
+    } else if (!VAPID_KEY) {
+      statusEl.textContent = 'Notificaciones en app activadas (falta VAPID key para push en segundo plano)';
+    }
+  } catch(err) {
+    console.error('[Push] Error:', err);
+  }
+}
+
+/* Notificaciones FCM en primer plano */
+function setupFCMForeground() {
+  if (!messaging) return;
+  messaging.onMessage(payload => {
+    console.log('[FCM] Mensaje en primer plano:', payload);
+    const title = payload.notification?.title || payload.data?.titulo || 'AlertaCuba';
+    const body  = payload.notification?.body  || payload.data?.cuerpo  || '';
+    showNotifBanner(title, body);
+    if (state.alarmOn) playSoundByKey(selectedSound);
+  });
+}
+
+function sendNativeNotification(data) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  new Notification('🚨 ' + (data.titulo || 'ALERTA — AlertaCuba'), {
+    body: data.cuerpo || data.lugar || '',
+    tag: 'alertacuba',
+    renotify: true,
+    requireInteraction: (data.severidad === 'critica' || data.severidad === 'alta'),
+    vibrate: [300,100,300,100,600],
+  });
+}
+
+/* ================================================================
+   BANNER IN-APP
+   ================================================================ */
+let _bannerTimeout = null;
+function showNotifBanner(title, sub) {
+  document.getElementById('nbTitle').textContent = title;
+  document.getElementById('nbSub').textContent = sub;
+  const banner = document.getElementById('notifBanner');
+  banner.classList.add('show');
+  clearTimeout(_bannerTimeout);
+  _bannerTimeout = setTimeout(() => banner.classList.remove('show'), 7000);
+}
+function closeNotifBanner() {
+  clearTimeout(_bannerTimeout);
+  document.getElementById('notifBanner').classList.remove('show');
+}
+
+/* ================================================================
+   HERO STATUS
+   ================================================================ */
+function updateHeroStatus(type, title, sub, since) {
+  const hero = document.getElementById('heroStatus');
+  const titleEl = document.getElementById('heroTitle');
+  const subEl = document.getElementById('heroSub');
+  const sinceEl = document.getElementById('heroSince');
+  hero.className = 'hero-status ' + type;
+  titleEl.textContent = title;
+  subEl.textContent = sub;
+  if (since) sinceEl.textContent = since;
+}
+
+/* ================================================================
+   NAVEGACIÓN
+   ================================================================ */
+function goToView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   const tab = document.querySelector('.tab-item[data-tab="' + name + '"]');
-  if(tab) tab.classList.add('active');
-  window.scrollTo({top:0, behavior:'instant'});
+  if (tab) tab.classList.add('active');
+  window.scrollTo({top:0,behavior:'instant'});
 }
 
-function setRange(range, btn){
+function setRange(range, btn) {
   state.range = range;
   document.querySelectorAll('.segment button[data-range]').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   loadQuakes();
 }
-
-function setMagFilter(mag, btn){
+function setMagFilter(mag, btn) {
   state.magFilter = mag;
   document.querySelectorAll('.segment button[data-mag]').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderFullFeed();
 }
 
-/* -------------------- UTILIDADES -------------------- */
-function haversine(lat1, lon1, lat2, lon2){
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+/* ================================================================
+   UTILIDADES
+   ================================================================ */
+function haversine(lat1,lon1,lat2,lon2) {
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function magColor(mag) {
+  if(mag>=6) return{badgeBg:'rgba(225,6,0,0.15)',badgeFg:'#ff7a5c',numBg:'#e10600',bannerA:'#5c120f',bannerB:'#1f0503'};
+  if(mag>=4.5) return{badgeBg:'rgba(245,183,0,0.15)',badgeFg:'#b58500',numBg:'#f5b700',bannerA:'#3a2c08',bannerB:'#1c1503'};
+  if(mag>=3) return{badgeBg:'rgba(0,87,184,0.15)',badgeFg:'#3d8bc7',numBg:'#0057b8',bannerA:'#123a5c',bannerB:'#04141f'};
+  return{badgeBg:'rgba(150,150,150,0.12)',badgeFg:'#888',numBg:'#888',bannerA:'#1a1a1a',bannerB:'#0a0a0a'};
+}
+function timeAgo(ts) {
+  if (!ts) return '—';
+  const diff = Date.now()-ts,min=Math.floor(diff/60000);
+  if(min<1) return 'ahora';if(min<60) return min+' min';
+  const h=Math.floor(min/60);if(h<24) return h+' h';
+  return Math.floor(h/24)+' d';
+}
+function fmtDate(ts) {
+  return new Date(ts).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function magColor(mag){
-  if(mag >= 6) return {light:'#5c120f', dark:'#1f0503', glow:'rgba(225,6,0,0.7)', badgeBg:'rgba(225,6,0,0.17)', badgeFg:'#ff7a5c', numBg:'#e10600'};
-  if(mag >= 4.5) return {light:'#3a2c08', dark:'#1c1503', glow:'rgba(245,183,0,0.58)', badgeBg:'rgba(245,183,0,0.17)', badgeFg:'#f5b700', numBg:'#f5b700'};
-  if(mag >= 3) return {light:'#123a5c', dark:'#04141f', glow:'rgba(0,87,184,0.45)', badgeBg:'rgba(0,87,184,0.17)', badgeFg:'#3d8bc7', numBg:'#0057b8'};
-  return {light:'#1a1a1a', dark:'#0a0a0a', glow:'rgba(150,150,150,0.4)', badgeBg:'rgba(150,150,150,0.15)', badgeFg:'#a0a0a0', numBg:'#808080'};
-}
-
-function timeAgo(ts){
-  const diff = Date.now() - ts;
-  const min = Math.floor(diff/60000);
-  if(min < 1) return 'ahora';
-  if(min < 60) return min + ' min';
-  const h = Math.floor(min/60);
-  if(h < 24) return h + ' h';
-  const d = Math.floor(h/24);
-  return d + ' d';
-}
-
-function fmtDate(ts){
-  const d = new Date(ts);
-  return d.toLocaleString('es-ES', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
-}
-
-/* -------------------- CARGA DE SISMOS (USGS) -------------------- */
-async function loadQuakes(){
-  try{
-    setConnStatus('loading');
+/* ================================================================
+   USGS — Carga de sismos
+   ================================================================ */
+async function loadQuakes() {
+  try {
     const res = await fetch(USGS_FEEDS[state.range]);
-    if(!res.ok) throw new Error('USGS respondió ' + res.status);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     state.quakes = data.features
       .map(f => ({
@@ -728,10 +1507,8 @@ async function loadQuakes(){
         mag: f.properties.mag,
         place: f.properties.place || 'Ubicación desconocida',
         time: f.properties.time,
-        updated: f.properties.updated,
         tsunami: f.properties.tsunami,
         sig: f.properties.sig,
-        alert: f.properties.alert,
         url: f.properties.url,
         lon: f.geometry.coordinates[0],
         lat: f.geometry.coordinates[1],
@@ -739,33 +1516,47 @@ async function loadQuakes(){
       }))
       .filter(q => typeof q.mag === 'number')
       .filter(q => /cuba/i.test(q.place))
-      .sort((a,b) => b.time - a.time);
+      .sort((a,b) => b.time-a.time);
 
-    state.quakes.forEach(q => q.distance = haversine(state.userLat, state.userLon, q.lat, q.lon));
+    state.quakes.forEach(q => q.distance = haversine(state.userLat,state.userLon,q.lat,q.lon));
 
     renderAll();
-    setConnStatus('ok');
-    checkForAlarm();
-  }catch(err){
-    console.error('Error cargando USGS:', err);
-    setConnStatus('error');
+    updateLastRefresh();
+    checkUSGSAlarm();
+  } catch(err) {
+    console.error('[USGS]', err);
   }
 }
 
-function setConnStatus(mode){
-  /* chip removed — status handled silently */
+function updateLastRefresh() {
+  const el = document.getElementById('heroSince');
+  if(el && !state.activeAlert) el.textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
 }
 
-/* -------------------- RENDER GENERAL -------------------- */
-function renderAll(){
+/* ================================================================
+   RENDER
+   ================================================================ */
+function renderAll() {
   renderNearest();
   renderHomeFeed();
   renderFullFeed();
+  if (!state.activeAlert) {
+    if (state.quakes.length === 0) {
+      updateHeroStatus('ok','Sin actividad sísmica en Cuba','Sistema activo — ningún sismo en el período seleccionado','');
+    } else {
+      const top = state.quakes[0];
+      const msg = top.mag >= 4.5
+        ? 'Sismo de M' + top.mag.toFixed(1) + ' registrado'
+        : 'Actividad menor registrada — sin riesgo significativo';
+      updateHeroStatus(top.mag>=4.5?'warn':'ok', msg, top.place,'');
+    }
+  }
 }
 
-
-function renderNearest(){
-  if(!currentNearest){ document.getElementById('nearestCard').style.display = 'none'; return; }
+function renderNearest() {
+  if (!state.quakes.length) { document.getElementById('nearestCard').style.display='none'; return; }
+  const sorted = [...state.quakes].sort((a,b) => a.distance-b.distance);
+  currentNearest = sorted[0];
   const q = currentNearest;
   const c = magColor(q.mag);
   document.getElementById('nearestCard').style.display = 'flex';
@@ -779,40 +1570,32 @@ function renderNearest(){
   document.getElementById('nearestTime').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>' + timeAgo(q.time);
 }
 
-/* -------------------- FEEDS -------------------- */
-function renderHomeFeed(){
+function renderHomeFeed() {
   const list = document.getElementById('homeFeedList');
-  const top = [...state.quakes].sort((a,b) => b.time - a.time).slice(0,6);
-  renderFeedInto(list, top);
+  renderFeedInto(list, state.quakes.slice(0,6));
 }
-
-function renderFullFeed(){
+function renderFullFeed() {
   const list = document.getElementById('fullFeedList');
-  let filtered = state.quakes.filter(q => q.mag >= state.magFilter);
-  filtered = filtered.sort((a,b) => b.time - a.time);
-  renderFeedInto(list, filtered, true);
+  renderFeedInto(list, state.quakes.filter(q=>q.mag>=state.magFilter), true);
 }
-
-function renderFeedInto(container, quakes, showEmpty){
+function renderFeedInto(container, quakes, showEmpty) {
   container.innerHTML = '';
-  if(quakes.length === 0 && showEmpty){
-    container.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><p>No hay eventos que coincidan con este filtro.</p></div>';
+  if (!quakes.length && showEmpty) {
+    container.innerHTML='<div class="empty-state"><p>No hay eventos que coincidan con este filtro.</p></div>';
     return;
   }
-  quakes.forEach((q, idx) => {
+  quakes.forEach((q,idx) => {
     const c = magColor(q.mag);
     const row = document.createElement('div');
     row.className = 'feed-row';
     row.onclick = () => openDetail(q);
     row.innerHTML =
-      '<div class="feed-num" style="background:' + c.numBg + ';">' + q.mag.toFixed(1) + '</div>' +
-      '<div class="feed-body">' +
-        '<div class="feed-title">' + q.place + '</div>' +
-        '<div class="feed-meta">' + q.depth.toFixed(0) + ' km prof. · ' + Math.round(q.distance).toLocaleString('es-ES') + ' km de ti</div>' +
-      '</div>' +
-      '<div class="feed-time">' + timeAgo(q.time) + '</div>';
+      '<div class="feed-num" style="background:'+c.numBg+';">'+q.mag.toFixed(1)+'</div>'+
+      '<div class="feed-body"><div class="feed-title">'+esc(q.place)+'</div>'+
+      '<div class="feed-meta">'+q.depth.toFixed(0)+' km prof. · '+Math.round(q.distance).toLocaleString('es-ES')+' km</div></div>'+
+      '<div class="feed-time">'+timeAgo(q.time)+'</div>';
     container.appendChild(row);
-    if(idx < quakes.length - 1){
+    if (idx < quakes.length-1) {
       const div = document.createElement('div');
       div.className = 'feed-divider';
       container.appendChild(div);
@@ -820,376 +1603,231 @@ function renderFeedInto(container, quakes, showEmpty){
   });
 }
 
-/* -------------------- DETALLE -------------------- */
-function openDetail(q){
-  if(!q) return;
-  state.currentDetail = q;
+/* ================================================================
+   DETALLE
+   ================================================================ */
+function openDetail(q) {
+  if (!q) return;
   const c = magColor(q.mag);
   const banner = document.getElementById('detailMagBanner');
-  banner.style.background = 'linear-gradient(135deg, ' + c.light + ', ' + c.dark + ')';
+  banner.style.background = 'linear-gradient(135deg,'+c.bannerA+','+c.bannerB+')';
   document.getElementById('detailMag').textContent = q.mag.toFixed(1);
-  document.getElementById('detailMagType').textContent = q.mag >= 6 ? 'Fuerte' : q.mag >= 4.5 ? 'Moderado' : q.mag >= 3 ? 'Leve' : 'Menor';
+  document.getElementById('detailMagType').textContent = q.mag>=6?'Fuerte':q.mag>=4.5?'Moderado':q.mag>=3?'Leve':'Menor';
   document.getElementById('detailPlace').textContent = q.place;
   document.getElementById('detailDate').textContent = fmtDate(q.time);
-  document.getElementById('detailDepth').textContent = q.depth.toFixed(0) + ' km';
-  document.getElementById('detailDistance').textContent = Math.round(q.distance).toLocaleString('es-ES') + ' km';
-  document.getElementById('detailTsunami').textContent = q.tsunami === 1 ? 'Posible' : 'Ninguno';
-  document.getElementById('detailSig').textContent = q.sig || '—';
-  currentDetailUrl = q.url || '#';
+  document.getElementById('detailDepth').textContent = q.depth.toFixed(0)+' km';
+  document.getElementById('detailDistance').textContent = Math.round(q.distance).toLocaleString('es-ES')+' km';
+  document.getElementById('detailTsunami').textContent = q.tsunami===1?'Posible':'Ninguno';
+  document.getElementById('detailSig').textContent = q.sig||'—';
+  currentDetailUrl = q.url||'#';
   goToView('detail');
 }
 
-
-/* -------------------- CLIMA (Open-Meteo) -------------------- */
-async function loadWeather(){
-  try{
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + state.userLat + '&longitude=' + state.userLon +
-      '&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,weather_code&timezone=auto';
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('Open-Meteo respondió ' + res.status);
-    const data = await res.json();
-    const cur = data.current;
-
-    const grid = document.getElementById('weatherGrid');
-    if(!grid) return;
-    grid.innerHTML =
-      metricHtml('<path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>', Math.round(cur.temperature_2m) + '°C', 'Temp.') +
-      metricHtml('<path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/>', Math.round(cur.pressure_msl) + ' hPa', 'Presión') +
-      metricHtml('<path d="M12 2s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>', Math.round(cur.relative_humidity_2m) + '%', 'Humedad') +
-      metricHtml('<path d="M3 8h9a3 3 0 1 0-3-3M3 16h13a3 3 0 1 1-3 3M3 12h16a3 3 0 1 0-3-3"/>', Math.round(cur.wind_speed_10m) + ' km/h', 'Viento');
-
-    const risk = document.getElementById('pressureRisk');
-    if(cur.pressure_msl < 1005){
-      risk.textContent = 'Presión baja';
-      risk.style.background = 'rgba(245,183,0,0.15)'; risk.style.color = 'var(--warning)';
-    }else if(cur.pressure_msl > 1025){
-      risk.textContent = 'Presión alta';
-      risk.style.background = 'rgba(206,17,38,0.12)'; risk.style.color = 'var(--primary)';
-    }else{
-      risk.textContent = 'Presión estable';
-      risk.style.background = 'rgba(206,17,38,0.08)'; risk.style.color = 'var(--primary-light)';
-    }
-
-    reverseGeocode();
-  }catch(err){
-    console.error('Error cargando Open-Meteo:', err);
-    document.getElementById('weatherGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1; padding:14px;"><p>No se pudo obtener el clima ahora mismo.</p></div>';
+/* ================================================================
+   ALARMA USGS (auto-detect sismos)
+   ================================================================ */
+function checkUSGSAlarm() {
+  if (!state.alarmOn) return;
+  const relevant = state.quakes.filter(q=>q.mag>=state.magThreshold).sort((a,b)=>b.time-a.time)[0];
+  if (relevant && relevant.id !== state.lastAlertedId) {
+    state.lastAlertedId = relevant.id;
+    // Sintetizar como alerta Firebase
+    const synth = {
+      activa: true,
+      id: relevant.id,
+      tipo: 'sismo',
+      titulo: 'Sismo M' + relevant.mag.toFixed(1) + ' · ' + relevant.place,
+      cuerpo: relevant.depth.toFixed(0)+' km de profundidad · '+Math.round(relevant.distance).toLocaleString('es-ES')+' km de tu ubicación',
+      magnitud: relevant.mag,
+      lugar: relevant.place,
+      severidad: relevant.mag>=6?'critica':relevant.mag>=4.5?'alta':'media',
+      timestamp: relevant.time,
+      emitidaPor: 'USGS (automático)'
+    };
+    state.activeAlert = synth;
+    onNewActiveAlert(synth);
   }
 }
 
-function metricHtml(pathD, val, lbl){
-  return '<div class="weather-metric"><svg class="icon" viewBox="0 0 24 24">' + pathD + '</svg><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
-}
-
-async function reverseGeocode(){
-  try{
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + state.userLat + '&longitude=' + state.userLon + '&current=temperature_2m&timezone=auto';
-    const res = await fetch(url);
-    const data = await res.json();
-    document.getElementById('weatherLoc').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>' + (data.timezone ? data.timezone.split('/').pop().replace('_',' ') : 'Tu ubicación');
-  }catch(e){
-    document.getElementById('weatherLoc').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>Tu ubicación';
-  }
-}
-
-/* -------------------- GEOLOCALIZACIÓN -------------------- */
-function toggleSwitch(el, key){
+/* ================================================================
+   GEOLOCALIZACIÓN & SWITCHES
+   ================================================================ */
+function toggleSwitch(el, key) {
   const isOn = el.classList.toggle('on');
-  state[key + 'On'] = isOn;
-  if(key === 'geo'){
-    if(isOn){ requestGeolocation(); } else { state.hasRealGeo = false; }
-  }
+  state[key+'On'] = isOn;
+  if (key==='geo') { isOn ? requestGeolocation() : (state.hasRealGeo=false); }
+}
+function requestGeolocation() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    state.userLat = pos.coords.latitude;
+    state.userLon = pos.coords.longitude;
+    state.hasRealGeo = true;
+    state.quakes.forEach(q => q.distance = haversine(state.userLat,state.userLon,q.lat,q.lon));
+    renderAll();
+  }, err => console.warn('[Geo]',err.message), {enableHighAccuracy:false,timeout:8000});
+}
+function updateMagThresh(val) {
+  state.magThreshold = parseFloat(val);
+  document.getElementById('magThreshVal').textContent = 'M '+parseFloat(val).toFixed(1);
 }
 
-function requestGeolocation(){
-  if(!navigator.geolocation){ return; }
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      state.userLat = pos.coords.latitude;
-      state.userLon = pos.coords.longitude;
-      state.hasRealGeo = true;
-      loadWeather();
-      state.quakes.forEach(q => q.distance = haversine(state.userLat, state.userLon, q.lat, q.lon));
-      renderAll();
-      if(globeReady) positionUserMarker();
-    },
-    err => { console.warn('Geolocalización no disponible:', err.message); },
-    {enableHighAccuracy:false, timeout:8000}
-  );
-}
-
-/* ============================================================
-   SISTEMA DE ALERTAS SONORAS — Web Audio API, 3 sonidos
-   Sintetizados 100% en el navegador sin archivos externos.
-   ============================================================ */
+/* ================================================================
+   AUDIO — Web Audio API (sintetizado, sin archivos)
+   ================================================================ */
 let audioCtx = null;
 let selectedSound = 'seismic';
 
-function getAudioCtx(){
-  if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-  if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if (audioCtx.state==='suspended') audioCtx.resume();
   return audioCtx;
 }
-
-function selectSound(key, el){
+function selectSound(key, el) {
   selectedSound = key;
   document.querySelectorAll('.sound-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
 }
-
-function previewSound(key){
-  playSoundByKey(key);
-}
-
-function playSoundByKey(key){
-  switch(key){
-    case 'eas':      return playEASSiren();
-    case 'seismic':    return playSeismicAlert();
-    case 'civildef':   return playCivilDefense();
-    default:           return playSeismicAlert();
+function previewSound(key) { playSoundByKey(key); }
+function playSoundByKey(key) {
+  switch(key) {
+    case 'eas': return playEASSiren();
+    case 'seismic': return playSeismicAlert();
+    case 'civildef': return playCivilDefense();
+    default: return playSeismicAlert();
   }
 }
 
-/* ---- EAS SIREN — sirena agresiva de dos tonos sawtooth ---- */
-function playEASSiren(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 3.0;
-
-  const master = ctx.createGain();
-  master.gain.value = 0.0001;
-  master.connect(ctx.destination);
-  master.gain.exponentialRampToValueAtTime(0.38, now + 0.03);
-
-  const osc = ctx.createOscillator();
-  osc.type = 'sawtooth';
-  const filt = ctx.createBiquadFilter();
-  filt.type = 'bandpass'; filt.frequency.value = 1200; filt.Q.value = 0.8;
-  const g = ctx.createGain(); g.gain.value = 0.6;
-  osc.connect(filt).connect(g).connect(master);
-
-  /* Barrido ascendente-descendente tipo sirena real */
-  const step = 0.28;
-  for(let i = 0; i < duration / (step * 2); i++){
-    const t = now + i * step * 2;
-    osc.frequency.setValueAtTime(660, t);
-    osc.frequency.linearRampToValueAtTime(1320, t + step);
-    osc.frequency.linearRampToValueAtTime(660, t + step * 2);
+function playEASSiren() {
+  const ctx=getAudioCtx(),now=ctx.currentTime,dur=3.0;
+  const master=ctx.createGain();
+  master.gain.value=0.0001;master.connect(ctx.destination);
+  master.gain.exponentialRampToValueAtTime(0.38,now+0.03);
+  const osc=ctx.createOscillator();osc.type='sawtooth';
+  const filt=ctx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=1200;filt.Q.value=0.8;
+  const g=ctx.createGain();g.gain.value=0.6;
+  osc.connect(filt);filt.connect(g);g.connect(master);
+  const step=0.28;
+  for(let i=0;i<dur/(step*2);i++){
+    const t=now+i*step*2;
+    osc.frequency.setValueAtTime(660,t);
+    osc.frequency.linearRampToValueAtTime(1320,t+step);
+    osc.frequency.linearRampToValueAtTime(660,t+step*2);
   }
-
-  master.gain.setValueAtTime(0.38, now + duration - 0.2);
-  master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-  osc.start(now); osc.stop(now + duration);
-  return duration;
+  master.gain.setValueAtTime(0.38,now+dur-0.2);
+  master.gain.exponentialRampToValueAtTime(0.0001,now+dur);
+  osc.start(now);osc.stop(now+dur);return dur;
 }
 
-/* ---- ALERTA SÍSMICA — onda grave creciente con pulsos rítmicos ---- */
-function playSeismicAlert(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 4.0;
-
-  const master = ctx.createGain();
-  master.gain.setValueAtTime(0.0001, now);
-  master.gain.linearRampToValueAtTime(0.42, now + 0.05);
-  master.gain.setValueAtTime(0.42, now + duration - 0.2);
-  master.gain.linearRampToValueAtTime(0.0001, now + duration);
+function playSeismicAlert() {
+  const ctx=getAudioCtx(),now=ctx.currentTime,dur=4.0;
+  const master=ctx.createGain();
+  master.gain.setValueAtTime(0.0001,now);
+  master.gain.linearRampToValueAtTime(0.42,now+0.05);
+  master.gain.setValueAtTime(0.42,now+dur-0.2);
+  master.gain.linearRampToValueAtTime(0.0001,now+dur);
   master.connect(ctx.destination);
-
-  /* Rumble grave de fondo (simula vibración del suelo) */
-  const rumble = ctx.createOscillator();
-  rumble.type = 'sine';
-  rumble.frequency.setValueAtTime(38, now);
-  rumble.frequency.linearRampToValueAtTime(55, now + duration);
-  const rg = ctx.createGain(); rg.gain.value = 0.6;
-  rumble.connect(rg).connect(master);
-  rumble.start(now); rumble.stop(now + duration);
-
-  /* Pulsos agudos crecientes encima del rumble */
-  const intervals = [0.0, 0.5, 0.9, 1.2, 1.45, 1.65, 1.82, 1.96, 2.08, 2.18];
-  intervals.forEach((offset, i) => {
-    const t = now + offset;
-    const osc = ctx.createOscillator();
-    osc.type = 'square';
-    osc.frequency.value = 440 + i * 55;
-    const env = ctx.createGain();
-    const beepDur = 0.07 + i * 0.008;
-    env.gain.setValueAtTime(0.0001, t);
-    env.gain.linearRampToValueAtTime(0.35 + i * 0.04, t + 0.008);
-    env.gain.setValueAtTime(0.35 + i * 0.04, t + beepDur - 0.01);
-    env.gain.linearRampToValueAtTime(0.0001, t + beepDur);
-    osc.connect(env).connect(master);
-    osc.start(t); osc.stop(t + beepDur + 0.02);
+  const rumble=ctx.createOscillator();rumble.type='sine';
+  rumble.frequency.setValueAtTime(38,now);
+  rumble.frequency.linearRampToValueAtTime(55,now+dur);
+  const rg=ctx.createGain();rg.gain.value=0.6;
+  rumble.connect(rg);rg.connect(master);
+  rumble.start(now);rumble.stop(now+dur);
+  [0,0.5,0.9,1.2,1.45,1.65,1.82,1.96,2.08,2.18].forEach((offset,i) => {
+    const t=now+offset,osc=ctx.createOscillator();
+    osc.type='square';osc.frequency.value=440+i*55;
+    const env=ctx.createGain();const beepDur=0.07+i*0.008;
+    env.gain.setValueAtTime(0.0001,t);
+    env.gain.linearRampToValueAtTime(0.35+i*0.04,t+0.008);
+    env.gain.setValueAtTime(0.35+i*0.04,t+beepDur-0.01);
+    env.gain.linearRampToValueAtTime(0.0001,t+beepDur);
+    osc.connect(env);env.connect(master);
+    osc.start(t);osc.stop(t+beepDur+0.02);
   });
-
-  return duration;
+  return dur;
 }
 
-/* ---- DEFENSA CIVIL — sirena wail clásica subida/bajada lenta ---- */
-function playCivilDefense(){
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const duration = 6.0;
-
-  const master = ctx.createGain();
-  master.gain.setValueAtTime(0.0001, now);
-  master.gain.linearRampToValueAtTime(0.45, now + 0.3);
-  master.gain.setValueAtTime(0.45, now + duration - 0.4);
-  master.gain.linearRampToValueAtTime(0.0001, now + duration);
+function playCivilDefense() {
+  const ctx=getAudioCtx(),now=ctx.currentTime,dur=6.0;
+  const master=ctx.createGain();
+  master.gain.setValueAtTime(0.0001,now);
+  master.gain.linearRampToValueAtTime(0.45,now+0.3);
+  master.gain.setValueAtTime(0.45,now+dur-0.4);
+  master.gain.linearRampToValueAtTime(0.0001,now+dur);
   master.connect(ctx.destination);
-
-  const osc = ctx.createOscillator();
-  osc.type = 'sawtooth';
-  const filt = ctx.createBiquadFilter();
-  filt.type = 'lowpass'; filt.frequency.value = 2400;
-  const g = ctx.createGain(); g.gain.value = 0.55;
-  osc.connect(filt).connect(g).connect(master);
-
-  /* Ciclos largos de 3 s: subida 2 s, bajada 1 s */
-  const cycleLen = 3.0;
-  const cycles = Math.ceil(duration / cycleLen);
-  for(let i = 0; i < cycles; i++){
-    const t = now + i * cycleLen;
-    osc.frequency.setValueAtTime(220, t);
-    osc.frequency.exponentialRampToValueAtTime(900, t + cycleLen * 0.67);
-    osc.frequency.exponentialRampToValueAtTime(220, t + cycleLen);
+  const osc=ctx.createOscillator();osc.type='sawtooth';
+  const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=2400;
+  const g=ctx.createGain();g.gain.value=0.55;
+  osc.connect(filt);filt.connect(g);g.connect(master);
+  const cycleLen=3.0;
+  for(let i=0;i<Math.ceil(dur/cycleLen);i++){
+    const t=now+i*cycleLen;
+    osc.frequency.setValueAtTime(220,t);
+    osc.frequency.exponentialRampToValueAtTime(900,t+cycleLen*0.67);
+    osc.frequency.exponentialRampToValueAtTime(220,t+cycleLen);
   }
-
-  osc.start(now); osc.stop(now + duration);
-  return duration;
+  osc.start(now);osc.stop(now+dur);return dur;
 }
 
-function testAlarm(){
-  const btn = document.getElementById('testAlarmBtn');
-  const dur = playSoundByKey(selectedSound);
-  if(state.vibrateOn && navigator.vibrate){ navigator.vibrate([250,90,250,90,250,90,600]); }
+function testAlarm() {
+  const btn=document.getElementById('testAlarmBtn');
+  const dur=playSoundByKey(selectedSound);
+  if(state.vibrateOn&&navigator.vibrate) navigator.vibrate([250,90,250,90,250,90,600]);
   btn.classList.add('playing');
   flashScreen();
-  setTimeout(() => btn.classList.remove('playing'), dur*1000);
+  setTimeout(()=>btn.classList.remove('playing'),dur*1000);
 }
 
-function flashScreen(){
-  const el = document.getElementById('screenFlash');
+function flashScreen() {
+  const el=document.getElementById('screenFlash');
   el.classList.remove('active');
   void el.offsetWidth;
   el.classList.add('active');
-  setTimeout(() => el.classList.remove('active'), 2600);
+  setTimeout(()=>el.classList.remove('active'),2600);
 }
 
-function updateMagThresh(val){
-  state.magThreshold = parseFloat(val);
-  document.getElementById('magThreshVal').textContent = 'M ' + parseFloat(val).toFixed(1);
-}
-
-function checkForAlarm(){
-  if(!state.monitoring || !state.alarmOn) return;
-  const relevant = state.quakes.filter(q => q.mag >= state.magThreshold).sort((a,b) => b.time - a.time)[0];
-  if(relevant && relevant.id !== state.lastAlertedId){
-    state.lastAlertedId = relevant.id;
-    triggerAlert(relevant);
-  }
-}
-
-function triggerAlert(q){
-  const dur = playSoundByKey(selectedSound);
-  if(state.vibrateOn && navigator.vibrate){ navigator.vibrate([300,100,300,100,300,100,700]); }
-  flashScreen();
-  document.getElementById('toastMag').textContent = q.mag.toFixed(1);
-  document.getElementById('toastType').textContent = q.mag >= 6 ? 'Sismo mayor' : q.mag >= 4.5 ? 'Sismo moderado' : 'Sismo leve';
-  document.getElementById('toastTitle').textContent = q.place;
-  document.getElementById('toastSub').innerHTML = 'A ' + Math.round(q.distance).toLocaleString('es-ES') + ' km de ti&nbsp;&nbsp;·&nbsp;&nbsp;' + q.depth.toFixed(0) + ' km de profundidad';
-  const toast = document.getElementById('toastAlert');
-  toast.classList.add('show');
-  if(q.mag >= 6){ toast.classList.add('blinking'); } else { toast.classList.remove('blinking'); }
-  startDismissCountdown();
-  
-  /* Notificación — vía Service Worker si disponible (funciona en segundo plano) */
-  if('serviceWorker' in navigator && navigator.serviceWorker.controller){
-    navigator.serviceWorker.controller.postMessage({
-      type: 'QUAKE_ALERT',
-      mag: q.mag,
-      place: q.place,
-      distance: q.distance,
-      depth: q.depth,
-      urgent: q.mag >= 6
-    });
-  } else if('Notification' in window && Notification.permission === 'granted'){
-    new Notification('ALERTA SISMICA — M ' + q.mag.toFixed(1), {
-      body: q.place + '\nA ' + Math.round(q.distance).toLocaleString('es-ES') + ' km · ' + q.depth.toFixed(0) + ' km de profundidad',
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 11-14h-8l1-6z" fill="%23ce1126"/></svg>',
-      tag: 'seismic-alert',
-      renotify: true,
-      requireInteraction: q.mag >= 6
-    });
-  }
-  
-}
-
-let _dismissCountdown = null;
-function startDismissCountdown(){
-  const btn = document.getElementById('dismissBtn');
-  if(!btn) return;
-  btn.disabled = true;
-  let secs = 5;
-  btn.textContent = 'Descartar (' + secs + ')';
-  clearInterval(_dismissCountdown);
-  _dismissCountdown = setInterval(() => {
-    secs--;
-    if(secs <= 0){
-      clearInterval(_dismissCountdown);
-      btn.disabled = false;
-      btn.textContent = 'Descartar';
-    } else {
-      btn.textContent = 'Descartar (' + secs + ')';
-    }
-  }, 1000);
-}
-
-function dismissToast(){
-  clearInterval(_dismissCountdown);
-  const toast = document.getElementById('toastAlert');
-  toast.classList.remove('show');
-  toast.classList.remove('blinking');
-  const btn = document.getElementById('dismissBtn');
-  if(btn){ btn.disabled = false; btn.textContent = 'Descartar'; }
-}
-
-/* -------------------- POLLING -------------------- */
+/* ================================================================
+   POLLING & ARRANQUE
+   ================================================================ */
 let pollInterval = null;
-function startPolling(){
+function startPolling() {
   if(pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(() => { loadQuakes(); }, 60000);
-}
-function stopPolling(){
-  if(pollInterval){ clearInterval(pollInterval); pollInterval = null; }
-}
-function refreshAll(){
-  loadQuakes();
-  loadWeather();
+  pollInterval = setInterval(loadQuakes, 60000);
 }
 
+async function init() {
+  // Iniciar audio con primer clic
+  document.body.addEventListener('click', () => getAudioCtx(), {once:true});
 
-/* -------------------- ARRANQUE -------------------- */
-function init(){
-  loadQuakes();
-  loadWeather();
+  // Firebase
+  initFirebase();
+
+  // USGS
+  await loadQuakes();
   startPolling();
-  setInterval(loadWeather, 5 * 60000);
 
-  /* Registrar Service Worker para notificaciones en segundo plano */
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      console.log('[SW] Registrado:', reg.scope);
-    }).catch(err => {
-      console.warn('[SW] No se pudo registrar:', err);
-    });
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    try {
+      await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('[SW] Firebase Messaging SW registrado');
+    } catch(err) {
+      console.warn('[SW]', err.message);
+    }
   }
 
-  if('Notification' in window && Notification.permission === 'default'){
-    Notification.requestPermission();
-  }
+  // FCM foreground handler
+  setupFCMForeground();
 
-  document.body.addEventListener('click', () => { getAudioCtx(); }, {once:true});
+  // Comprobar permisos actuales
+  if ('Notification' in window) {
+    const statusEl = document.getElementById('pushPermStatus');
+    if (Notification.permission === 'granted') {
+      statusEl.textContent = 'Notificaciones activadas ✓';
+    } else if (Notification.permission === 'denied') {
+      statusEl.textContent = 'Notificaciones bloqueadas — actívalas desde ajustes';
+    }
+  }
 }
 
 init();

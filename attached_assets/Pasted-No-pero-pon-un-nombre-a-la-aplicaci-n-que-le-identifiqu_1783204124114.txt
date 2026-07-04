@@ -1,0 +1,20 @@
+No, pero pon un nombre a la aplicación que le identifique que no aparezca, inteligencia artificial, entiende investiguen Internet un nombre único para la aplicación y que la alerta sea mucho mejor porque la veo muy fea, además porque hay como un icono ahí que parece un triángulo que eso no me gusta para nada tampoco ashhh Además las alertas no llegan automáticamente. Las alertas llegan cuando alguien las emite, o sea así como el gobierno que emite las alertas cuando algo pasa es eso mismo entiendes así que debes vincular mi Fire Base por qué la plataforma funcionará tanto para terremoto como sismo o cosas mundiales que estén pasando en Cuba. Sabes cualquiera alerta llegará al usuario automáticamente y también le llegará en sus notificaciones del teléfono entiendes así que haz la plataforma más intuitiva o sea más buena también necesito que busques una manera para que llegue así como en las notificaciones de que bloquea la pantalla y lo pone así en medio de la pantalla para que todo el mundo lo sepa bueno asimismo igual pero en Cuba por ahora sólo haz esto luego te voy a dar otra instrucción para que la hagas mira mi firebase aquí  // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyC9v2qp6zGtmvsFiOknlmTHnN6zZY1RLcI",
+  authDomain: "ggggg-f2508.firebaseapp.com",
+  databaseURL: "https://ggggg-f2508-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ggggg-f2508",
+  storageBucket: "ggggg-f2508.firebasestorage.app",
+  messagingSenderId: "120837533638",
+  appId: "1:120837533638:web:6720ebd1367f3acf9f4cc7",
+  measurementId: "G-E2JX3ZGG5K"
+};
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);

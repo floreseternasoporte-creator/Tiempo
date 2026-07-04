@@ -1,6 +1,30 @@
-modules = ["web"]
+modules = ["web", "python-base-3.13"]
 [agent]
 expertMode = true
 
 [nix]
 channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "AlertaCuba"
+
+[[workflows.workflow]]
+name = "AlertaCuba"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 server.py"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
