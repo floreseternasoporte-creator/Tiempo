@@ -1,2 +1,0 @@
-- [AlertaCuba auth model](alertacuba-auth.md) — phone OTP → links internal email (normalizePhoneEmail shared fn); login accepts phone or email + password
-- [AlertaCuba admin access](alertacuba-admin.md) — admin panel gated by ADMIN_EMAILS list; client-side only (cosmetic), real enforcement needs Firebase Security Rules
