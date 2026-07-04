@@ -1144,7 +1144,7 @@ function generateMathCaptcha() {
     type: 'math',
     question: `¿Cuál es el resultado de ${a} ${op} ${b}?`,
     answer: result.toString(),
-    display: `<div class="captcha-puzzle"><div class="captcha-question">¿Cuál es el resultado?</div><div class="captcha-math">${a} ${op} ${b} = ?</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric"></div></div>`
+    display: `<div class="captcha-puzzle"><div class="captcha-question">¿Cuál es el resultado?</div><div class="captcha-math">${a} ${op} ${b} = ?</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric" oninput="syncCaptchaButton()" onkeydown="if(event.key==='Enter') verifyCaptcha()"></div></div>`
   };
   return _currentCaptcha.display;
 }
@@ -1180,25 +1180,39 @@ function generateSequenceCaptcha() {
     type: 'sequence',
     question: s.q,
     answer: s.next.toString(),
-    display: `<div class="captcha-puzzle"><div class="captcha-question">${s.seq.join(', ')}, ?</div><div class="captcha-question" style="font-size:13px;color:var(--text-2);margin-top:-8px;">${s.q}</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric"></div></div>`
+    display: `<div class="captcha-puzzle"><div class="captcha-question">${s.seq.join(', ')}, ?</div><div class="captcha-question" style="font-size:13px;color:var(--text-2);margin-top:-8px;">${s.q}</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric" oninput="syncCaptchaButton()" onkeydown="if(event.key==='Enter') verifyCaptcha()"></div></div>`
   };
   return _currentCaptcha.display;
+}
+
+function syncCaptchaButton() {
+  const btn = document.getElementById('captchaBtn');
+  if (!btn || !_currentCaptcha) return;
+  if (_currentCaptcha.type === 'select') {
+    btn.disabled = !document.querySelector('.captcha-option.selected');
+    return;
+  }
+  const input = document.getElementById('captchaAnswer');
+  btn.disabled = !(input && input.value.trim());
 }
 
 function selectCaptchaOption(el, value) {
   document.querySelectorAll('.captcha-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   el.dataset.selected = value;
-  document.getElementById('captchaBtn').disabled = false;
+  syncCaptchaButton();
 }
 
 function refreshCaptcha() {
   document.getElementById('captchaError').textContent = '';
   const content = generateCaptcha();
   document.getElementById('captchaContent').innerHTML = content;
-  document.getElementById('captchaBtn').disabled = true;
+  syncCaptchaButton();
   const input = document.getElementById('captchaAnswer');
-  if (input) input.focus();
+  if (input) {
+    input.addEventListener('input', syncCaptchaButton);
+    input.focus();
+  }
 }
 
 function verifyCaptcha() {
