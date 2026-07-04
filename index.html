@@ -6,78 +6,246 @@
 <meta name="theme-color" content="#ce1126">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>AlertaCuba — Sistema de Alerta</title>
+<title>AlertaCuba</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
 <style>
+/* ===== VARIABLES ===== */
 :root{
-  --bg:#ffffff;
-  --surface:#ffffff;
-  --surface-2:#faf3e8;
-  --surface-hover:#f3e7d4;
-  --stroke:rgba(206,17,38,0.1);
-  --stroke-strong:rgba(206,17,38,0.18);
-  --text-1:#000000;
-  --text-2:rgba(0,0,0,0.65);
-  --text-3:rgba(0,0,0,0.45);
-  --danger:#e10600;
-  --danger-2:#ff7a5c;
-  --warning:#f5b700;
-  --safe:#0057b8;
-  --info:#0057b8;
-  --deep:#0057b8;
-  --primary:#ce1126;
-  --primary-light:#f2542d;
-  --primary-lighter:#fbe0de;
-  --accent:#f5b700;
+  --bg:#ffffff;--surface:#ffffff;--surface-2:#faf3e8;--surface-hover:#f3e7d4;
+  --stroke:rgba(206,17,38,0.1);--stroke-strong:rgba(206,17,38,0.18);
+  --text-1:#000;--text-2:rgba(0,0,0,0.65);--text-3:rgba(0,0,0,0.45);
+  --danger:#e10600;--danger-2:#ff7a5c;--warning:#f5b700;
+  --safe:#0057b8;--info:#0057b8;--primary:#ce1126;--primary-light:#f2542d;--primary-lighter:#fbe0de;
   --font:'Poppins',-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
   --font-display:'Bebas Neue',var(--font);
 }
-
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{background:var(--bg);}
-body{
-  font-family:var(--font);
-  background:var(--bg);
-  color:var(--text-1);
-  min-height:100vh;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-  padding-bottom:96px;
-}
-::-webkit-scrollbar{display:none;}
-*{scrollbar-width:none;}
+html,body{height:100%;background:var(--bg);}
+body{font-family:var(--font);color:var(--text-1);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{display:none;}*{scrollbar-width:none;}
 button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer;}
 input,select,textarea{font-family:inherit;}
-
 svg.icon{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;flex-shrink:0;}
 svg.icon *{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 svg.icon.filled *{fill:currentColor;stroke:none;}
 
-/* ===================== TOP BAR ===================== */
+/* ===== SCREENS CONTAINER ===== */
+.screen{
+  position:fixed;inset:0;display:none;flex-direction:column;
+  background:#fff;overflow-y:auto;overflow-x:hidden;
+  z-index:300;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.screen.active{display:flex;}
+.screen-enter{animation:screenIn .35s cubic-bezier(0.4,0,0.2,1) both;}
+.screen-leave{animation:screenOut .3s cubic-bezier(0.4,0,0.2,1) both;}
+@keyframes screenIn{from{opacity:0;transform:translateX(32px);}to{opacity:1;transform:none;}}
+@keyframes screenOut{from{opacity:1;}to{opacity:0;}}
+
+/* ===== SPLASH ===== */
+#screen-splash{
+  background:#fff;
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:0;z-index:500;
+}
+.splash-word{
+  font-family:var(--font-display);
+  font-size:88px;letter-spacing:.1em;line-height:1;
+  opacity:0;transform:translateY(28px);
+}
+.splash-word.red{color:var(--primary);animation:splashIn .55s cubic-bezier(0.34,1.56,0.64,1) .15s forwards;}
+.splash-word.blue{color:var(--info);animation:splashIn .55s cubic-bezier(0.34,1.56,0.64,1) .5s forwards;}
+@keyframes splashIn{to{opacity:1;transform:none;}}
+.splash-line{width:48px;height:3px;background:linear-gradient(90deg,var(--primary),var(--info));border-radius:2px;margin:10px 0;opacity:0;animation:splashIn .4s ease .9s forwards;}
+
+/* ===== AUTH SCREENS ===== */
+.auth-screen{
+  min-height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 28px calc(env(safe-area-inset-bottom) + 32px);
+  gap:0;
+}
+.auth-logo{
+  font-family:var(--font-display);font-size:48px;letter-spacing:.06em;
+  line-height:1;margin-bottom:8px;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
+.auth-logo .l-red{color:var(--primary);}
+.auth-logo .l-blue{color:var(--info);}
+.auth-tagline{font-size:13px;font-weight:600;color:var(--text-3);text-align:center;margin-bottom:48px;letter-spacing:.03em;}
+.auth-btn{
+  width:100%;max-width:360px;border-radius:16px;padding:17px;
+  font-size:15.5px;font-weight:800;letter-spacing:.02em;
+  margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .12s ease,opacity .2s;
+}
+.auth-btn:active{transform:scale(0.97);}
+.auth-btn.primary{background:linear-gradient(135deg,var(--primary),#f2542d);color:#fff;box-shadow:0 12px 28px -10px rgba(206,17,38,0.55);}
+.auth-btn.secondary{background:transparent;border:2px solid var(--stroke-strong);color:var(--primary);font-weight:800;}
+
+/* form header with back button */
+.form-header{
+  width:100%;max-width:420px;
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:28px;
+}
+.back-btn{
+  width:38px;height:38px;border-radius:50%;background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.back-btn svg{width:20px;height:20px;color:var(--text-1);}
+.form-title{font-family:var(--font-display);font-size:28px;letter-spacing:.03em;}
+
+/* form fields */
+.form-body{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;}
+.field-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:5px;display:block;}
+.field-input{
+  width:100%;padding:14px 16px;border:1.5px solid var(--stroke-strong);border-radius:14px;
+  font-size:15px;font-weight:600;color:var(--text-1);background:var(--surface-2);
+  outline:none;transition:border-color .2s;
+}
+.field-input:focus{border-color:var(--primary);}
+.phone-row{display:flex;gap:10px;}
+.phone-prefix{
+  padding:14px 14px;border:1.5px solid var(--stroke-strong);border-radius:14px;
+  font-size:15px;font-weight:700;background:var(--surface-2);
+  flex-shrink:0;min-width:72px;text-align:center;color:var(--text-2);
+}
+.form-submit{
+  width:100%;border-radius:16px;padding:17px;margin-top:6px;
+  font-size:15.5px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--primary),#f2542d);
+  box-shadow:0 12px 28px -10px rgba(206,17,38,0.5);
+  transition:transform .12s,opacity .2s;
+}
+.form-submit:active{transform:scale(0.97);}
+.form-submit:disabled{opacity:.45;}
+.form-note{font-size:12px;color:var(--text-3);text-align:center;line-height:1.5;margin-top:4px;}
+.form-error{font-size:13px;color:var(--danger);font-weight:600;text-align:center;min-height:18px;}
+.form-link{font-size:13px;color:var(--info);font-weight:700;cursor:pointer;text-align:center;margin-top:8px;}
+
+/* OTP input */
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:8px 0;}
+.otp-box{
+  width:48px;height:58px;border:2px solid var(--stroke-strong);border-radius:14px;
+  text-align:center;font-size:24px;font-weight:800;color:var(--text-1);
+  background:var(--surface-2);outline:none;transition:border-color .2s;
+  -webkit-appearance:none;
+}
+.otp-box:focus{border-color:var(--primary);}
+.otp-hint{font-size:13px;color:var(--text-2);text-align:center;line-height:1.5;}
+
+/* Welcome screen */
+.welcome-icon{
+  width:90px;height:90px;border-radius:50%;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:24px;
+  box-shadow:0 12px 32px -8px rgba(34,197,94,0.5);
+  animation:popIn .6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.welcome-icon svg{width:44px;height:44px;color:#fff;}
+@keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.welcome-title{font-family:var(--font-display);font-size:44px;letter-spacing:.03em;color:var(--text-1);text-align:center;margin-bottom:10px;}
+.welcome-sub{font-size:15px;color:var(--text-2);text-align:center;line-height:1.55;max-width:300px;margin-bottom:40px;}
+
+/* ID verification */
+.id-section{padding:28px 24px;display:flex;flex-direction:column;gap:16px;flex:1;}
+.id-card-btn{
+  background:var(--surface);border:1.5px solid var(--stroke-strong);border-radius:18px;
+  padding:20px 18px;display:flex;align-items:center;gap:16px;
+  cursor:pointer;transition:border-color .2s,background .2s;
+}
+.id-card-btn.done{border-color:#22c55e;background:rgba(34,197,94,0.04);}
+.id-card-btn.active{border-color:var(--primary);background:rgba(206,17,38,0.04);}
+.id-card-icon{
+  width:52px;height:52px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface-2);
+}
+.id-card-btn.done .id-card-icon{background:rgba(34,197,94,0.12);}
+.id-card-icon svg{width:24px;height:24px;color:var(--text-2);}
+.id-card-btn.done .id-card-icon svg{color:#22c55e;}
+.id-card-body{flex:1;}
+.id-card-name{font-size:15px;font-weight:800;}
+.id-card-desc{font-size:12.5px;color:var(--text-2);margin-top:2px;}
+.id-card-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.id-card-btn.done .id-card-status{color:#22c55e;}
+.id-submit{
+  margin:16px 24px;border-radius:16px;padding:17px;
+  font-size:15.5px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--primary),#f2542d);
+  box-shadow:0 12px 28px -10px rgba(206,17,38,0.5);
+  display:none;
+}
+.id-submit.show{display:block;}
+
+/* ===== CAMERA OVERLAY ===== */
+#cam-overlay{
+  position:fixed;inset:0;z-index:600;background:#000;
+  display:none;flex-direction:column;
+}
+#cam-overlay.active{display:flex;}
+#cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#cam-canvas{position:absolute;inset:0;width:100%;height:100%;}
+.cam-top{
+  position:absolute;top:0;left:0;right:0;
+  padding:calc(env(safe-area-inset-top)+16px) 20px 16px;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.65),transparent);
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:2;
+}
+.cam-top .cam-title{font-size:17px;font-weight:800;color:#fff;}
+.cam-close-btn{
+  width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;
+}
+.cam-bottom{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:16px 20px calc(env(safe-area-inset-bottom)+24px);
+  background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  z-index:2;
+}
+.cam-status{
+  font-size:15px;font-weight:700;color:#fff;
+  text-align:center;padding:10px 20px;
+  background:rgba(0,0,0,0.5);border-radius:20px;
+  backdrop-filter:blur(6px);
+  min-width:200px;
+}
+.cam-progress{
+  height:4px;width:160px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;
+}
+.cam-progress-bar{height:100%;background:#22c55e;border-radius:2px;width:0%;transition:width .1s linear;}
+
+/* ===== MAIN APP STYLES ===== */
+#screen-app{
+  position:fixed;inset:0;display:none;flex-direction:column;
+  background:var(--bg);overflow:hidden;z-index:200;
+  padding-bottom:0;
+}
+#screen-app.active{display:flex;}
+.app-inner{flex:1;overflow-y:auto;padding-bottom:96px;}
+
 .topbar{
   position:sticky;top:0;z-index:50;
-  padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
-  background:rgba(255,255,255,0.98);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+  padding:calc(env(safe-area-inset-top)+14px) 20px 12px;
+  background:rgba(255,255,255,0.98);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid var(--stroke);
   display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
 }
 .topbar::before{
-  content:'';
-  position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,
-    var(--primary) 0%,var(--primary) 33.33%,
-    #ffffff 33.33%,#ffffff 66.66%,
-    var(--info) 66.66%,var(--info) 100%);
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary) 0%,var(--primary) 33.33%,#fff 33.33%,#fff 66.66%,var(--info) 66.66%,var(--info) 100%);
 }
 .topbar-title{
-  font-family:var(--font-display);
-  font-size:24px;font-weight:400;letter-spacing:0.04em;
+  font-family:var(--font-display);font-size:24px;letter-spacing:.04em;
   display:flex;align-items:center;gap:9px;
-  color:var(--primary);
 }
 .brand-wordmark{color:var(--text-1);}
 .topbar-title .brand-icon{width:26px;height:26px;color:var(--primary);}
@@ -86,115 +254,59 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
   width:36px;height:36px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   background:var(--surface-2);font-size:16px;color:var(--text-1);
-  transition:transform .15s ease,background .15s ease;
+  transition:transform .15s,background .15s;
 }
 .icon-btn:active{transform:scale(0.88);background:var(--surface-hover);}
-.notif-btn{position:relative;}
-.notif-btn .badge{
-  position:absolute;top:4px;right:4px;
-  width:8px;height:8px;border-radius:50%;
-  background:var(--danger);border:1.5px solid #fff;
-  display:none;
-}
-.notif-btn.has-badge .badge{display:block;}
-
 .status-chip{
-  display:flex;align-items:center;gap:6px;
-  font-size:11px;font-weight:700;color:var(--primary);
-  background:rgba(206,17,38,0.09);
-  border:1px solid rgba(206,17,38,0.22);
-  padding:5px 10px 5px 8px;border-radius:20px;
-  text-transform:uppercase;letter-spacing:.04em;
+  display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+  color:var(--primary);background:rgba(206,17,38,0.09);border:1px solid rgba(206,17,38,0.22);
+  padding:5px 10px 5px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;
 }
 .status-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);box-shadow:0 0 8px var(--primary);}
 .status-chip.pulse .dot{animation:dotpulse 1.4s ease-in-out infinite;}
 @keyframes dotpulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.5);}}
 
-/* ===================== HERO ESTADO ===================== */
+/* ===== HERO STATUS ===== */
 .hero-status{
-  margin:16px 20px 0;
-  border-radius:20px;
-  padding:22px 20px;
-  background:linear-gradient(140deg,#f9f0ee 0%,#fbe0de 100%);
+  margin:16px 20px 0;border-radius:20px;padding:22px 20px;
+  background:linear-gradient(140deg,#f9f0ee,#fbe0de);
   border:1px solid rgba(206,17,38,0.12);
   display:flex;align-items:center;gap:16px;
 }
-.hero-status.ok{background:linear-gradient(140deg,#eef4fc 0%,#ddeafb 100%);border-color:rgba(0,87,184,0.14);}
-.hero-status.warn{background:linear-gradient(140deg,#fdf7e3 0%,#faeec8 100%);border-color:rgba(245,183,0,0.22);}
-.hero-status.danger{background:linear-gradient(140deg,#fdecea 0%,#fbd8d5 100%);border-color:rgba(225,6,0,0.2);}
-.hero-pulse-ring{
-  position:relative;width:52px;height:52px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-}
-.hero-pulse-ring .ring{
-  position:absolute;inset:0;border-radius:50%;
-  border:2px solid var(--primary);opacity:0;
-  animation:heroRing 2.4s ease-out infinite;
-}
-.hero-pulse-ring .ring:nth-child(2){animation-delay:.8s;}
-.hero-pulse-ring .ring:nth-child(3){animation-delay:1.6s;}
-@keyframes heroRing{0%{transform:scale(0.5);opacity:.6;}100%{transform:scale(1.6);opacity:0;}}
-.hero-pulse-ring .dot-center{
-  width:22px;height:22px;border-radius:50%;
-  background:var(--primary);
-  display:flex;align-items:center;justify-content:center;
-  position:relative;z-index:1;
-  box-shadow:0 3px 10px rgba(206,17,38,0.4);
-}
+.hero-status.ok{background:linear-gradient(140deg,#eef4fc,#ddeafb);border-color:rgba(0,87,184,0.14);}
+.hero-status.warn{background:linear-gradient(140deg,#fdf7e3,#faeec8);border-color:rgba(245,183,0,0.22);}
+.hero-status.danger{background:linear-gradient(140deg,#fdecea,#fbd8d5);border-color:rgba(225,6,0,0.2);}
+.hero-pulse-ring{position:relative;width:52px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.hero-pulse-ring .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--primary);opacity:0;animation:heroRing 2.4s ease-out infinite;}
+.hero-pulse-ring .ring:nth-child(2){animation-delay:.8s;}.hero-pulse-ring .ring:nth-child(3){animation-delay:1.6s;}
+@keyframes heroRing{0%{transform:scale(.5);opacity:.6;}100%{transform:scale(1.6);opacity:0;}}
+.hero-pulse-ring .dot-center{width:22px;height:22px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;box-shadow:0 3px 10px rgba(206,17,38,0.4);}
 .hero-pulse-ring .dot-center svg{width:12px;height:12px;color:#fff;}
-.hero-status.ok .ring{border-color:var(--info);}
-.hero-status.ok .dot-center{background:var(--info);box-shadow:0 3px 10px rgba(0,87,184,0.35);}
-.hero-status.warn .ring{border-color:var(--warning);}
-.hero-status.warn .dot-center{background:var(--warning);box-shadow:0 3px 10px rgba(245,183,0,0.4);}
-.hero-status.danger .ring{border-color:var(--danger);}
-.hero-status.danger .dot-center{background:var(--danger);box-shadow:0 3px 10px rgba(225,6,0,0.45);}
+.hero-status.ok .ring{border-color:var(--info);}.hero-status.ok .dot-center{background:var(--info);box-shadow:0 3px 10px rgba(0,87,184,0.35);}
+.hero-status.warn .ring{border-color:var(--warning);}.hero-status.warn .dot-center{background:var(--warning);box-shadow:0 3px 10px rgba(245,183,0,0.4);}
+.hero-status.danger .ring{border-color:var(--danger);}.hero-status.danger .dot-center{background:var(--danger);box-shadow:0 3px 10px rgba(225,6,0,0.45);}
 .hero-text .title{font-size:15px;font-weight:800;line-height:1.2;}
 .hero-text .sub{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.4;}
 .hero-text .since{font-size:11.5px;color:var(--text-3);margin-top:5px;font-weight:600;}
 
-/* ===================== SEGMENT TABS ===================== */
+/* ===== MISC APP ===== */
 .segment-wrap{padding:14px 20px 6px;overflow-x:auto;}
-.segment{
-  display:inline-flex;background:transparent;border-radius:12px;padding:3px;
-  border:1px solid var(--stroke);
-}
-.segment button{
-  padding:8px 16px;font-size:13px;font-weight:700;color:var(--text-2);
-  border-radius:10px;transition:background .2s,color .2s;
-  white-space:nowrap;
-}
+.segment{display:inline-flex;background:transparent;border-radius:12px;padding:3px;border:1px solid var(--stroke);}
+.segment button{padding:8px 16px;font-size:13px;font-weight:700;color:var(--text-2);border-radius:10px;transition:background .2s,color .2s;white-space:nowrap;}
 .segment button.active{background:var(--primary);color:#fff;font-weight:800;}
-
-/* ===================== NEAREST CARD ===================== */
-.nearest-card{
-  margin:12px 20px;
-  background:var(--surface);border:1px solid var(--stroke);border-radius:18px;
-  padding:16px;
-  display:flex;align-items:center;gap:14px;
-  box-shadow:0 2px 12px rgba(206,17,38,0.07);
-  cursor:pointer;
-  transition:transform .12s ease,box-shadow .12s ease;
-}
+.nearest-card{margin:12px 20px;background:var(--surface);border:1px solid var(--stroke);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(206,17,38,0.07);cursor:pointer;transition:transform .12s,box-shadow .12s;}
 .nearest-card:active{transform:scale(0.98);}
-.nearest-badge{
-  width:52px;height:52px;border-radius:14px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:17px;font-weight:800;
-}
+.nearest-badge{width:52px;height:52px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;}
 .nearest-info{flex:1;min-width:0;}
 .nearest-info .place{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .nearest-info .meta{font-size:12px;color:var(--text-2);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
 .nearest-info .meta span{display:inline-flex;align-items:center;gap:4px;}
 .nearest-info .meta svg{width:13px;height:13px;}
 .nearest-chevron{color:var(--text-3);width:16px;height:16px;flex-shrink:0;}
-
-/* ===================== SECTION HEADERS ===================== */
 .section{padding:0 20px 8px;}
 .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.section-head h2{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:0.01em;}
-.section-head .see-all{font-size:13px;color:var(--info);font-weight:700;}
-
-/* ===================== FEED LIST ===================== */
+.section-head h2{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:.01em;}
+.section-head .see-all{font-size:13px;color:var(--info);font-weight:700;cursor:pointer;}
 .feed-list{display:flex;flex-direction:column;}
 .feed-row{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;transition:background .15s;}
 .feed-row:active{background:var(--surface-2);}
@@ -203,62 +315,40 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .feed-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .feed-meta{font-size:12px;color:var(--text-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .feed-time{font-size:11.5px;color:var(--text-3);flex-shrink:0;text-align:right;min-width:44px;font-weight:600;}
-.feed-divider{height:0.5px;background:var(--stroke);margin-left:73px;}
+.feed-divider{height:.5px;background:var(--stroke);margin-left:73px;}
 .empty-state{padding:44px 20px;text-align:center;color:var(--text-2);}
 .empty-state svg{width:36px;height:36px;color:var(--text-3);margin-bottom:10px;}
 .empty-state p{font-size:13.5px;line-height:1.5;}
-
-/* ===================== DETAIL MAG BANNER ===================== */
-.detail-mag-banner{
-  margin:16px 20px 4px;
-  border-radius:20px;padding:28px 24px;
-  background:linear-gradient(135deg,var(--primary-lighter),var(--primary));
-  display:flex;align-items:center;gap:20px;
-}
+.detail-mag-banner{margin:16px 20px 4px;border-radius:20px;padding:28px 24px;display:flex;align-items:center;gap:20px;}
 .detail-mag-num{font-family:var(--font-display);font-size:80px;font-weight:400;line-height:1;color:#fff;flex-shrink:0;}
-.detail-mag-type{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.85);}
-.weather-metric{background:var(--surface-2);border-radius:14px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;border:0.5px solid var(--stroke);}
+.detail-mag-type{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.85);}
+.weather-metric{background:var(--surface-2);border-radius:14px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;border:.5px solid var(--stroke);}
 .weather-metric svg{width:19px;height:19px;color:var(--info);}
 .weather-metric .val{font-size:15px;font-weight:800;}
 .weather-metric .lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
-
-/* ===================== SETTINGS ===================== */
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:0.5px solid var(--stroke);}
-.setting-row:first-child{border-radius:16px 16px 0 0;}
-.setting-row:last-child{border-radius:0 0 16px 16px;border-bottom:none;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:.5px solid var(--stroke);}
+.setting-row:first-child{border-radius:16px 16px 0 0;}.setting-row:last-child{border-radius:0 0 16px 16px;border-bottom:none;}
 .setting-row .left{display:flex;align-items:center;gap:12px;}
 .setting-row .left .ico-badge{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
 .setting-row .left .ico-badge svg{width:16px;height:16px;}
 .setting-row .label{font-size:14.5px;font-weight:600;}
 .setting-row .desc{font-size:12px;color:var(--text-2);margin-top:1px;}
-.switch{width:48px;height:28px;border-radius:16px;background:var(--surface-2);position:relative;flex-shrink:0;transition:background .2s;border:0.5px solid var(--stroke);cursor:pointer;}
+.switch{width:48px;height:28px;border-radius:16px;background:var(--surface-2);position:relative;flex-shrink:0;transition:background .2s;border:.5px solid var(--stroke);cursor:pointer;}
 .switch.on{background:var(--safe);border-color:var(--safe);}
-.switch .knob{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.4);}
+.switch .knob{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4);}
 .switch.on .knob{transform:translateX(20px);}
 .slider-row{padding:14px 16px;background:var(--surface);}
 .slider-row .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .slider-row .top .label{font-size:14.5px;font-weight:600;}
 .slider-row .top .value{font-size:14px;font-weight:800;color:var(--danger-2);}
 input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--surface-2);outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.5);cursor:pointer;border:0.5px solid var(--stroke);}
-.alarm-test-btn{
-  width:100%;border-radius:16px;padding:18px;display:flex;align-items:center;justify-content:center;gap:10px;
-  font-size:15px;font-weight:800;color:#fff;
-  background:linear-gradient(135deg,var(--primary),#f2542d);
-  box-shadow:0 14px 34px -12px rgba(206,17,38,0.55);
-  transition:transform .12s ease;
-}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer;border:.5px solid var(--stroke);}
+.alarm-test-btn{width:100%;border-radius:16px;padding:18px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--primary),#f2542d);box-shadow:0 14px 34px -12px rgba(206,17,38,.55);transition:transform .12s;}
 .alarm-test-btn:active{transform:scale(0.97);}
 .alarm-test-btn.playing{animation:btnflash .5s ease-in-out infinite;}
-@keyframes btnflash{0%,100%{box-shadow:0 14px 34px -12px rgba(225,6,0,0.45);}50%{box-shadow:0 14px 44px -8px rgba(225,6,0,0.9);}}
-
+@keyframes btnflash{0%,100%{box-shadow:0 14px 34px -12px rgba(225,6,0,.45);}50%{box-shadow:0 14px 44px -8px rgba(225,6,0,.9);}}
 .sound-picker{display:flex;flex-direction:column;gap:8px;}
-.sound-option{
-  display:flex;align-items:center;gap:14px;
-  padding:13px 16px;border-radius:14px;
-  background:var(--surface);border:1.5px solid var(--stroke);
-  cursor:pointer;transition:border-color .2s,background .2s;
-}
+.sound-option{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:14px;background:var(--surface);border:1.5px solid var(--stroke);cursor:pointer;transition:border-color .2s,background .2s;}
 .sound-option.selected{border-color:var(--primary);background:rgba(206,17,38,0.04);}
 .sound-option .so-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--surface-2);}
 .sound-option.selected .so-icon{background:rgba(206,17,38,0.12);}
@@ -266,280 +356,83 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .sound-option .so-name{font-size:14.5px;font-weight:700;}
 .sound-option .so-desc{font-size:12px;color:var(--text-2);margin-top:1px;}
 .sound-option .so-play{width:32px;height:32px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.sound-option.selected .so-play{background:rgba(206,17,38,0.15);}
+.sound-option.selected .so-play{background:rgba(206,17,38,.15);}
 .sound-option .so-play svg{width:14px;height:14px;color:var(--primary);}
 .sound-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--stroke);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .sound-option.selected .sound-check{border-color:var(--primary);background:var(--primary);}
 .sound-check svg{width:11px;height:11px;color:#fff;display:none;}
 .sound-option.selected .sound-check svg{display:block;}
-
-/* ===================== TAB BAR ===================== */
 .tabbar{
-  position:fixed;left:0;right:0;bottom:0;z-index:90;
-  padding:9px 8px calc(env(safe-area-inset-bottom) + 8px);
-  background:rgba(255,255,255,0.98);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-top:1px solid var(--stroke);
-  display:flex;
+  position:sticky;bottom:0;z-index:90;
+  padding:9px 8px calc(env(safe-area-inset-bottom)+8px);
+  background:rgba(255,255,255,.98);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--stroke);display:flex;flex-shrink:0;
 }
 .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 0;color:var(--text-3);cursor:pointer;transition:color .15s,transform .15s;}
 .tab-item svg{width:24px;height:24px;}
 .tab-item span{font-size:10px;font-weight:700;}
 .tab-item.active{color:var(--primary);}
 .tab-item:active{transform:scale(0.88);}
-
-/* ===================== VIEWS ===================== */
 .view{display:none;}
 .view.active{display:block;}
-.divider-lg{height:8px;}
-.divider-xl{height:26px;}
-
-/* ===================== ALERTA FULLSCREEN — NUEVA VERSIÓN ===================== */
-.alert-overlay{
-  position:fixed;inset:0;z-index:200;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:0;
-  opacity:0;pointer-events:none;
-  transition:opacity .3s ease;
-  overflow:hidden;
-}
+.divider-lg{height:8px;}.divider-xl{height:26px;}
+/* Alert overlay */
+.alert-overlay{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity .3s ease;overflow:hidden;}
 .alert-overlay.show{opacity:1;pointer-events:all;}
-
-/* Fondo animado por severidad */
-.alert-bg{
-  position:absolute;inset:0;
-  background:linear-gradient(160deg,#3a0810 0%,#7a0e1d 40%,#ce1126 80%,#f2542d 100%);
-  transition:background 1s ease;
-}
-.alert-overlay.warn .alert-bg{background:linear-gradient(160deg,#3a2800 0%,#7a5500 40%,#c89000 80%,#f5b700 100%);}
-.alert-overlay.info .alert-bg{background:linear-gradient(160deg,#001a3d 0%,#003a8c 40%,#0057b8 80%,#2c7be5 100%);}
-
-/* Partículas de fondo */
-.alert-bg::after{
-  content:'';
-  position:absolute;inset:0;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.04) 0%, transparent 50%);
-}
-
-/* Pulso de onda sísmica — icono central */
-.alert-wave-wrap{
-  position:relative;
-  width:100px;height:100px;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:28px;
-  z-index:1;
-}
-.alert-wave-wrap .wave-ring{
-  position:absolute;inset:0;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.5);
-  animation:waveOut 1.8s ease-out infinite;
-}
-.alert-wave-wrap .wave-ring:nth-child(2){animation-delay:.6s;}
-.alert-wave-wrap .wave-ring:nth-child(3){animation-delay:1.2s;}
-@keyframes waveOut{
-  0%{transform:scale(.3);opacity:.9;}
-  100%{transform:scale(1.8);opacity:0;}
-}
-.alert-wave-wrap .wave-core{
-  width:56px;height:56px;border-radius:50%;
-  background:rgba(255,255,255,0.15);
-  border:2px solid rgba(255,255,255,0.6);
-  display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(4px);
-  position:relative;z-index:1;
-}
+.alert-bg{position:absolute;inset:0;background:linear-gradient(160deg,#3a0810 0%,#7a0e1d 40%,#ce1126 80%,#f2542d 100%);transition:background 1s;}
+.alert-overlay.warn .alert-bg{background:linear-gradient(160deg,#3a2800,#7a5500,#c89000,#f5b700);}
+.alert-overlay.info .alert-bg{background:linear-gradient(160deg,#001a3d,#003a8c,#0057b8,#2c7be5);}
+.alert-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.05),transparent 50%),radial-gradient(circle at 80% 80%,rgba(255,255,255,.04),transparent 50%);}
+.alert-wave-wrap{position:relative;width:100px;height:100px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;z-index:1;}
+.alert-wave-wrap .wave-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.5);animation:waveOut 1.8s ease-out infinite;}
+.alert-wave-wrap .wave-ring:nth-child(2){animation-delay:.6s;}.alert-wave-wrap .wave-ring:nth-child(3){animation-delay:1.2s;}
+@keyframes waveOut{0%{transform:scale(.3);opacity:.9;}100%{transform:scale(1.8);opacity:0;}}
+.alert-wave-wrap .wave-core{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);position:relative;z-index:1;}
 .alert-wave-wrap .wave-core svg{width:28px;height:28px;color:#fff;}
-
-/* Ticker en la parte superior */
-.alert-ticker{
-  position:absolute;top:0;left:0;right:0;
-  padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(0,0,0,0.25);
-  backdrop-filter:blur(6px);
-  border-bottom:1px solid rgba(255,255,255,0.12);
-  z-index:2;
-}
-.alert-ticker .ticker-brand{
-  font-family:var(--font-display);
-  font-size:20px;letter-spacing:.06em;color:#fff;opacity:.9;
-}
-.alert-ticker .ticker-label{
-  font-size:11px;font-weight:800;color:rgba(255,255,255,0.8);
-  text-transform:uppercase;letter-spacing:.16em;
-  background:rgba(255,255,255,0.15);
-  padding:4px 10px;border-radius:20px;
-  border:1px solid rgba(255,255,255,0.2);
-  animation:tickerPulse 1.4s ease-in-out infinite;
-}
+.alert-ticker{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top)+14px) 20px 12px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.25);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.12);z-index:2;}
+.alert-ticker .ticker-brand{font-family:var(--font-display);font-size:20px;letter-spacing:.06em;color:#fff;opacity:.9;}
+.alert-ticker .ticker-label{font-size:11px;font-weight:800;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.16em;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.2);animation:tickerPulse 1.4s ease-in-out infinite;}
 @keyframes tickerPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
-
-/* Cuerpo de la alerta */
-.alert-body{
-  display:flex;flex-direction:column;align-items:center;
-  z-index:1;padding:0 28px;width:100%;
-}
-.alert-type-tag{
-  font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;
-  color:rgba(255,255,255,0.7);margin-bottom:10px;
-}
-.alert-mag{
-  font-family:var(--font-display);
-  font-size:108px;font-weight:400;color:#fff;line-height:1;
-  letter-spacing:-.01em;
-  text-shadow:0 0 60px rgba(255,255,255,0.3);
-  margin-bottom:0;
-}
-.alert-mag-label{
-  font-size:14px;font-weight:700;color:rgba(255,255,255,0.6);
-  text-transform:uppercase;letter-spacing:.1em;
-  margin-bottom:20px;
-}
-.alert-title{
-  font-size:22px;font-weight:800;color:#fff;
-  text-align:center;line-height:1.25;margin-bottom:8px;
-  text-shadow:0 2px 16px rgba(0,0,0,0.3);
-}
-.alert-message{
-  font-size:14px;color:rgba(255,255,255,0.82);
-  text-align:center;font-weight:600;line-height:1.55;
-  max-width:320px;margin-bottom:10px;
-}
-.alert-source{
-  font-size:12px;color:rgba(255,255,255,0.5);
-  text-align:center;font-weight:600;
-  margin-bottom:40px;
-}
-
-/* Botón descartar */
-.alert-dismiss{
-  position:absolute;bottom:calc(env(safe-area-inset-bottom) + 32px);
-  left:28px;right:28px;
-  background:rgba(255,255,255,0.18);
-  border:2px solid rgba(255,255,255,0.35);
-  color:#fff;border-radius:50px;
-  padding:16px 48px;
-  font-size:15px;font-weight:800;letter-spacing:.04em;
-  cursor:pointer;transition:background .2s;
-  backdrop-filter:blur(8px);
-  z-index:2;
-}
-.alert-dismiss:active{background:rgba(255,255,255,0.3);}
-.alert-dismiss:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none;}
-
-/* Flash de pantalla */
-.screen-flash{
-  position:fixed;inset:0;z-index:150;pointer-events:none;
-  background:rgba(206,17,38,0.18);opacity:0;
-}
+.alert-body{display:flex;flex-direction:column;align-items:center;z-index:1;padding:0 28px;width:100%;}
+.alert-type-tag{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.7);margin-bottom:10px;}
+.alert-mag{font-family:var(--font-display);font-size:108px;font-weight:400;color:#fff;line-height:1;letter-spacing:-.01em;text-shadow:0 0 60px rgba(255,255,255,.3);margin-bottom:0;}
+.alert-mag-label{font-size:14px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px;}
+.alert-title{font-size:22px;font-weight:800;color:#fff;text-align:center;line-height:1.25;margin-bottom:8px;text-shadow:0 2px 16px rgba(0,0,0,.3);}
+.alert-message{font-size:14px;color:rgba(255,255,255,.82);text-align:center;font-weight:600;line-height:1.55;max-width:320px;margin-bottom:10px;}
+.alert-source{font-size:12px;color:rgba(255,255,255,.5);text-align:center;font-weight:600;margin-bottom:40px;}
+.alert-dismiss{position:absolute;bottom:calc(env(safe-area-inset-bottom)+32px);left:28px;right:28px;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);color:#fff;border-radius:50px;padding:16px 48px;font-size:15px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .2s;backdrop-filter:blur(8px);z-index:2;}
+.alert-dismiss:active{background:rgba(255,255,255,.3);}
+.alert-dismiss:disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.screen-flash{position:fixed;inset:0;z-index:350;pointer-events:none;background:rgba(206,17,38,.18);opacity:0;}
 .screen-flash.active{animation:flashfull .5s ease-in-out 5;}
 @keyframes flashfull{0%,100%{opacity:0;}50%{opacity:1;}}
-
-/* ===================== ADMIN PANEL ===================== */
-.admin-panel{
-  position:fixed;inset:0;z-index:300;
-  background:rgba(0,0,0,0.7);
-  backdrop-filter:blur(8px);
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  opacity:0;pointer-events:none;transition:opacity .3s ease;
-}
+/* Admin panel */
+.admin-panel{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .3s;}
 .admin-panel.show{opacity:1;pointer-events:all;}
-.admin-sheet{
-  background:#fff;border-radius:24px 24px 0 0;
-  padding:24px 20px calc(env(safe-area-inset-bottom) + 32px);
-  width:100%;max-width:520px;
-  max-height:90vh;overflow-y:auto;
-}
-.admin-sheet h3{
-  font-family:var(--font-display);font-size:24px;letter-spacing:.03em;
-  margin-bottom:4px;color:var(--primary);
-}
+.admin-sheet{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom)+32px);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.admin-sheet h3{font-family:var(--font-display);font-size:24px;letter-spacing:.03em;margin-bottom:4px;color:var(--primary);}
 .admin-sheet .sub{font-size:12.5px;color:var(--text-2);margin-bottom:20px;}
 .admin-field{margin-bottom:14px;}
 .admin-field label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px;}
-.admin-field input,
-.admin-field select,
-.admin-field textarea{
-  width:100%;padding:12px 14px;border:1.5px solid var(--stroke);border-radius:12px;
-  font-size:14.5px;font-weight:600;color:var(--text-1);
-  background:var(--surface-2);
-  transition:border-color .2s;outline:none;
-}
-.admin-field input:focus,
-.admin-field select:focus,
-.admin-field textarea:focus{border-color:var(--primary);}
+.admin-field input,.admin-field select,.admin-field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--stroke);border-radius:12px;font-size:14.5px;font-weight:600;color:var(--text-1);background:var(--surface-2);outline:none;transition:border-color .2s;}
+.admin-field input:focus,.admin-field select:focus,.admin-field textarea:focus{border-color:var(--primary);}
 .admin-field textarea{resize:vertical;min-height:80px;}
 .admin-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.admin-send-btn{
-  width:100%;border-radius:14px;padding:16px;
-  font-size:15px;font-weight:800;color:#fff;
-  background:linear-gradient(135deg,var(--primary),#f2542d);
-  box-shadow:0 10px 28px -8px rgba(206,17,38,0.5);
-  margin-top:8px;transition:transform .12s,opacity .2s;
-}
+.admin-send-btn{width:100%;border-radius:14px;padding:16px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--primary),#f2542d);box-shadow:0 10px 28px -8px rgba(206,17,38,.5);margin-top:8px;transition:transform .12s,opacity .2s;}
 .admin-send-btn:active{transform:scale(0.97);}
 .admin-send-btn:disabled{opacity:.5;}
-.admin-cancel{
-  width:100%;margin-top:10px;padding:14px;
-  font-size:14px;font-weight:700;color:var(--text-2);
-  border-radius:14px;background:var(--surface-2);
-}
-.admin-close-btn{
-  position:absolute;top:20px;right:20px;
-  width:32px;height:32px;border-radius:50%;
-  background:var(--surface-2);display:flex;align-items:center;justify-content:center;
-  font-size:18px;color:var(--text-2);
-}
-
-/* ===================== NOTIF BANNER (in-app) ===================== */
-.notif-banner{
-  position:fixed;top:calc(env(safe-area-inset-top) + 60px);left:16px;right:16px;
-  z-index:100;
-  background:#fff;border-radius:16px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.18);
-  padding:14px 16px;
-  display:flex;align-items:center;gap:12px;
-  transform:translateY(-120px);opacity:0;
-  transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),opacity .4s ease;
-  border:1px solid var(--stroke);
-}
+.admin-cancel{width:100%;margin-top:10px;padding:14px;font-size:14px;font-weight:700;color:var(--text-2);border-radius:14px;background:var(--surface-2);}
+/* Notif banner */
+.notif-banner{position:fixed;top:calc(env(safe-area-inset-top)+60px);left:16px;right:16px;z-index:600;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:14px 16px;display:flex;align-items:center;gap:12px;transform:translateY(-120px);opacity:0;transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),opacity .4s;border:1px solid var(--stroke);}
 .notif-banner.show{transform:translateY(0);opacity:1;}
 .notif-banner .nb-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);flex-shrink:0;box-shadow:0 0 8px var(--danger);}
 .notif-banner .nb-body{flex:1;min-width:0;}
 .notif-banner .nb-title{font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .notif-banner .nb-sub{font-size:12px;color:var(--text-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .notif-banner .nb-close{width:24px;height:24px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--text-3);}
-
-/* ===================== MISC ===================== */
-@media (min-width:640px){
-  body{max-width:520px;margin:0 auto;border-left:1px solid var(--stroke);border-right:1px solid var(--stroke);}
-  .tabbar{max-width:520px;left:50%;transform:translateX(-50%);right:auto;width:100%;}
-  .notif-banner{max-width:520px;left:50%;transform:translateY(-120px) translateX(-50%);}
-  .notif-banner.show{transform:translateY(0) translateX(-50%);}
-}
-
-.chip-row{display:flex;gap:6px;flex-wrap:wrap;margin:0 20px 12px;}
-.chip{font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;border:1.5px solid;text-transform:uppercase;letter-spacing:.05em;}
-.chip.red{color:var(--danger);border-color:rgba(225,6,0,0.3);background:rgba(225,6,0,0.07);}
-.chip.yellow{color:#b58500;border-color:rgba(245,183,0,0.35);background:rgba(245,183,0,0.1);}
-.chip.blue{color:var(--info);border-color:rgba(0,87,184,0.25);background:rgba(0,87,184,0.07);}
-.chip.gray{color:var(--text-3);border-color:rgba(0,0,0,0.12);background:rgba(0,0,0,0.04);}
-.skeleton{background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-hover) 37%,var(--surface-2) 63%);background-size:400% 100%;animation:sk 1.4s ease infinite;border-radius:12px;}
-@keyframes sk{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
-
-/* Historial de alertas Firebase */
-.fb-alert-card{
-  margin:0 20px 12px;
-  background:var(--surface);border:1px solid var(--stroke);border-radius:16px;
-  padding:14px 16px;display:flex;gap:14px;align-items:flex-start;
-  box-shadow:0 1px 6px rgba(206,17,38,0.05);
-}
-.fb-alert-card .fb-icon{
-  width:42px;height:42px;border-radius:12px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-}
+/* Firebase alert cards */
+.fb-alert-card{margin:0 20px 12px;background:var(--surface);border:1px solid var(--stroke);border-radius:16px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 1px 6px rgba(206,17,38,.05);}
+.fb-alert-card .fb-icon{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .fb-alert-card .fb-icon svg{width:20px;height:20px;}
 .fb-alert-card .fb-body{flex:1;min-width:0;}
 .fb-alert-card .fb-title{font-size:14px;font-weight:800;line-height:1.25;}
@@ -547,411 +440,486 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .fb-alert-card .fb-footer{display:flex;justify-content:space-between;align-items:center;margin-top:7px;}
 .fb-alert-card .fb-source{font-size:11px;color:var(--text-3);font-weight:600;}
 .fb-alert-card .fb-time{font-size:11px;color:var(--text-3);font-weight:600;}
-
-/* Indicador de conexión Firebase */
-.fb-status{
-  display:flex;align-items:center;gap:7px;
-  padding:0 20px;margin-bottom:6px;
+/* Link email section */
+.link-email-section{padding:12px 16px;background:var(--surface);display:flex;flex-direction:column;gap:8px;}
+.link-email-section input{width:100%;padding:11px 14px;border:1.5px solid var(--stroke);border-radius:12px;font-size:14px;font-weight:600;color:var(--text-1);background:var(--surface-2);outline:none;}
+.link-email-section input:focus{border-color:var(--primary);}
+.link-email-btn{width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:800;color:#fff;background:var(--info);transition:opacity .2s;}
+.link-email-btn:active{opacity:.8;}
+@media (min-width:640px){
+  body{max-width:520px;margin:0 auto;border-left:1px solid var(--stroke);border-right:1px solid var(--stroke);}
+  .tabbar{max-width:520px;}
+  .notif-banner{max-width:488px;}
+  #cam-overlay{max-width:520px;left:50%;transform:translateX(-50%);}
 }
-.fb-status .fb-dot{width:7px;height:7px;border-radius:50%;background:#ccc;}
-.fb-status.connected .fb-dot{background:#22c55e;box-shadow:0 0 6px #22c55e;}
-.fb-status.disconnected .fb-dot{background:#e10600;}
-.fb-status span{font-size:11.5px;color:var(--text-3);font-weight:600;}
 </style>
 </head>
 <body>
 
-<div class="screen-flash" id="screenFlash"></div>
-
-<!-- ===================== ALERTA FULLSCREEN ===================== -->
-<div class="alert-overlay" id="alertOverlay">
-  <div class="alert-bg"></div>
-  <div class="alert-ticker">
-    <div class="ticker-brand">AlertaCuba</div>
-    <div class="ticker-label" id="alertTickerLabel">Alerta activa</div>
-  </div>
-  <div class="alert-wave-wrap">
-    <div class="wave-ring"></div>
-    <div class="wave-ring"></div>
-    <div class="wave-ring"></div>
-    <div class="wave-core">
-      <!-- Icono de onda sísmica / señal -->
-      <svg class="icon" viewBox="0 0 24 24">
-        <path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/>
-      </svg>
-    </div>
-  </div>
-  <div class="alert-body">
-    <div class="alert-type-tag" id="alertTypeTag">Alerta</div>
-    <div class="alert-mag" id="alertMag" style="display:none;"></div>
-    <div class="alert-mag-label" id="alertMagLabel" style="display:none;">Magnitud</div>
-    <div class="alert-title" id="alertTitle">Alerta emitida</div>
-    <div class="alert-message" id="alertMessage"></div>
-    <div class="alert-source" id="alertSource"></div>
-  </div>
-  <button class="alert-dismiss" id="alertDismissBtn" onclick="dismissAlert()">Descartar</button>
-</div>
-
-<!-- ===================== PANEL ADMIN ===================== -->
-<div class="admin-panel" id="adminPanel">
-  <div class="admin-sheet">
-    <!-- PIN gate -->
-    <div id="adminPinGate">
-      <h3>Acceso de administrador</h3>
-      <p class="sub">Introduce el PIN para acceder al panel de emisión de alertas.</p>
-      <div class="admin-field">
-        <label>PIN de administrador</label>
-        <input type="password" id="adminPinInput" placeholder="••••••" maxlength="12"
-          onkeydown="if(event.key==='Enter')verifyAdminPin()">
-      </div>
-      <button class="admin-send-btn" onclick="verifyAdminPin()">Acceder</button>
-      <button class="admin-cancel" onclick="closeAdmin()">Cancelar</button>
-    </div>
-    <!-- Formulario de alerta (oculto hasta autenticar) -->
-    <div id="adminForm" style="display:none;">
-    <h3>Emitir Alerta</h3>
-    <p class="sub">Escribe una alerta para todos los usuarios de AlertaCuba en Cuba.</p>
-    <div class="admin-row">
-      <div class="admin-field">
-        <label>Tipo de alerta</label>
-        <select id="adminTipo">
-          <option value="sismo">🌊 Sismo / Terremoto</option>
-          <option value="tsunami">🌊 Tsunami</option>
-          <option value="ciclon">🌀 Ciclón / Huracán</option>
-          <option value="general">📢 Alerta general</option>
-          <option value="aviso">ℹ️ Aviso informativo</option>
-        </select>
-      </div>
-      <div class="admin-field">
-        <label>Severidad</label>
-        <select id="adminSeveridad">
-          <option value="critica">🔴 Emergencia crítica</option>
-          <option value="alta">🟡 Alerta alta</option>
-          <option value="media">🔵 Aviso</option>
-          <option value="info">⚪ Informativo</option>
-        </select>
-      </div>
-    </div>
-    <div class="admin-field">
-      <label>Título</label>
-      <input type="text" id="adminTitulo" placeholder="Ej: Sismo detectado en Santiago de Cuba" maxlength="80">
-    </div>
-    <div class="admin-field">
-      <label>Mensaje / descripción</label>
-      <textarea id="adminMensaje" placeholder="Detalles de la alerta para la ciudadanía..."></textarea>
-    </div>
-    <div class="admin-row">
-      <div class="admin-field">
-        <label>Magnitud (opcional)</label>
-        <input type="number" id="adminMagnitud" placeholder="Ej: 5.5" step="0.1" min="1" max="10">
-      </div>
-      <div class="admin-field">
-        <label>Lugar</label>
-        <input type="text" id="adminLugar" placeholder="Ej: Santiago de Cuba">
-      </div>
-    </div>
-    <div class="admin-field">
-      <label>Emitida por</label>
-      <input type="text" id="adminEmitidaPor" placeholder="Ej: Defensa Civil Cuba" value="Defensa Civil Cuba">
-    </div>
-    <button class="admin-send-btn" id="adminSendBtn" onclick="sendAlert()">
-      🚨 Emitir alerta ahora
-    </button>
-    <button class="admin-cancel" onclick="closeAdmin()">Cancelar</button>
-    </div><!-- /adminForm -->
+<!-- ===== SPLASH ===== -->
+<div class="screen active" id="screen-splash">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:0;">
+    <span class="splash-word red">ALERTA</span>
+    <div class="splash-line"></div>
+    <span class="splash-word blue">CUBA</span>
   </div>
 </div>
 
-<!-- ===================== NOTIF BANNER IN-APP ===================== -->
-<div class="notif-banner" id="notifBanner">
-  <div class="nb-dot"></div>
-  <div class="nb-body">
-    <div class="nb-title" id="nbTitle">Nueva alerta</div>
-    <div class="nb-sub" id="nbSub"></div>
-  </div>
-  <button class="nb-close" onclick="closeNotifBanner()">✕</button>
-</div>
-
-<!-- ===================== TOP BAR ===================== -->
-<div class="topbar">
-  <div class="topbar-title">
-    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M12 2a1 1 0 0 1 0 4M12 18a1 1 0 0 1 0 4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke-width="1.8"/>
-    </svg>
-    <span style="color:var(--primary);">Alerta</span><span class="brand-wordmark">Cuba</span>
-  </div>
-  <div class="topbar-actions">
-    <div class="status-chip pulse" id="topStatusChip">
-      <div class="dot"></div>
-      <span id="topStatusText">En vivo</span>
+<!-- ===== AUTH CHOICE ===== -->
+<div class="screen" id="screen-auth">
+  <div class="auth-screen">
+    <div class="auth-logo">
+      <span class="l-red">ALERTA</span>
+      <span class="l-blue">CUBA</span>
     </div>
-    <button class="icon-btn notif-btn" id="notifToggleBtn" onclick="requestPushPermission()" title="Notificaciones">
-      <div class="badge"></div>
-      <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    </button>
-    <button class="icon-btn" onclick="goToView('settings')" aria-label="Ajustes">
-      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
+    <p class="auth-tagline">Sistema de Alerta para Cuba</p>
+    <button class="auth-btn primary" onclick="showScreen('screen-login')">Iniciar sesión</button>
+    <button class="auth-btn secondary" onclick="showScreen('screen-register')">Registrarse</button>
   </div>
 </div>
 
-<!-- ===================== VIEW: INICIO ===================== -->
-<div class="view active" id="view-home">
-
-  <!-- Estado del sistema -->
-  <div class="hero-status ok" id="heroStatus">
-    <div class="hero-pulse-ring">
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="dot-center">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+<!-- ===== LOGIN ===== -->
+<div class="screen" id="screen-login">
+  <div class="auth-screen" style="justify-content:flex-start;padding-top:calc(env(safe-area-inset-top)+28px);">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('screen-auth')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="form-title">Iniciar sesión</span>
+    </div>
+    <div class="form-body">
+      <div>
+        <label class="field-label">Número de teléfono o correo</label>
+        <input class="field-input" type="text" id="loginId" placeholder="Ej: 55555555 o correo@email.com" autocomplete="username">
       </div>
-    </div>
-    <div class="hero-text">
-      <div class="title" id="heroTitle">Conectado — Sin alertas activas</div>
-      <div class="sub" id="heroSub">Sistema monitoreando Cuba en tiempo real</div>
-      <div class="since" id="heroSince">Última actualización: ahora</div>
-    </div>
-  </div>
-
-  <!-- Estado Firebase -->
-  <div class="fb-status" id="fbStatus" style="margin-top:10px;">
-    <div class="fb-dot"></div>
-    <span id="fbStatusText">Conectando a Firebase...</span>
-  </div>
-
-  <div class="divider-lg"></div>
-
-  <!-- Alerta activa Firebase (si existe) -->
-  <div id="activeAlertSection" style="display:none;">
-    <div class="section-head" style="padding:0 20px 10px;">
-      <h2 style="color:var(--danger);">🚨 Alerta activa</h2>
-    </div>
-    <div id="activeAlertCard"></div>
-    <div class="divider-lg"></div>
-  </div>
-
-  <!-- Sismo más cercano -->
-  <div class="nearest-card" id="nearestCard" style="display:none;" onclick="openDetail(currentNearest)">
-    <div class="nearest-badge" id="nearestBadge">—</div>
-    <div class="nearest-info">
-      <div class="place" id="nearestPlace">—</div>
-      <div class="meta">
-        <span id="nearestDist"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>—</span>
-        <span id="nearestDepth"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>—</span>
-        <span id="nearestTime"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>—</span>
+      <div>
+        <label class="field-label">Contraseña</label>
+        <input class="field-input" type="password" id="loginPwd" placeholder="Tu contraseña" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') doLogin()">
       </div>
+      <p class="form-error" id="loginError"></p>
+      <button class="form-submit" id="loginBtn" onclick="doLogin()">Entrar</button>
+      <p class="form-note">¿No tienes cuenta? <span class="form-link" onclick="showScreen('screen-register')">Regístrate</span></p>
     </div>
-    <svg class="icon nearest-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-  </div>
-
-  <div class="divider-lg"></div>
-
-  <!-- Alertas recientes emitidas -->
-  <div class="section">
-    <div class="section-head">
-      <h2>Alertas emitidas</h2>
-      <span class="see-all" onclick="goToView('feed')">Ver todo</span>
-    </div>
-  </div>
-  <div id="fbAlertsHome"></div>
-
-  <div class="divider-lg"></div>
-
-  <!-- Actividad sísmica reciente (USGS) -->
-  <div class="section">
-    <div class="section-head">
-      <h2>Actividad sísmica</h2>
-      <div class="segment" style="border:none;padding:0;">
-        <button class="active" data-range="hour" onclick="setRange('hour',this)" style="padding:5px 10px;font-size:12px;">1h</button>
-        <button data-range="day" onclick="setRange('day',this)" style="padding:5px 10px;font-size:12px;">Hoy</button>
-        <button data-range="week" onclick="setRange('week',this)" style="padding:5px 10px;font-size:12px;">Semana</button>
-      </div>
-    </div>
-  </div>
-  <div class="feed-list" id="homeFeedList"></div>
-
-  <div class="divider-xl"></div>
-</div>
-
-<!-- ===================== VIEW: ACTIVIDAD COMPLETA ===================== -->
-<div class="view" id="view-feed">
-  <div class="segment-wrap" style="padding-top:16px;">
-    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Toda la actividad</h2></div>
-  </div>
-  <div class="segment-wrap">
-    <div class="segment">
-      <button class="active" data-mag="0" onclick="setMagFilter(0,this)">Todo</button>
-      <button data-mag="3" onclick="setMagFilter(3,this)">M3+</button>
-      <button data-mag="4.5" onclick="setMagFilter(4.5,this)">M4.5+</button>
-      <button data-mag="6" onclick="setMagFilter(6,this)">M6+</button>
-    </div>
-  </div>
-  <div class="divider-lg"></div>
-  <div class="feed-list" id="fullFeedList"></div>
-</div>
-
-<!-- ===================== VIEW: AJUSTES ===================== -->
-<div class="view" id="view-settings">
-  <div class="segment-wrap" style="padding-top:16px;">
-    <div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes</h2></div>
-  </div>
-
-  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Notificaciones</p></div>
-  <div class="section">
-    <div class="setting-row">
-      <div class="left">
-        <div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-        <div><div class="label">Notificaciones push</div><div class="desc" id="pushPermStatus">Recibe alertas aunque la app esté cerrada</div></div>
-      </div>
-      <button class="icon-btn" onclick="requestPushPermission()">
-        <svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
-    </div>
-    <div class="setting-row">
-      <div class="left">
-        <div class="ico-badge" style="background:var(--danger);"><svg class="icon filled" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-        <div><div class="label">Alarma sonora</div><div class="desc">Sirena de emergencia al recibir alerta</div></div>
-      </div>
-      <div class="switch on" id="switchAlarm" onclick="toggleSwitch(this,'alarm')"><div class="knob"></div></div>
-    </div>
-    <div class="setting-row">
-      <div class="left">
-        <div class="ico-badge" style="background:var(--deep);"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="8" height="20" rx="2"/><path d="M2 9v6M22 8v8M19 6v12"/></svg></div>
-        <div><div class="label">Vibración</div><div class="desc">Patrón de vibración de emergencia</div></div>
-      </div>
-      <div class="switch on" id="switchVibrate" onclick="toggleSwitch(this,'vibrate')"><div class="knob"></div></div>
-    </div>
-    <div class="setting-row">
-      <div class="left">
-        <div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
-        <div><div class="label">Ubicación en tiempo real</div><div class="desc">Calcula distancia desde tu posición</div></div>
-      </div>
-      <div class="switch" id="switchGeo" onclick="toggleSwitch(this,'geo')"><div class="knob"></div></div>
-    </div>
-  </div>
-
-  <div class="divider-lg"></div>
-  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Umbral de alerta sísmica</p></div>
-  <div class="section">
-    <div class="slider-row" style="border-radius:16px;">
-      <div class="top"><span class="label">Magnitud mínima para alertar</span><span class="value" id="magThreshVal">M 4.5</span></div>
-      <input type="range" min="2" max="7" step="0.5" value="4.5" id="magThresh" oninput="updateMagThresh(this.value)">
-    </div>
-  </div>
-
-  <div class="divider-lg"></div>
-  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tipo de alerta sonora</p></div>
-  <div class="section">
-    <div class="sound-picker" id="soundPicker">
-      <div class="sound-option selected" data-sound="seismic" onclick="selectSound('seismic',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
-        <div class="so-body"><div class="so-name">Alerta Sísmica</div><div class="so-desc">Onda grave con pulsos crecientes</div></div>
-        <button class="so-play" onclick="event.stopPropagation();previewSound('seismic');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="civildef" onclick="selectSound('civildef',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger-2);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div class="so-body"><div class="so-name">Defensa Civil</div><div class="so-desc">Sirena clásica — subida y bajada lenta</div></div>
-        <button class="so-play" onclick="event.stopPropagation();previewSound('civildef');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-      <div class="sound-option" data-sound="eas" onclick="selectSound('eas',this)">
-        <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--warning);"><path d="M11 5 6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
-        <div class="so-body"><div class="so-name">Sirena EAS</div><div class="so-desc">Sirena agresiva de dos tonos</div></div>
-        <button class="so-play" onclick="event.stopPropagation();previewSound('eas');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
-        <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider-lg"></div>
-  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Probar alerta</p></div>
-  <div class="section">
-    <button class="alarm-test-btn" id="testAlarmBtn" onclick="testAlarm()">
-      <svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>
-      Activar alerta de prueba
-    </button>
-  </div>
-
-  <div class="divider-lg"></div>
-  <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Panel de emisión</p></div>
-  <div class="section">
-    <div class="setting-row" style="border-radius:16px;cursor:pointer;" onclick="openAdmin()">
-      <div class="left">
-        <div class="ico-badge" style="background:#7c3aed;"><svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.67a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div>
-        <div><div class="label">Emitir alerta oficial</div><div class="desc">Panel de administrador — emitir alertas a todos los usuarios</div></div>
-      </div>
-      <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
-    </div>
-  </div>
-
-  <div class="divider-xl"></div>
-</div>
-
-<!-- ===================== VIEW: DETALLE ===================== -->
-<div class="view" id="view-detail">
-  <div class="segment-wrap" style="padding-top:16px;display:flex;align-items:center;gap:12px;">
-    <button class="icon-btn" onclick="goToView('home')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
-    <div style="font-size:16px;font-weight:800;">Detalle del evento</div>
-  </div>
-  <div class="detail-mag-banner" id="detailMagBanner">
-    <div class="detail-mag-num" id="detailMag">—</div>
-    <div class="detail-mag-type" id="detailMagType">—</div>
-  </div>
-  <div class="section" style="text-align:center;">
-    <div style="font-size:19px;font-weight:800;margin-bottom:4px;" id="detailPlace">—</div>
-    <div style="font-size:13.5px;color:var(--text-2);font-weight:600;" id="detailDate">—</div>
-  </div>
-  <div class="divider-lg"></div>
-  <div class="section" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg><div class="val" id="detailDepth">—</div><div class="lbl">Profundidad</div></div>
-    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg><div class="val" id="detailDistance">—</div><div class="lbl">Distancia</div></div>
-    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 2-5h4"/></svg><div class="val" id="detailTsunami">—</div><div class="lbl">Riesgo tsunami</div></div>
-    <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><div class="val" id="detailSig">—</div><div class="lbl">Índice de impacto</div></div>
-  </div>
-  <div class="divider-lg"></div>
-  <div class="section">
-    <button id="detailLinkBtn" onclick="window.open(currentDetailUrl,'_blank')" style="width:100%;background:var(--surface);border:0.5px solid var(--stroke);border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14.5px;font-weight:700;">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
-      Ver informe en USGS
-    </button>
-  </div>
-  <div class="divider-xl"></div>
-</div>
-
-<!-- ===================== TAB BAR ===================== -->
-<div class="tabbar">
-  <div class="tab-item active" data-tab="home" onclick="goToView('home')">
-    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span>Inicio</span>
-  </div>
-  <div class="tab-item" data-tab="feed" onclick="goToView('feed')">
-    <svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-    <span>Actividad</span>
-  </div>
-  <div class="tab-item" data-tab="settings" onclick="goToView('settings')">
-    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    <span>Ajustes</span>
   </div>
 </div>
 
-<!-- ===================== FIREBASE SDK ===================== -->
+<!-- ===== REGISTER ===== -->
+<div class="screen" id="screen-register">
+  <div class="auth-screen" style="justify-content:flex-start;padding-top:calc(env(safe-area-inset-top)+28px);">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('screen-auth')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="form-title">Crear cuenta</span>
+    </div>
+    <div class="form-body">
+      <div>
+        <label class="field-label">Número de Cuba</label>
+        <p class="form-note" style="text-align:left;margin-bottom:8px;color:var(--text-2);">Para crear una cuenta necesitas un número de teléfono cubano.</p>
+        <div class="phone-row">
+          <span class="phone-prefix">🇨🇺 +53</span>
+          <input class="field-input" type="tel" id="regPhone" placeholder="55 555 5555" maxlength="8" autocomplete="tel-national">
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Contraseña</label>
+        <input class="field-input" type="password" id="regPwd" placeholder="Crea una contraseña segura" autocomplete="new-password">
+      </div>
+      <div>
+        <label class="field-label">Confirmar contraseña</label>
+        <input class="field-input" type="password" id="regPwd2" placeholder="Repite la contraseña" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter') doRegister()">
+      </div>
+      <p class="form-error" id="regError"></p>
+      <button class="form-submit" id="regBtn" onclick="doRegister()">Verificar número</button>
+      <p class="form-note">Al registrarte aceptas los términos del servicio de AlertaCuba.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== OTP ===== -->
+<div class="screen" id="screen-otp">
+  <div class="auth-screen" style="justify-content:flex-start;padding-top:calc(env(safe-area-inset-top)+28px);">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('screen-register')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="form-title">Código SMS</span>
+    </div>
+    <div class="form-body">
+      <p class="otp-hint">Enviamos un código de 6 dígitos al número <strong id="otpPhoneLabel">+53 —</strong>. Introdúcelo aquí.</p>
+      <div class="otp-wrap" id="otpWrap">
+        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
+        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
+        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
+        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
+        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
+        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
+      </div>
+      <p class="form-error" id="otpError"></p>
+      <button class="form-submit" id="otpBtn" onclick="doConfirmOTP()">Confirmar código</button>
+      <p class="form-note">¿No recibiste el código? <span class="form-link" onclick="resendOTP()">Reenviar</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WELCOME ===== -->
+<div class="screen" id="screen-welcome">
+  <div class="auth-screen">
+    <div class="welcome-icon">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" stroke-width="2.5"/></svg>
+    </div>
+    <h2 class="welcome-title">¡Todo listo!</h2>
+    <p class="welcome-sub">Ahora por favor confirmemos tu identidad.<br>Necesitamos verificar tu Carné de Identidad cubano.</p>
+    <button class="auth-btn primary" style="max-width:360px;" onclick="showScreen('screen-id')">Aceptar</button>
+  </div>
+</div>
+
+<!-- ===== ID VERIFICATION ===== -->
+<div class="screen" id="screen-id">
+  <div style="padding:calc(env(safe-area-inset-top)+28px) 24px 16px;display:flex;align-items:center;gap:10px;">
+    <div>
+      <div style="font-family:var(--font-display);font-size:26px;letter-spacing:.02em;">Verifica tu Carné</div>
+      <div style="font-size:13px;color:var(--text-2);margin-top:2px;">Escanea ambos lados de tu carnet de identidad</div>
+    </div>
+  </div>
+  <div class="id-section">
+    <div class="id-card-btn" id="idFrontBtn" onclick="openCamera('front')">
+      <div class="id-card-icon">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h2M13 15h4"/></svg>
+      </div>
+      <div class="id-card-body">
+        <div class="id-card-name">Parte delantera</div>
+        <div class="id-card-desc">Cara con tu foto e información</div>
+        <div class="id-card-status" id="idFrontStatus">Toca para escanear</div>
+      </div>
+      <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </div>
+    <div class="id-card-btn" id="idBackBtn" onclick="openCamera('back')">
+      <div class="id-card-icon">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h10"/></svg>
+      </div>
+      <div class="id-card-body">
+        <div class="id-card-name">Reverso del carnet</div>
+        <div class="id-card-desc">Cara trasera con el código de barras</div>
+        <div class="id-card-status" id="idBackStatus">Toca para escanear</div>
+      </div>
+      <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </div>
+    <p style="font-size:12.5px;color:var(--text-3);line-height:1.5;margin-top:4px;">
+      Tus datos son procesados de forma segura. Solo se verifican para confirmar tu identidad.
+    </p>
+  </div>
+  <button class="id-submit" id="idSubmitBtn" onclick="completeIdVerification()">Continuar a AlertaCuba</button>
+</div>
+
+<!-- ===== CAMERA OVERLAY ===== -->
+<div id="cam-overlay">
+  <video id="cam-video" autoplay playsinline muted></video>
+  <canvas id="cam-canvas"></canvas>
+  <div class="cam-top">
+    <span class="cam-title" id="camTitle">Escanea tu carnet</span>
+    <button class="cam-close-btn" onclick="closeCamera()">✕</button>
+  </div>
+  <div class="cam-bottom">
+    <div class="cam-status" id="camStatus">Coloca tu carnet en el recuadro</div>
+    <div class="cam-progress"><div class="cam-progress-bar" id="camProgressBar"></div></div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="screen-app">
+  <div class="app-inner">
+
+    <!-- ALERT OVERLAY -->
+    <div class="alert-overlay" id="alertOverlay">
+      <div class="alert-bg"></div>
+      <div class="alert-ticker">
+        <div class="ticker-brand">AlertaCuba</div>
+        <div class="ticker-label" id="alertTickerLabel">Alerta activa</div>
+      </div>
+      <div class="alert-wave-wrap">
+        <div class="wave-ring"></div><div class="wave-ring"></div><div class="wave-ring"></div>
+        <div class="wave-core"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
+      </div>
+      <div class="alert-body">
+        <div class="alert-type-tag" id="alertTypeTag">Alerta</div>
+        <div class="alert-mag" id="alertMag" style="display:none;"></div>
+        <div class="alert-mag-label" id="alertMagLabel" style="display:none;">Magnitud</div>
+        <div class="alert-title" id="alertTitle">Alerta emitida</div>
+        <div class="alert-message" id="alertMessage"></div>
+        <div class="alert-source" id="alertSource"></div>
+      </div>
+      <button class="alert-dismiss" id="alertDismissBtn" onclick="dismissAlert()">Descartar</button>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-panel" id="adminPanel">
+      <div class="admin-sheet">
+        <h3>Emitir Alerta</h3>
+        <p class="sub">Envía una alerta a todos los usuarios de AlertaCuba.</p>
+        <div class="admin-row">
+          <div class="admin-field">
+            <label>Tipo de alerta</label>
+            <select id="adminTipo">
+              <option value="sismo">🌊 Sismo / Terremoto</option>
+              <option value="tsunami">🌊 Tsunami</option>
+              <option value="ciclon">🌀 Ciclón / Huracán</option>
+              <option value="general">📢 Alerta general</option>
+              <option value="aviso">ℹ️ Aviso informativo</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <label>Severidad</label>
+            <select id="adminSeveridad">
+              <option value="critica">🔴 Emergencia crítica</option>
+              <option value="alta">🟡 Alerta alta</option>
+              <option value="media">🔵 Aviso</option>
+              <option value="info">⚪ Informativo</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-field"><label>Título</label><input type="text" id="adminTitulo" placeholder="Ej: Sismo detectado en Santiago de Cuba" maxlength="80"></div>
+        <div class="admin-field"><label>Mensaje / descripción</label><textarea id="adminMensaje" placeholder="Detalles de la alerta..."></textarea></div>
+        <div class="admin-row">
+          <div class="admin-field"><label>Magnitud (opcional)</label><input type="number" id="adminMagnitud" placeholder="Ej: 5.5" step="0.1" min="1" max="10"></div>
+          <div class="admin-field"><label>Lugar</label><input type="text" id="adminLugar" placeholder="Ej: Santiago de Cuba"></div>
+        </div>
+        <div class="admin-field"><label>Emitida por</label><input type="text" id="adminEmitidaPor" value="Defensa Civil Cuba"></div>
+        <button class="admin-send-btn" id="adminSendBtn" onclick="sendAlert()">🚨 Emitir alerta ahora</button>
+        <button class="admin-cancel" onclick="closeAdmin()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- NOTIF BANNER -->
+    <div class="notif-banner" id="notifBanner">
+      <div class="nb-dot"></div>
+      <div class="nb-body"><div class="nb-title" id="nbTitle">Nueva alerta</div><div class="nb-sub" id="nbSub"></div></div>
+      <button class="nb-close" onclick="closeNotifBanner()">✕</button>
+    </div>
+
+    <div class="screen-flash" id="screenFlash"></div>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-title">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2a1 1 0 0 1 0 4M12 18a1 1 0 0 1 0 4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke-width="1.8"/>
+        </svg>
+        <span style="color:var(--primary);">Alerta</span><span class="brand-wordmark">Cuba</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="status-chip pulse"><div class="dot"></div><span>En vivo</span></div>
+        <button class="icon-btn" onclick="requestPushPermission()" title="Notificaciones">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="icon-btn" onclick="goToView('settings')">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW: INICIO -->
+    <div class="view active" id="view-home">
+      <div class="hero-status ok" id="heroStatus">
+        <div class="hero-pulse-ring">
+          <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+          <div class="dot-center"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+        </div>
+        <div class="hero-text">
+          <div class="title" id="heroTitle">Conectado — Sin alertas activas</div>
+          <div class="sub" id="heroSub">Sistema monitoreando Cuba en tiempo real</div>
+          <div class="since" id="heroSince">Última actualización: ahora</div>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div id="activeAlertSection" style="display:none;">
+        <div class="section-head" style="padding:0 20px 10px;"><h2 style="color:var(--danger);">🚨 Alerta activa</h2></div>
+        <div id="activeAlertCard"></div>
+        <div class="divider-lg"></div>
+      </div>
+      <div class="nearest-card" id="nearestCard" style="display:none;" onclick="openDetail(currentNearest)">
+        <div class="nearest-badge" id="nearestBadge">—</div>
+        <div class="nearest-info">
+          <div class="place" id="nearestPlace">—</div>
+          <div class="meta">
+            <span id="nearestDist"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>—</span>
+            <span id="nearestDepth"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>—</span>
+            <span id="nearestTime"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>—</span>
+          </div>
+        </div>
+        <svg class="icon nearest-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section">
+        <div class="section-head"><h2>Alertas emitidas</h2><span class="see-all" onclick="goToView('feed')">Ver todo</span></div>
+      </div>
+      <div id="fbAlertsHome"></div>
+      <div class="divider-lg"></div>
+      <div class="section">
+        <div class="section-head">
+          <h2>Actividad sísmica</h2>
+          <div class="segment" style="border:none;padding:0;">
+            <button class="active" data-range="hour" onclick="setRange('hour',this)" style="padding:5px 10px;font-size:12px;">1h</button>
+            <button data-range="day" onclick="setRange('day',this)" style="padding:5px 10px;font-size:12px;">Hoy</button>
+            <button data-range="week" onclick="setRange('week',this)" style="padding:5px 10px;font-size:12px;">Semana</button>
+          </div>
+        </div>
+      </div>
+      <div class="feed-list" id="homeFeedList"></div>
+      <div class="divider-xl"></div>
+    </div>
+
+    <!-- VIEW: ACTIVIDAD -->
+    <div class="view" id="view-feed">
+      <div class="segment-wrap" style="padding-top:16px;"><div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Toda la actividad</h2></div></div>
+      <div class="segment-wrap">
+        <div class="segment">
+          <button class="active" data-mag="0" onclick="setMagFilter(0,this)">Todo</button>
+          <button data-mag="3" onclick="setMagFilter(3,this)">M3+</button>
+          <button data-mag="4.5" onclick="setMagFilter(4.5,this)">M4.5+</button>
+          <button data-mag="6" onclick="setMagFilter(6,this)">M6+</button>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="feed-list" id="fullFeedList"></div>
+    </div>
+
+    <!-- VIEW: AJUSTES -->
+    <div class="view" id="view-settings">
+      <div class="segment-wrap" style="padding-top:16px;"><div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes</h2></div></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Notificaciones</p></div>
+      <div class="section">
+        <div class="setting-row">
+          <div class="left"><div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="label">Notificaciones push</div><div class="desc" id="pushPermStatus">Recibe alertas aunque la app esté cerrada</div></div></div>
+          <button class="icon-btn" onclick="requestPushPermission()"><svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+        <div class="setting-row">
+          <div class="left"><div class="ico-badge" style="background:var(--danger);"><svg class="icon filled" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="label">Alarma sonora</div><div class="desc">Sirena al recibir alerta</div></div></div>
+          <div class="switch on" id="switchAlarm" onclick="toggleSwitch(this,'alarm')"><div class="knob"></div></div>
+        </div>
+        <div class="setting-row">
+          <div class="left"><div class="ico-badge" style="background:var(--deep,#0057b8);"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="8" height="20" rx="2"/><path d="M2 9v6M22 8v8M19 6v12"/></svg></div><div><div class="label">Vibración</div><div class="desc">Patrón de vibración de emergencia</div></div></div>
+          <div class="switch on" id="switchVibrate" onclick="toggleSwitch(this,'vibrate')"><div class="knob"></div></div>
+        </div>
+        <div class="setting-row">
+          <div class="left"><div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></div><div><div class="label">Ubicación en tiempo real</div><div class="desc">Calcula distancia desde tu posición</div></div></div>
+          <div class="switch" id="switchGeo" onclick="toggleSwitch(this,'geo')"><div class="knob"></div></div>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Cuenta</p></div>
+      <div class="section">
+        <div class="setting-row" id="linkEmailRow">
+          <div class="left"><div class="ico-badge" style="background:#8b5cf6;"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="label">Vincular correo electrónico</div><div class="desc" id="linkEmailDesc">Vincula un email como respaldo de tu cuenta</div></div></div>
+          <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <div class="link-email-section" id="linkEmailSection" style="display:none;border-radius:0 0 16px 16px;">
+          <p style="font-size:12px;color:var(--text-2);line-height:1.5;">Si pierdes tu número, podrás acceder con este correo y contraseña.</p>
+          <input type="email" id="linkEmailInput" placeholder="tucorreo@email.com" autocomplete="email">
+          <input type="password" id="linkEmailPwd" placeholder="Elige una contraseña para este correo" autocomplete="new-password"
+            style="width:100%;padding:11px 14px;border:1.5px solid var(--stroke);border-radius:12px;font-size:14px;font-weight:600;color:var(--text-1);background:var(--surface-2);outline:none;margin-top:6px;">
+          <button class="link-email-btn" onclick="doLinkEmail()">Vincular correo</button>
+          <p class="form-error" id="linkEmailError"></p>
+        </div>
+        <div class="setting-row" style="cursor:pointer;" onclick="doSignOut()">
+          <div class="left"><div class="ico-badge" style="background:#ef4444;"><svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><div><div class="label">Cerrar sesión</div><div class="desc" id="signOutDesc">Sesión activa</div></div></div>
+          <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Umbral de alerta sísmica</p></div>
+      <div class="section"><div class="slider-row" style="border-radius:16px;"><div class="top"><span class="label">Magnitud mínima para alertar</span><span class="value" id="magThreshVal">M 4.5</span></div><input type="range" min="2" max="7" step="0.5" value="4.5" id="magThresh" oninput="updateMagThresh(this.value)"></div></div>
+      <div class="divider-lg"></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tipo de alerta sonora</p></div>
+      <div class="section">
+        <div class="sound-picker" id="soundPicker">
+          <div class="sound-option selected" data-sound="seismic" onclick="selectSound('seismic',this)">
+            <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--primary);"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
+            <div class="so-body"><div class="so-name">Alerta Sísmica</div><div class="so-desc">Onda grave con pulsos crecientes</div></div>
+            <button class="so-play" onclick="event.stopPropagation();previewSound('seismic');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
+            <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+          </div>
+          <div class="sound-option" data-sound="civildef" onclick="selectSound('civildef',this)">
+            <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--danger-2);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="so-body"><div class="so-name">Defensa Civil</div><div class="so-desc">Sirena clásica — subida y bajada lenta</div></div>
+            <button class="so-play" onclick="event.stopPropagation();previewSound('civildef');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
+            <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+          </div>
+          <div class="sound-option" data-sound="eas" onclick="selectSound('eas',this)">
+            <div class="so-icon"><svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--warning);"><path d="M11 5 6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
+            <div class="so-body"><div class="so-name">Sirena EAS</div><div class="so-desc">Sirena agresiva de dos tonos</div></div>
+            <button class="so-play" onclick="event.stopPropagation();previewSound('eas');"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg></button>
+            <div class="sound-check"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Probar alerta</p></div>
+      <div class="section"><button class="alarm-test-btn" id="testAlarmBtn" onclick="testAlarm()"><svg class="icon filled" viewBox="0 0 24 24"><path d="m5 3 14 9-14 9V3z"/></svg>Activar alerta de prueba</button></div>
+      <div class="divider-lg"></div>
+      <!-- Admin panel entry — solo visible para admins -->
+      <div id="adminEntry" style="display:none;">
+        <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Panel de administrador</p></div>
+        <div class="section">
+          <div class="setting-row" style="border-radius:16px;cursor:pointer;" onclick="openAdmin()">
+            <div class="left"><div class="ico-badge" style="background:#7c3aed;"><svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.67a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div><div><div class="label">Emitir alerta oficial</div><div class="desc">Enviar alertas a todos los usuarios</div></div></div>
+            <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+        <div class="divider-lg"></div>
+      </div>
+      <div class="divider-xl"></div>
+    </div>
+
+    <!-- VIEW: DETALLE -->
+    <div class="view" id="view-detail">
+      <div class="segment-wrap" style="padding-top:16px;display:flex;align-items:center;gap:12px;">
+        <button class="icon-btn" onclick="goToView('home')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div style="font-size:16px;font-weight:800;">Detalle del evento</div>
+      </div>
+      <div class="detail-mag-banner" id="detailMagBanner">
+        <div class="detail-mag-num" id="detailMag">—</div>
+        <div class="detail-mag-type" id="detailMagType">—</div>
+      </div>
+      <div class="section" style="text-align:center;">
+        <div style="font-size:19px;font-weight:800;margin-bottom:4px;" id="detailPlace">—</div>
+        <div style="font-size:13.5px;color:var(--text-2);font-weight:600;" id="detailDate">—</div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg><div class="val" id="detailDepth">—</div><div class="lbl">Profundidad</div></div>
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg><div class="val" id="detailDistance">—</div><div class="lbl">Distancia</div></div>
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 2-5h4"/></svg><div class="val" id="detailTsunami">—</div><div class="lbl">Riesgo tsunami</div></div>
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><div class="val" id="detailSig">—</div><div class="lbl">Índice de impacto</div></div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section"><button id="detailLinkBtn" onclick="window.open(currentDetailUrl,'_blank')" style="width:100%;background:var(--surface);border:.5px solid var(--stroke);border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14.5px;font-weight:700;"><svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>Ver informe en USGS</button></div>
+      <div class="divider-xl"></div>
+    </div>
+
+  </div><!-- /app-inner -->
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <div class="tab-item active" data-tab="home" onclick="goToView('home')"><svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Inicio</span></div>
+    <div class="tab-item" data-tab="feed" onclick="goToView('feed')"><svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Actividad</span></div>
+    <div class="tab-item" data-tab="settings" onclick="goToView('settings')"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Ajustes</span></div>
+  </div>
+
+</div><!-- /screen-app -->
+
+<!-- reCAPTCHA invisible para Firebase phone auth -->
+<div id="recaptcha-container"></div>
+
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 
 <script>
 'use strict';
 /* ================================================================
-   AlertaCuba — Sistema de Alerta en Tiempo Real para Cuba
-   Firebase Realtime DB + FCM + USGS
+   AlertaCuba — Sistema de Alerta para Cuba
    ================================================================ */
 
-/* -------- CONFIGURACIÓN FIREBASE -------- */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyC9v2qp6zGtmvsFiOknlmTHnN6zZY1RLcI",
   authDomain: "ggggg-f2508.firebaseapp.com",
@@ -963,874 +931,862 @@ const FIREBASE_CONFIG = {
   measurementId: "G-E2JX3ZGG5K"
 };
 
-/* ⚠️  VAPID KEY: Debes obtener tu clave VAPID pública desde:
-   Firebase Console → Configuración del proyecto → Cloud Messaging
-   → Configuración web → Generar par de claves.
-   Pégala aquí para que las notificaciones push funcionen en segundo plano. */
-const VAPID_KEY = ""; // <- pega tu clave pública VAPID aquí
+/* Emails con acceso de administrador */
+const ADMIN_EMAILS = ['zam.contact@yahoo.com'];
 
-/* -------- FUENTES USGS -------- */
+/* VAPID key — obtener de Firebase Console → Cloud Messaging → Web configuration */
+const VAPID_KEY = "";
+
 const USGS_FEEDS = {
-  hour: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
-  day:  'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson',
-  week: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson'
+  hour:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
+  day:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson',
+  week:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson'
 };
 
-/* -------- ESTADO GLOBAL -------- */
+let app, db, auth, messaging;
+let currentUser = null;
+
 let state = {
-  range: 'day',
-  quakes: [],
-  userLat: 23.1136,
-  userLon: -82.3666,
-  hasRealGeo: false,
-  alarmOn: true,
-  vibrateOn: true,
-  geoOn: false,
-  magThreshold: 4.5,
-  lastAlertedId: null,
-  magFilter: 0,
-  fbAlerts: [],
-  activeAlert: null,
-  fbConnected: false,
+  range:'day', quakes:[], userLat:23.1136, userLon:-82.3666,
+  hasRealGeo:false, alarmOn:true, vibrateOn:true, geoOn:false,
+  magThreshold:4.5, lastAlertedId:null, magFilter:0, activeAlert:null, fbAlerts:[]
 };
-
 let currentNearest = null;
 let currentDetailUrl = '#';
-let app, db, messaging;
+
+/* ================================================================
+   SCREENS
+   ================================================================ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); }
+}
 
 /* ================================================================
    FIREBASE INIT
    ================================================================ */
 function initFirebase() {
-  try {
-    app = firebase.initializeApp(FIREBASE_CONFIG);
-    db  = firebase.database();
-    try {
-      messaging = firebase.messaging();
-    } catch(e) {
-      console.warn('[FCM] No soportado en este navegador:', e.message);
-    }
+  app = firebase.initializeApp(FIREBASE_CONFIG);
+  db   = firebase.database();
+  auth = firebase.auth();
+  try { messaging = firebase.messaging(); } catch(e) {}
 
-    listenFirebaseConnection();
-    listenActiveAlert();
-    listenAlertHistory();
+  auth.onAuthStateChanged(async user => {
+    currentUser = user;
+    if (user) {
+      // Check ID verification
+      const snap = await db.ref('users/' + user.uid + '/idVerified').get();
+      if (snap.val() === true) {
+        enterApp(user);
+      } else {
+        showScreen('screen-id');
+      }
+    } else {
+      showScreen('screen-auth');
+    }
+  });
+
+  listenActiveAlert();
+  listenAlertHistory();
+}
+
+/* ================================================================
+   SPLASH
+   ================================================================ */
+function startSplash() {
+  showScreen('screen-splash');
+  setTimeout(() => {
+    initFirebase();
+  }, 2600);
+}
+
+/* ================================================================
+   ENTER APP
+   ================================================================ */
+function enterApp(user) {
+  showScreen('screen-app');
+  // Show/hide admin entry
+  const isAdmin = ADMIN_EMAILS.includes((user.email||'').toLowerCase());
+  document.getElementById('adminEntry').style.display = isAdmin ? 'block' : 'none';
+  // Show user info in sign out row
+  const desc = document.getElementById('signOutDesc');
+  if (desc) desc.textContent = user.email || user.phoneNumber || 'Sesión activa';
+  // Check linked email status
+  updateLinkEmailUI(user);
+  // Load data
+  loadQuakes();
+  startPolling();
+  setupFCMForeground();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+  }
+  document.body.addEventListener('click', () => getAudioCtx(), {once:true});
+}
+
+function updateLinkEmailUI(user) {
+  const hasEmail = user.providerData.some(p => p.providerId === 'password');
+  const desc = document.getElementById('linkEmailDesc');
+  if (hasEmail && desc) desc.textContent = 'Correo vinculado: ' + (user.email || '');
+}
+
+/* ================================================================
+   SIGN OUT
+   ================================================================ */
+async function doSignOut() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  await auth.signOut();
+  showScreen('screen-auth');
+}
+
+/* ================================================================
+   REGISTER — phone OTP + link email/password
+   ================================================================ */
+let _confirmationResult = null;
+let _regPassword = '';
+let _regPhone = '';
+
+async function doRegister() {
+  const phone = document.getElementById('regPhone').value.trim();
+  const pwd   = document.getElementById('regPwd').value;
+  const pwd2  = document.getElementById('regPwd2').value;
+  const errEl = document.getElementById('regError');
+  errEl.textContent = '';
+
+  if (!phone || phone.length < 7) { errEl.textContent = 'Introduce un número de teléfono cubano válido.'; return; }
+  if (pwd.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+  if (pwd !== pwd2) { errEl.textContent = 'Las contraseñas no coinciden.'; return; }
+
+  _regPhone = '+53' + phone.replace(/\s/g,'');
+  _regPassword = pwd;
+
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = 'Enviando código...';
+
+  try {
+    if (!window._recaptchaVerifier) {
+      window._recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {size:'invisible'});
+    }
+    _confirmationResult = await auth.signInWithPhoneNumber(_regPhone, window._recaptchaVerifier);
+    document.getElementById('otpPhoneLabel').textContent = _regPhone;
+    showScreen('screen-otp');
+    setupOTPBoxes();
   } catch(err) {
-    console.error('[Firebase] Error al inicializar:', err);
-    setFbStatus(false);
+    console.error('[Auth]', err);
+    errEl.textContent = errorMsg(err.code);
+    // Reset recaptcha on error
+    window._recaptchaVerifier = null;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Verificar número';
   }
 }
 
-/* Monitorear conexión */
-function listenFirebaseConnection() {
-  const connRef = db.ref('.info/connected');
-  connRef.on('value', snap => {
-    const connected = snap.val() === true;
-    state.fbConnected = connected;
-    setFbStatus(connected);
+function setupOTPBoxes() {
+  const boxes = document.querySelectorAll('.otp-box');
+  boxes.forEach((box, i) => {
+    box.value = '';
+    box.oninput = () => {
+      box.value = box.value.replace(/\D/g,'').slice(-1);
+      if (box.value && i < boxes.length - 1) boxes[i+1].focus();
+    };
+    box.onkeydown = (e) => {
+      if (e.key === 'Backspace' && !box.value && i > 0) boxes[i-1].focus();
+      if (e.key === 'Enter') doConfirmOTP();
+    };
   });
+  boxes[0].focus();
 }
 
-function setFbStatus(connected) {
-  const el = document.getElementById('fbStatus');
-  const txt = document.getElementById('fbStatusText');
-  if (!el) return;
-  el.className = 'fb-status ' + (connected ? 'connected' : 'disconnected');
-  txt.textContent = connected ? 'Firebase conectado — recibiendo alertas en vivo' : 'Desconectado de Firebase';
+async function doConfirmOTP() {
+  const boxes = document.querySelectorAll('.otp-box');
+  const code = Array.from(boxes).map(b => b.value).join('');
+  const errEl = document.getElementById('otpError');
+  errEl.textContent = '';
+
+  if (code.length < 6) { errEl.textContent = 'Introduce los 6 dígitos del código.'; return; }
+
+  const btn = document.getElementById('otpBtn');
+  btn.disabled = true; btn.textContent = 'Verificando...';
+
+  try {
+    const result = await _confirmationResult.confirm(code);
+    const user = result.user;
+
+    // Link email/password credential using phone-based internal email
+    const internalEmail = normalizePhoneEmail(_regPhone);
+    const emailCred = firebase.auth.EmailAuthProvider.credential(internalEmail, _regPassword);
+    try {
+      await user.linkWithCredential(emailCred);
+    } catch(linkErr) {
+      // credential-already-in-use means it was already linked (e.g. re-registration); ok
+      if (linkErr.code !== 'auth/provider-already-linked' && linkErr.code !== 'auth/credential-already-in-use') {
+        console.error('[Link]', linkErr);
+        throw new Error('No se pudo crear tu cuenta completa. Intenta de nuevo.');
+      }
+    }
+
+    // Save profile to DB
+    await db.ref('users/' + user.uid).set({
+      phone: _regPhone,
+      internalEmail: _regPhone.replace('+','') + '@alertacuba.internal',
+      createdAt: Date.now()
+    });
+
+    showScreen('screen-welcome');
+  } catch(err) {
+    console.error('[OTP]', err);
+    errEl.textContent = 'Código incorrecto. Intenta de nuevo.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Confirmar código';
+  }
 }
 
-/* ----------------------------------------------------------------
-   ALERTAS EN TIEMPO REAL (nodo: /alertas/activa)
-   Estructura que el admin escribe:
-   {
-     activa: true,
-     id: "unique",
-     tipo: "sismo",
-     titulo: "Sismo en Santiago",
-     cuerpo: "...",
-     magnitud: 5.5,
-     lugar: "Santiago de Cuba",
-     profundidad: 10,
-     severidad: "alta",   // info|media|alta|critica
-     timestamp: Date.now(),
-     emitidaPor: "Defensa Civil Cuba"
-   }
-   ---------------------------------------------------------------- */
+async function resendOTP() {
+  try {
+    window._recaptchaVerifier = null;
+    window._recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {size:'invisible'});
+    _confirmationResult = await auth.signInWithPhoneNumber(_regPhone, window._recaptchaVerifier);
+    document.getElementById('otpError').textContent = 'Código reenviado.';
+  } catch(err) {
+    document.getElementById('otpError').textContent = errorMsg(err.code);
+  }
+}
+
+/* ================================================================
+   LOGIN
+   ================================================================ */
+async function doLogin() {
+  const id  = document.getElementById('loginId').value.trim();
+  const pwd = document.getElementById('loginPwd').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+
+  if (!id || !pwd) { errEl.textContent = 'Rellena todos los campos.'; return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+
+  try {
+    let email = id;
+    // If it looks like a phone number, convert to internal email using shared normalizer
+    if (/^\+?[\d\s\-]{7,}$/.test(id)) {
+      email = normalizePhoneEmail(id);
+    }
+    await auth.signInWithEmailAndPassword(email, pwd);
+    // onAuthStateChanged will handle navigation
+  } catch(err) {
+    console.error('[Login]', err);
+    errEl.textContent = errorMsg(err.code);
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+/* ================================================================
+   ID VERIFICATION
+   ================================================================ */
+let _idScanned = {front: false, back: false};
+let _camMode = 'front';
+let _camStream = null;
+let _camAnimFrame = null;
+let _detectionTimer = null;
+let _detectionProgress = 0;
+
+document.getElementById('idFrontBtn').addEventListener('click', () => openCamera('front'));
+document.getElementById('idBackBtn').addEventListener('click', () => openCamera('back'));
+document.getElementById('linkEmailRow').addEventListener('click', toggleLinkEmail);
+
+async function openCamera(mode) {
+  _camMode = mode;
+  const overlay = document.getElementById('cam-overlay');
+  const title = document.getElementById('camTitle');
+  title.textContent = mode === 'front' ? 'Parte delantera del carnet' : 'Reverso del carnet';
+  overlay.classList.add('active');
+
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video: {facingMode: 'environment', width:{ideal:1280}, height:{ideal:720}}
+    });
+    const video = document.getElementById('cam-video');
+    video.srcObject = _camStream;
+    await video.play();
+    startScanLoop();
+  } catch(err) {
+    console.warn('[Camera]', err);
+    // Simulate scan if camera not available
+    simulateScan();
+  }
+}
+
+function closeCamera() {
+  stopCamera();
+  document.getElementById('cam-overlay').classList.remove('active');
+}
+
+function stopCamera() {
+  cancelAnimationFrame(_camAnimFrame);
+  clearTimeout(_detectionTimer);
+  _detectionProgress = 0;
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+}
+
+function startScanLoop() {
+  const video = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  const ctx = canvas.getContext('2d');
+  const status = document.getElementById('camStatus');
+  const progressBar = document.getElementById('camProgressBar');
+
+  let stableFrames = 0;
+  const NEEDED_FRAMES = 18; // ~1.5s at 12fps
+  _detectionProgress = 0;
+
+  function drawOverlay(detected) {
+    canvas.width = canvas.offsetWidth * devicePixelRatio;
+    canvas.height = canvas.offsetHeight * devicePixelRatio;
+    ctx.save();
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+    // ID card rect (1.58:1 ratio, centered)
+    const rw = Math.min(W * 0.8, 340);
+    const rh = rw / 1.586;
+    const rx = (W - rw) / 2;
+    const ry = (H - rh) / 2;
+
+    // Dark overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.52)';
+    ctx.fillRect(0, 0, W, H);
+    // Clear rect
+    ctx.clearRect(rx, ry, rw, rh);
+
+    // Border
+    const color = detected ? '#22c55e' : 'rgba(255,255,255,0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(rx, ry, rw, rh);
+
+    // Corner markers
+    const cs = 22;
+    ctx.strokeStyle = detected ? '#22c55e' : '#fff';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    [[rx,ry,1,1],[rx+rw,ry,-1,1],[rx,ry+rh,1,-1],[rx+rw,ry+rh,-1,-1]].forEach(([x,y,dx,dy]) => {
+      ctx.beginPath(); ctx.moveTo(x+dx*cs, y); ctx.lineTo(x, y); ctx.lineTo(x, y+dy*cs); ctx.stroke();
+    });
+
+    ctx.restore();
+  }
+
+  function analyze() {
+    if (!_camStream) return;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = 160; offscreen.height = 90;
+    const oc = offscreen.getContext('2d');
+    oc.drawImage(video, 0, 0, 160, 90);
+    const imageData = oc.getImageData(32, 22, 96, 46);
+    const d = imageData.data;
+    let sum = 0, sumSq = 0, n = d.length / 4;
+    for (let i = 0; i < d.length; i += 4) {
+      const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+      sum += g; sumSq += g * g;
+    }
+    const mean = sum / n;
+    const variance = sumSq / n - mean * mean;
+    return variance;
+  }
+
+  function loop() {
+    if (!_camStream) return;
+    const variance = analyze() || 0;
+    let detected = false;
+
+    if (variance < 80) {
+      status.textContent = 'Coloca tu carnet en el recuadro';
+      stableFrames = 0;
+    } else if (variance < 200) {
+      status.textContent = 'Acércate un poco más al carnet';
+      stableFrames = Math.max(0, stableFrames - 1);
+    } else if (variance > 1800) {
+      status.textContent = 'No muevas el teléfono';
+      stableFrames = Math.max(0, stableFrames - 2);
+    } else {
+      stableFrames++;
+      detected = stableFrames > 3;
+      if (stableFrames < NEEDED_FRAMES) {
+        status.textContent = 'Perfecto, mantén firme... (' + Math.round(stableFrames/NEEDED_FRAMES*100) + '%)';
+      }
+    }
+
+    _detectionProgress = Math.min(100, (stableFrames / NEEDED_FRAMES) * 100);
+    progressBar.style.width = _detectionProgress + '%';
+    drawOverlay(detected);
+
+    if (stableFrames >= NEEDED_FRAMES) {
+      status.textContent = '✓ Detectado — procesando...';
+      progressBar.style.width = '100%';
+      setTimeout(() => captureScan(), 500);
+      return;
+    }
+
+    _camAnimFrame = requestAnimationFrame(loop);
+  }
+
+  setTimeout(loop, 300);
+}
+
+function simulateScan() {
+  // Fallback when camera is unavailable (HTTP context)
+  const status = document.getElementById('camStatus');
+  const progressBar = document.getElementById('camProgressBar');
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 5;
+    progressBar.style.width = progress + '%';
+    if (progress < 60) status.textContent = 'Simulando escaneo...';
+    else status.textContent = 'Detectando carnet...';
+    if (progress >= 100) {
+      clearInterval(interval);
+      status.textContent = '✓ Detectado — procesando...';
+      setTimeout(() => captureScan(), 500);
+    }
+  }, 120);
+}
+
+function captureScan() {
+  stopCamera();
+  _idScanned[_camMode] = true;
+
+  const btnId = _camMode === 'front' ? 'idFrontBtn' : 'idBackBtn';
+  const statusId = _camMode === 'front' ? 'idFrontStatus' : 'idBackStatus';
+  const btn = document.getElementById(btnId);
+  btn.classList.add('done');
+  btn.classList.remove('active');
+  document.getElementById(statusId).textContent = '✓ Escaneado correctamente';
+  document.getElementById('cam-overlay').classList.remove('active');
+
+  if (_idScanned.front && _idScanned.back) {
+    const submitBtn = document.getElementById('idSubmitBtn');
+    submitBtn.classList.add('show');
+  }
+}
+
+async function completeIdVerification() {
+  if (!currentUser) return;
+  try {
+    await db.ref('users/' + currentUser.uid + '/idVerified').set(true);
+    enterApp(currentUser);
+  } catch(err) {
+    console.error('[ID]', err);
+    enterApp(currentUser);
+  }
+}
+
+/* ================================================================
+   LINK EMAIL
+   ================================================================ */
+function toggleLinkEmail() {
+  const section = document.getElementById('linkEmailSection');
+  const visible = section.style.display !== 'none';
+  section.style.display = visible ? 'none' : 'block';
+}
+
+async function doLinkEmail() {
+  const email = document.getElementById('linkEmailInput').value.trim();
+  const pwd   = document.getElementById('linkEmailPwd').value;
+  const errEl = document.getElementById('linkEmailError');
+  errEl.style.color = 'var(--danger)';
+  errEl.textContent = '';
+
+  if (!email || !email.includes('@')) { errEl.textContent = 'Introduce un correo electrónico válido.'; return; }
+  if (!pwd || pwd.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+
+  try {
+    // Create a new email/password credential and link it to the current user
+    const credential = firebase.auth.EmailAuthProvider.credential(email, pwd);
+    await currentUser.linkWithCredential(credential);
+    errEl.style.color = '#22c55e';
+    errEl.textContent = '✓ Correo vinculado correctamente';
+    document.getElementById('linkEmailInput').value = '';
+    document.getElementById('linkEmailPwd').value = '';
+    document.getElementById('linkEmailSection').style.display = 'none';
+    updateLinkEmailUI(auth.currentUser);
+  } catch(err) {
+    errEl.style.color = 'var(--danger)';
+    errEl.textContent = errorMsg(err.code);
+  }
+}
+
+/* ================================================================
+   FIREBASE REALTIME — ALERTS
+   ================================================================ */
 function listenActiveAlert() {
-  const ref = db.ref('alertas/activa');
-  ref.on('value', snap => {
+  db.ref('alertas/activa').on('value', snap => {
     const data = snap.val();
     if (data && data.activa === true) {
       if (!state.activeAlert || state.activeAlert.id !== data.id) {
         state.activeAlert = data;
-        onNewActiveAlert(data);
+        if (document.getElementById('screen-app').classList.contains('active')) {
+          onNewActiveAlert(data);
+        }
       }
     } else {
       state.activeAlert = null;
       dismissAlert();
-      document.getElementById('activeAlertSection').style.display = 'none';
+      const s = document.getElementById('activeAlertSection');
+      if(s) s.style.display = 'none';
     }
   });
 }
 
-/* Escuchar historial de alertas (nodo: /alertas/historial) */
 function listenAlertHistory() {
-  const ref = db.ref('alertas/historial');
-  ref.orderByChild('timestamp').limitToLast(20).on('value', snap => {
+  db.ref('alertas/historial').orderByChild('timestamp').limitToLast(20).on('value', snap => {
     const items = [];
-    snap.forEach(child => { items.push(child.val()); });
+    snap.forEach(child => items.push(child.val()));
     items.reverse();
     state.fbAlerts = items;
     renderFbAlerts();
   });
 }
 
-/* Alerta nueva recibida */
 function onNewActiveAlert(data) {
-  // Mostrar overlay fullscreen
   triggerOverlayAlert(data);
-
-  // Banner in-app
-  showNotifBanner(data.titulo, data.cuerpo || data.lugar || '');
-
-  // Render card en inicio
+  showNotifBanner(data.titulo, data.cuerpo || '');
   renderActiveAlertCard(data);
-
-  // Actualizar hero
   updateHeroStatus('danger', '🚨 ' + data.titulo, data.cuerpo || '', '');
-
-  // Sonido y vibración
   if (state.alarmOn) playSoundByKey(selectedSound);
-  if (state.vibrateOn && navigator.vibrate) {
-    const pat = data.severidad === 'critica'
-      ? [500,150,500,150,500,150,1000]
-      : [300,100,300,100,600];
-    navigator.vibrate(pat);
-  }
+  if (state.vibrateOn && navigator.vibrate) navigator.vibrate([500,150,500,150,500,150,1000]);
   flashScreen();
-
-  // Notificación nativa si app en segundo plano
   sendNativeNotification(data);
 }
 
 function triggerOverlayAlert(data) {
   const overlay = document.getElementById('alertOverlay');
-  const severidad = data.severidad || 'alta';
-
-  // Color por severidad
+  const sev = data.severidad || 'alta';
   overlay.className = 'alert-overlay';
-  if (severidad === 'info' || severidad === 'media') overlay.classList.add('info');
-  else if (severidad === 'alta') overlay.classList.add('warn');
-
-  // Tipo
-  const typeLabels = {
-    sismo:'Sismo / Terremoto', tsunami:'Alerta de Tsunami',
-    ciclon:'Ciclón / Huracán', general:'Alerta General', aviso:'Aviso'
-  };
-  document.getElementById('alertTickerLabel').textContent =
-    severidad === 'critica' ? '🚨 Emergencia' :
-    severidad === 'alta'    ? '⚠️ Alerta'    : 'ℹ️ Aviso';
-
-  document.getElementById('alertTypeTag').textContent = typeLabels[data.tipo] || 'Alerta';
-
-  // Magnitud (solo si es sismo)
-  const magEl = document.getElementById('alertMag');
-  const magLbl = document.getElementById('alertMagLabel');
-  if (data.magnitud && data.tipo === 'sismo') {
-    magEl.textContent = parseFloat(data.magnitud).toFixed(1);
-    magEl.style.display = 'block';
-    magLbl.style.display = 'block';
-  } else {
-    magEl.style.display = 'none';
-    magLbl.style.display = 'none';
-  }
-
-  document.getElementById('alertTitle').textContent = data.titulo || 'Alerta emitida';
-  document.getElementById('alertMessage').textContent = data.cuerpo || '';
-  document.getElementById('alertSource').textContent = data.emitidaPor ? 'Emitida por ' + data.emitidaPor : '';
-
+  if (sev==='info'||sev==='media') overlay.classList.add('info');
+  else if (sev==='alta') overlay.classList.add('warn');
+  document.getElementById('alertTickerLabel').textContent = sev==='critica'?'🚨 Emergencia':sev==='alta'?'⚠️ Alerta':'ℹ️ Aviso';
+  document.getElementById('alertTypeTag').textContent = {sismo:'Sismo',tsunami:'Tsunami',ciclon:'Ciclón',general:'Alerta',aviso:'Aviso'}[data.tipo]||'Alerta';
+  const magEl=document.getElementById('alertMag'), magLbl=document.getElementById('alertMagLabel');
+  if (data.magnitud && data.tipo==='sismo') { magEl.textContent=parseFloat(data.magnitud).toFixed(1); magEl.style.display='block'; magLbl.style.display='block'; }
+  else { magEl.style.display='none'; magLbl.style.display='none'; }
+  document.getElementById('alertTitle').textContent = data.titulo||'Alerta emitida';
+  document.getElementById('alertMessage').textContent = data.cuerpo||'';
+  document.getElementById('alertSource').textContent = data.emitidaPor?'Emitida por '+data.emitidaPor:'';
   overlay.classList.add('show');
   startDismissCountdown();
 }
 
 function dismissAlert() {
   clearInterval(_dismissCountdown);
-  const overlay = document.getElementById('alertOverlay');
+  const overlay=document.getElementById('alertOverlay');
   overlay.classList.remove('show');
-  const btn = document.getElementById('alertDismissBtn');
-  if (btn) { btn.disabled = false; btn.textContent = 'Descartar'; }
+  const btn=document.getElementById('alertDismissBtn');
+  if(btn){btn.disabled=false;btn.textContent='Descartar';}
 }
 
-let _dismissCountdown = null;
+let _dismissCountdown=null;
 function startDismissCountdown() {
-  const btn = document.getElementById('alertDismissBtn');
-  if (!btn) return;
-  const data = state.activeAlert;
-  const severidad = data ? data.severidad : 'alta';
-  const wait = severidad === 'critica' ? 8 : 5;
-  btn.disabled = true;
-  let secs = wait;
-  btn.textContent = 'Descartar (' + secs + ')';
+  const btn=document.getElementById('alertDismissBtn');
+  if(!btn) return;
+  const wait = (state.activeAlert&&state.activeAlert.severidad==='critica')?8:5;
+  btn.disabled=true; let secs=wait; btn.textContent='Descartar ('+secs+')';
   clearInterval(_dismissCountdown);
-  _dismissCountdown = setInterval(() => {
+  _dismissCountdown=setInterval(()=>{
     secs--;
-    if (secs <= 0) {
-      clearInterval(_dismissCountdown);
-      btn.disabled = false;
-      btn.textContent = 'Descartar alerta';
-    } else {
-      btn.textContent = 'Descartar (' + secs + ')';
-    }
-  }, 1000);
+    if(secs<=0){clearInterval(_dismissCountdown);btn.disabled=false;btn.textContent='Descartar';}
+    else btn.textContent='Descartar ('+secs+')';
+  },1000);
 }
 
 function renderActiveAlertCard(data) {
-  const section = document.getElementById('activeAlertSection');
-  const card = document.getElementById('activeAlertCard');
-  const colors = severityColors(data.severidad);
-  let details = '';
-  if (data.magnitud) details += 'M ' + parseFloat(data.magnitud).toFixed(1) + ' · ';
-  if (data.lugar) details += data.lugar + ' · ';
-  if (data.profundidad) details += data.profundidad + ' km prof.';
-
-  card.innerHTML = `<div class="fb-alert-card" style="border-color:${colors.border};background:${colors.bg};">
-    <div class="fb-icon" style="background:${colors.iconBg};">
-      <svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};">
-        <path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/>
-      </svg>
-    </div>
+  const section=document.getElementById('activeAlertSection');
+  const card=document.getElementById('activeAlertCard');
+  const colors=severityColors(data.severidad);
+  let details='';
+  if(data.magnitud) details+='M'+parseFloat(data.magnitud).toFixed(1)+' · ';
+  if(data.lugar) details+=data.lugar;
+  card.innerHTML=`<div class="fb-alert-card" style="border-color:${colors.border};background:${colors.bg};">
+    <div class="fb-icon" style="background:${colors.iconBg};"><svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
     <div class="fb-body">
       <div class="fb-title" style="color:${colors.fg};">${esc(data.titulo)}</div>
-      <div class="fb-msg">${esc(data.cuerpo || '')}</div>
-      ${details ? `<div class="fb-msg" style="margin-top:4px;font-weight:700;">${esc(details)}</div>` : ''}
-      <div class="fb-footer">
-        <div class="fb-source">${esc(data.emitidaPor || 'AlertaCuba')}</div>
-        <div class="fb-time">${timeAgo(data.timestamp)}</div>
-      </div>
+      <div class="fb-msg">${esc(data.cuerpo||'')}</div>
+      ${details?`<div class="fb-msg" style="margin-top:4px;font-weight:700;">${esc(details)}</div>`:''}
+      <div class="fb-footer"><div class="fb-source">${esc(data.emitidaPor||'AlertaCuba')}</div><div class="fb-time">${timeAgo(data.timestamp)}</div></div>
     </div>
   </div>`;
-  section.style.display = 'block';
+  section.style.display='block';
 }
 
 function renderFbAlerts() {
-  const container = document.getElementById('fbAlertsHome');
-  if (!container) return;
-  if (state.fbAlerts.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No hay alertas emitidas aún. El sistema está monitoreando Cuba.</p></div>';
-    return;
-  }
-  container.innerHTML = state.fbAlerts.map(a => {
-    const colors = severityColors(a.severidad);
-    let meta = [];
-    if (a.magnitud) meta.push('M' + parseFloat(a.magnitud).toFixed(1));
-    if (a.lugar) meta.push(a.lugar);
+  const container=document.getElementById('fbAlertsHome');
+  if(!container) return;
+  if(!state.fbAlerts.length){ container.innerHTML='<div class="empty-state"><p>No hay alertas emitidas aún. El sistema está monitoreando Cuba.</p></div>'; return; }
+  container.innerHTML=state.fbAlerts.map(a=>{
+    const colors=severityColors(a.severidad);
+    let meta=[];
+    if(a.magnitud) meta.push('M'+parseFloat(a.magnitud).toFixed(1));
+    if(a.lugar) meta.push(a.lugar);
     return `<div class="fb-alert-card" style="border-color:${colors.border};background:${colors.bg};">
-      <div class="fb-icon" style="background:${colors.iconBg};">
-        <svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};">
-          <path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/>
-        </svg>
-      </div>
+      <div class="fb-icon" style="background:${colors.iconBg};"><svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
       <div class="fb-body">
         <div class="fb-title">${esc(a.titulo)}</div>
-        <div class="fb-msg">${esc(a.cuerpo || '')}</div>
-        ${meta.length ? `<div class="fb-msg" style="margin-top:3px;font-weight:700;font-size:11.5px;">${esc(meta.join(' · '))}</div>` : ''}
-        <div class="fb-footer">
-          <div class="fb-source">${esc(a.emitidaPor || 'AlertaCuba')}</div>
-          <div class="fb-time">${timeAgo(a.timestamp)}</div>
-        </div>
+        <div class="fb-msg">${esc(a.cuerpo||'')}</div>
+        ${meta.length?`<div class="fb-msg" style="margin-top:3px;font-weight:700;font-size:11.5px;">${esc(meta.join(' · '))}</div>`:''}
+        <div class="fb-footer"><div class="fb-source">${esc(a.emitidaPor||'AlertaCuba')}</div><div class="fb-time">${timeAgo(a.timestamp)}</div></div>
       </div>
     </div>`;
   }).join('');
 }
 
-function severityColors(severidad) {
-  const map = {
-    critica: {bg:'rgba(225,6,0,0.06)',border:'rgba(225,6,0,0.25)',iconBg:'rgba(225,6,0,0.12)',fg:'#e10600'},
-    alta:    {bg:'rgba(245,183,0,0.06)',border:'rgba(245,183,0,0.28)',iconBg:'rgba(245,183,0,0.13)',fg:'#b58500'},
-    media:   {bg:'rgba(0,87,184,0.05)',border:'rgba(0,87,184,0.2)',iconBg:'rgba(0,87,184,0.1)',fg:'#0057b8'},
-    info:    {bg:'rgba(0,0,0,0.02)',border:'rgba(0,0,0,0.08)',iconBg:'rgba(0,0,0,0.06)',fg:'#555'},
-  };
-  return map[severidad] || map.media;
+function severityColors(s) {
+  return {critica:{bg:'rgba(225,6,0,0.06)',border:'rgba(225,6,0,0.25)',iconBg:'rgba(225,6,0,0.12)',fg:'#e10600'},
+    alta:{bg:'rgba(245,183,0,0.06)',border:'rgba(245,183,0,0.28)',iconBg:'rgba(245,183,0,0.13)',fg:'#b58500'},
+    media:{bg:'rgba(0,87,184,0.05)',border:'rgba(0,87,184,0.2)',iconBg:'rgba(0,87,184,0.1)',fg:'#0057b8'},
+    info:{bg:'rgba(0,0,0,0.02)',border:'rgba(0,0,0,0.08)',iconBg:'rgba(0,0,0,0.06)',fg:'#555'}}[s||'media']||{bg:'rgba(0,87,184,0.05)',border:'rgba(0,87,184,0.2)',iconBg:'rgba(0,87,184,0.1)',fg:'#0057b8'};
 }
 
 /* ================================================================
-   ADMIN PANEL — emitir alertas a Firebase
-   PIN default: 1234  (cámbialo en Firebase Console → RTDB → /config/adminPin)
+   ADMIN PANEL
    ================================================================ */
-let _adminUnlocked = false;
-
-function openAdmin() {
-  _adminUnlocked = false;
-  document.getElementById('adminPinGate').style.display = 'block';
-  document.getElementById('adminForm').style.display = 'none';
-  document.getElementById('adminPinInput').value = '';
-  document.getElementById('adminPanel').classList.add('show');
-  setTimeout(() => document.getElementById('adminPinInput').focus(), 300);
-}
-function closeAdmin() {
-  document.getElementById('adminPanel').classList.remove('show');
-  _adminUnlocked = false;
-}
-
-async function verifyAdminPin() {
-  const entered = document.getElementById('adminPinInput').value;
-  if (!entered) return;
-
-  // Leer PIN desde Firebase (nodo /config/adminPin), fallback a '1234'
-  let correctPin = '1234';
-  try {
-    const snap = await db.ref('config/adminPin').get();
-    if (snap.exists()) correctPin = String(snap.val());
-  } catch(e) { /* usar default */ }
-
-  if (entered === correctPin) {
-    _adminUnlocked = true;
-    document.getElementById('adminPinGate').style.display = 'none';
-    document.getElementById('adminForm').style.display = 'block';
-  } else {
-    document.getElementById('adminPinInput').value = '';
-    document.getElementById('adminPinInput').placeholder = 'PIN incorrecto — intenta de nuevo';
-    setTimeout(() => {
-      document.getElementById('adminPinInput').placeholder = '••••••';
-    }, 2000);
-  }
-}
+function openAdmin() { document.getElementById('adminPanel').classList.add('show'); }
+function closeAdmin() { document.getElementById('adminPanel').classList.remove('show'); }
 
 async function sendAlert() {
-  if (!_adminUnlocked) { closeAdmin(); return; }
-  const btn = document.getElementById('adminSendBtn');
-  const titulo = document.getElementById('adminTitulo').value.trim();
-  const cuerpo = document.getElementById('adminMensaje').value.trim();
-  const tipo = document.getElementById('adminTipo').value;
-  const severidad = document.getElementById('adminSeveridad').value;
-  const magnitud = document.getElementById('adminMagnitud').value;
-  const lugar = document.getElementById('adminLugar').value.trim();
-  const emitidaPor = document.getElementById('adminEmitidaPor').value.trim() || 'AlertaCuba';
-
-  if (!titulo) { alert('Escribe un título para la alerta.'); return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Enviando...';
-
-  const alertData = {
-    activa: true,
-    id: 'alerta-' + Date.now(),
-    tipo, titulo, cuerpo, severidad, lugar, emitidaPor,
-    timestamp: Date.now(),
-    ...(magnitud ? { magnitud: parseFloat(magnitud) } : {})
-  };
-
+  if (!currentUser || !ADMIN_EMAILS.includes((currentUser.email||'').toLowerCase())) { closeAdmin(); return; }
+  const btn=document.getElementById('adminSendBtn');
+  const titulo=document.getElementById('adminTitulo').value.trim();
+  const cuerpo=document.getElementById('adminMensaje').value.trim();
+  const tipo=document.getElementById('adminTipo').value;
+  const severidad=document.getElementById('adminSeveridad').value;
+  const magnitud=document.getElementById('adminMagnitud').value;
+  const lugar=document.getElementById('adminLugar').value.trim();
+  const emitidaPor=document.getElementById('adminEmitidaPor').value.trim()||'AlertaCuba';
+  if(!titulo){alert('Escribe un título.');return;}
+  btn.disabled=true;btn.textContent='Enviando...';
+  const alertData={activa:true,id:'alerta-'+Date.now(),tipo,titulo,cuerpo,severidad,lugar,emitidaPor,timestamp:Date.now(),...(magnitud?{magnitud:parseFloat(magnitud)}:{})};
   try {
-    // Escribir en /alertas/activa (todos los clientes la reciben al instante)
     await db.ref('alertas/activa').set(alertData);
-
-    // También guardar en historial
-    const histRef = db.ref('alertas/historial/' + alertData.id);
-    await histRef.set(alertData);
-
+    await db.ref('alertas/historial/'+alertData.id).set(alertData);
     closeAdmin();
-    // Limpiar form
-    document.getElementById('adminTitulo').value = '';
-    document.getElementById('adminMensaje').value = '';
-    document.getElementById('adminMagnitud').value = '';
-    document.getElementById('adminLugar').value = '';
-  } catch(err) {
-    console.error('[Admin] Error al enviar alerta:', err);
-    alert('Error al enviar: ' + err.message);
+    document.getElementById('adminTitulo').value='';
+    document.getElementById('adminMensaje').value='';
+    document.getElementById('adminMagnitud').value='';
+    document.getElementById('adminLugar').value='';
+  } catch(err){
+    alert('Error: '+err.message);
   } finally {
-    btn.disabled = false;
-    btn.textContent = '🚨 Emitir alerta ahora';
+    btn.disabled=false;btn.textContent='🚨 Emitir alerta ahora';
   }
 }
 
 /* ================================================================
-   NOTIFICACIONES PUSH (FCM)
+   PUSH NOTIFICATIONS
    ================================================================ */
 async function requestPushPermission() {
-  if (!('Notification' in window)) {
-    alert('Este navegador no soporta notificaciones.');
-    return;
-  }
-
-  const btn = document.getElementById('notifToggleBtn');
-  const statusEl = document.getElementById('pushPermStatus');
-
-  try {
-    const perm = await Notification.requestPermission();
-    if (perm !== 'granted') {
-      statusEl.textContent = 'Notificaciones no permitidas — actívalas desde ajustes del navegador';
-      return;
-    }
-
-    statusEl.textContent = 'Notificaciones activadas ✓';
-    btn.classList.add('has-badge');
-
-    // Registrar token FCM si hay clave VAPID
-    if (messaging && VAPID_KEY) {
-      try {
-        const token = await messaging.getToken({ vapidKey: VAPID_KEY });
-        if (token) {
-          console.log('[FCM] Token registrado:', token.substring(0,20) + '...');
-          // Guardar token en Firebase para que el admin pueda enviar push
-          const tokenRef = db.ref('tokens/' + token.substring(0,20));
-          await tokenRef.set({ token, ts: Date.now() });
-        }
-      } catch(err) {
-        console.warn('[FCM] No se pudo obtener token:', err.message);
-        statusEl.textContent = 'Notificaciones en app activadas (configura VAPID para push completo)';
-      }
-    } else if (!VAPID_KEY) {
-      statusEl.textContent = 'Notificaciones en app activadas (falta VAPID key para push en segundo plano)';
-    }
-  } catch(err) {
-    console.error('[Push] Error:', err);
-  }
+  if(!('Notification' in window)){return;}
+  const perm=await Notification.requestPermission();
+  const statusEl=document.getElementById('pushPermStatus');
+  if(perm==='granted'){ if(statusEl) statusEl.textContent='Notificaciones activadas ✓'; }
+  else { if(statusEl) statusEl.textContent='Notificaciones no permitidas'; }
 }
 
-/* Notificaciones FCM en primer plano */
 function setupFCMForeground() {
-  if (!messaging) return;
+  if(!messaging) return;
   messaging.onMessage(payload => {
-    console.log('[FCM] Mensaje en primer plano:', payload);
-    const title = payload.notification?.title || payload.data?.titulo || 'AlertaCuba';
-    const body  = payload.notification?.body  || payload.data?.cuerpo  || '';
-    showNotifBanner(title, body);
-    if (state.alarmOn) playSoundByKey(selectedSound);
+    const title=payload.notification?.title||payload.data?.titulo||'AlertaCuba';
+    const body=payload.notification?.body||payload.data?.cuerpo||'';
+    showNotifBanner(title,body);
+    if(state.alarmOn) playSoundByKey(selectedSound);
   });
 }
 
 function sendNativeNotification(data) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  new Notification('🚨 ' + (data.titulo || 'ALERTA — AlertaCuba'), {
-    body: data.cuerpo || data.lugar || '',
-    tag: 'alertacuba',
-    renotify: true,
-    requireInteraction: (data.severidad === 'critica' || data.severidad === 'alta'),
-    vibrate: [300,100,300,100,600],
-  });
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  new Notification('🚨 '+(data.titulo||'ALERTA — AlertaCuba'),{body:data.cuerpo||data.lugar||'',tag:'alertacuba',renotify:true,requireInteraction:data.severidad==='critica'||data.severidad==='alta'});
 }
 
-/* ================================================================
-   BANNER IN-APP
-   ================================================================ */
-let _bannerTimeout = null;
-function showNotifBanner(title, sub) {
-  document.getElementById('nbTitle').textContent = title;
-  document.getElementById('nbSub').textContent = sub;
-  const banner = document.getElementById('notifBanner');
+let _bannerTimeout=null;
+function showNotifBanner(title,sub){
+  document.getElementById('nbTitle').textContent=title;
+  document.getElementById('nbSub').textContent=sub;
+  const banner=document.getElementById('notifBanner');
   banner.classList.add('show');
   clearTimeout(_bannerTimeout);
-  _bannerTimeout = setTimeout(() => banner.classList.remove('show'), 7000);
+  _bannerTimeout=setTimeout(()=>banner.classList.remove('show'),7000);
 }
-function closeNotifBanner() {
-  clearTimeout(_bannerTimeout);
-  document.getElementById('notifBanner').classList.remove('show');
-}
+function closeNotifBanner(){ clearTimeout(_bannerTimeout); document.getElementById('notifBanner').classList.remove('show'); }
 
 /* ================================================================
-   HERO STATUS
+   HERO & NAVIGATION
    ================================================================ */
-function updateHeroStatus(type, title, sub, since) {
-  const hero = document.getElementById('heroStatus');
-  const titleEl = document.getElementById('heroTitle');
-  const subEl = document.getElementById('heroSub');
-  const sinceEl = document.getElementById('heroSince');
-  hero.className = 'hero-status ' + type;
-  titleEl.textContent = title;
-  subEl.textContent = sub;
-  if (since) sinceEl.textContent = since;
+function updateHeroStatus(type,title,sub,since){
+  const hero=document.getElementById('heroStatus');
+  if(!hero) return;
+  hero.className='hero-status '+type;
+  document.getElementById('heroTitle').textContent=title;
+  document.getElementById('heroSub').textContent=sub;
+  if(since) document.getElementById('heroSince').textContent=since;
 }
 
-/* ================================================================
-   NAVEGACIÓN
-   ================================================================ */
-function goToView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  const tab = document.querySelector('.tab-item[data-tab="' + name + '"]');
-  if (tab) tab.classList.add('active');
-  window.scrollTo({top:0,behavior:'instant'});
+function goToView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  const tab=document.querySelector('.tab-item[data-tab="'+name+'"]');
+  if(tab) tab.classList.add('active');
+  const inner=document.querySelector('.app-inner');
+  if(inner) inner.scrollTo({top:0,behavior:'instant'});
 }
 
-function setRange(range, btn) {
-  state.range = range;
-  document.querySelectorAll('.segment button[data-range]').forEach(b => b.classList.remove('active'));
+function setRange(range,btn){
+  state.range=range;
+  document.querySelectorAll('.segment button[data-range]').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   loadQuakes();
 }
-function setMagFilter(mag, btn) {
-  state.magFilter = mag;
-  document.querySelectorAll('.segment button[data-mag]').forEach(b => b.classList.remove('active'));
+function setMagFilter(mag,btn){
+  state.magFilter=mag;
+  document.querySelectorAll('.segment button[data-mag]').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderFullFeed();
 }
 
 /* ================================================================
-   UTILIDADES
+   PHONE NORMALIZATION — shared between register and login
    ================================================================ */
-function haversine(lat1,lon1,lat2,lon2) {
-  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-function magColor(mag) {
-  if(mag>=6) return{badgeBg:'rgba(225,6,0,0.15)',badgeFg:'#ff7a5c',numBg:'#e10600',bannerA:'#5c120f',bannerB:'#1f0503'};
-  if(mag>=4.5) return{badgeBg:'rgba(245,183,0,0.15)',badgeFg:'#b58500',numBg:'#f5b700',bannerA:'#3a2c08',bannerB:'#1c1503'};
-  if(mag>=3) return{badgeBg:'rgba(0,87,184,0.15)',badgeFg:'#3d8bc7',numBg:'#0057b8',bannerA:'#123a5c',bannerB:'#04141f'};
-  return{badgeBg:'rgba(150,150,150,0.12)',badgeFg:'#888',numBg:'#888',bannerA:'#1a1a1a',bannerB:'#0a0a0a'};
-}
-function timeAgo(ts) {
-  if (!ts) return '—';
-  const diff = Date.now()-ts,min=Math.floor(diff/60000);
-  if(min<1) return 'ahora';if(min<60) return min+' min';
-  const h=Math.floor(min/60);if(h<24) return h+' h';
-  return Math.floor(h/24)+' d';
-}
-function fmtDate(ts) {
-  return new Date(ts).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-}
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function normalizePhoneEmail(rawInput) {
+  // Strip everything except digits
+  const digits = rawInput.replace(/\D/g, '');
+  // Ensure it starts with 53 (Cuba country code)
+  const withCode = digits.startsWith('53') ? digits : '53' + digits;
+  return withCode + '@alertacuba.internal';
 }
 
 /* ================================================================
-   USGS — Carga de sismos
+   UTILS
    ================================================================ */
-async function loadQuakes() {
-  try {
-    const res = await fetch(USGS_FEEDS[state.range]);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    state.quakes = data.features
-      .map(f => ({
-        id: f.id,
-        mag: f.properties.mag,
-        place: f.properties.place || 'Ubicación desconocida',
-        time: f.properties.time,
-        tsunami: f.properties.tsunami,
-        sig: f.properties.sig,
-        url: f.properties.url,
-        lon: f.geometry.coordinates[0],
-        lat: f.geometry.coordinates[1],
-        depth: f.geometry.coordinates[2]
-      }))
-      .filter(q => typeof q.mag === 'number')
-      .filter(q => /cuba/i.test(q.place))
-      .sort((a,b) => b.time-a.time);
+function haversine(lat1,lon1,lat2,lon2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function magColor(mag){if(mag>=6) return{badgeBg:'rgba(225,6,0,0.15)',badgeFg:'#ff7a5c',numBg:'#e10600',bannerA:'#5c120f',bannerB:'#1f0503'};if(mag>=4.5) return{badgeBg:'rgba(245,183,0,0.15)',badgeFg:'#b58500',numBg:'#f5b700',bannerA:'#3a2c08',bannerB:'#1c1503'};if(mag>=3) return{badgeBg:'rgba(0,87,184,0.15)',badgeFg:'#3d8bc7',numBg:'#0057b8',bannerA:'#123a5c',bannerB:'#04141f'};return{badgeBg:'rgba(150,150,150,0.12)',badgeFg:'#888',numBg:'#888',bannerA:'#1a1a1a',bannerB:'#0a0a0a'};}
+function timeAgo(ts){if(!ts) return'—';const diff=Date.now()-ts,min=Math.floor(diff/60000);if(min<1) return'ahora';if(min<60) return min+' min';const h=Math.floor(min/60);if(h<24) return h+' h';return Math.floor(h/24)+' d';}
+function fmtDate(ts){return new Date(ts).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function errorMsg(code){const m={'auth/invalid-phone-number':'Número de teléfono inválido.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
 
-    state.quakes.forEach(q => q.distance = haversine(state.userLat,state.userLon,q.lat,q.lon));
-
+/* ================================================================
+   USGS — SISMOS
+   ================================================================ */
+async function loadQuakes(){
+  try{
+    const res=await fetch(USGS_FEEDS[state.range]);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    state.quakes=data.features.map(f=>({id:f.id,mag:f.properties.mag,place:f.properties.place||'Ubicación desconocida',time:f.properties.time,tsunami:f.properties.tsunami,sig:f.properties.sig,url:f.properties.url,lon:f.geometry.coordinates[0],lat:f.geometry.coordinates[1],depth:f.geometry.coordinates[2]})).filter(q=>typeof q.mag==='number').filter(q=>/cuba/i.test(q.place)).sort((a,b)=>b.time-a.time);
+    state.quakes.forEach(q=>q.distance=haversine(state.userLat,state.userLon,q.lat,q.lon));
     renderAll();
-    updateLastRefresh();
+    document.getElementById('heroSince').textContent='Última actualización: '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
     checkUSGSAlarm();
-  } catch(err) {
-    console.error('[USGS]', err);
-  }
-}
-
-function updateLastRefresh() {
-  const el = document.getElementById('heroSince');
-  if(el && !state.activeAlert) el.textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  }catch(err){console.error('[USGS]',err);}
 }
 
 /* ================================================================
    RENDER
    ================================================================ */
-function renderAll() {
-  renderNearest();
-  renderHomeFeed();
-  renderFullFeed();
-  if (!state.activeAlert) {
-    if (state.quakes.length === 0) {
-      updateHeroStatus('ok','Sin actividad sísmica en Cuba','Sistema activo — ningún sismo en el período seleccionado','');
-    } else {
-      const top = state.quakes[0];
-      const msg = top.mag >= 4.5
-        ? 'Sismo de M' + top.mag.toFixed(1) + ' registrado'
-        : 'Actividad menor registrada — sin riesgo significativo';
-      updateHeroStatus(top.mag>=4.5?'warn':'ok', msg, top.place,'');
-    }
-  }
+function renderAll(){renderNearest();renderHomeFeed();renderFullFeed();if(!state.activeAlert){if(!state.quakes.length){updateHeroStatus('ok','Sin actividad sísmica en Cuba','Sistema activo — monitoreando en tiempo real','');}else{const t=state.quakes[0];updateHeroStatus(t.mag>=4.5?'warn':'ok',t.mag>=4.5?'Sismo M'+t.mag.toFixed(1)+' registrado':'Actividad menor — sin riesgo significativo',t.place,'');}}}
+
+function renderNearest(){
+  if(!state.quakes.length){document.getElementById('nearestCard').style.display='none';return;}
+  const sorted=[...state.quakes].sort((a,b)=>a.distance-b.distance);
+  currentNearest=sorted[0];const q=currentNearest,c=magColor(q.mag);
+  document.getElementById('nearestCard').style.display='flex';
+  const badge=document.getElementById('nearestBadge');
+  badge.textContent=q.mag.toFixed(1);badge.style.background=c.badgeBg;badge.style.color=c.badgeFg;
+  document.getElementById('nearestPlace').textContent=q.place;
+  document.getElementById('nearestDist').innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>'+Math.round(q.distance).toLocaleString('es-ES')+' km';
+  document.getElementById('nearestDepth').innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>'+q.depth.toFixed(0)+' km prof.';
+  document.getElementById('nearestTime').innerHTML='<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>'+timeAgo(q.time);
 }
 
-function renderNearest() {
-  if (!state.quakes.length) { document.getElementById('nearestCard').style.display='none'; return; }
-  const sorted = [...state.quakes].sort((a,b) => a.distance-b.distance);
-  currentNearest = sorted[0];
-  const q = currentNearest;
-  const c = magColor(q.mag);
-  document.getElementById('nearestCard').style.display = 'flex';
-  const badge = document.getElementById('nearestBadge');
-  badge.textContent = q.mag.toFixed(1);
-  badge.style.background = c.badgeBg;
-  badge.style.color = c.badgeFg;
-  document.getElementById('nearestPlace').textContent = q.place;
-  document.getElementById('nearestDist').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>' + Math.round(q.distance).toLocaleString('es-ES') + ' km';
-  document.getElementById('nearestDepth').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>' + q.depth.toFixed(0) + ' km prof.';
-  document.getElementById('nearestTime').innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>' + timeAgo(q.time);
-}
-
-function renderHomeFeed() {
-  const list = document.getElementById('homeFeedList');
-  renderFeedInto(list, state.quakes.slice(0,6));
-}
-function renderFullFeed() {
-  const list = document.getElementById('fullFeedList');
-  renderFeedInto(list, state.quakes.filter(q=>q.mag>=state.magFilter), true);
-}
-function renderFeedInto(container, quakes, showEmpty) {
-  container.innerHTML = '';
-  if (!quakes.length && showEmpty) {
-    container.innerHTML='<div class="empty-state"><p>No hay eventos que coincidan con este filtro.</p></div>';
-    return;
-  }
-  quakes.forEach((q,idx) => {
-    const c = magColor(q.mag);
-    const row = document.createElement('div');
-    row.className = 'feed-row';
-    row.onclick = () => openDetail(q);
-    row.innerHTML =
-      '<div class="feed-num" style="background:'+c.numBg+';">'+q.mag.toFixed(1)+'</div>'+
-      '<div class="feed-body"><div class="feed-title">'+esc(q.place)+'</div>'+
-      '<div class="feed-meta">'+q.depth.toFixed(0)+' km prof. · '+Math.round(q.distance).toLocaleString('es-ES')+' km</div></div>'+
-      '<div class="feed-time">'+timeAgo(q.time)+'</div>';
+function renderHomeFeed(){renderFeedInto(document.getElementById('homeFeedList'),state.quakes.slice(0,6));}
+function renderFullFeed(){renderFeedInto(document.getElementById('fullFeedList'),state.quakes.filter(q=>q.mag>=state.magFilter),true);}
+function renderFeedInto(container,quakes,showEmpty){
+  container.innerHTML='';
+  if(!quakes.length&&showEmpty){container.innerHTML='<div class="empty-state"><p>No hay eventos que coincidan con este filtro.</p></div>';return;}
+  quakes.forEach((q,idx)=>{
+    const c=magColor(q.mag),row=document.createElement('div');
+    row.className='feed-row';row.onclick=()=>openDetail(q);
+    row.innerHTML='<div class="feed-num" style="background:'+c.numBg+';">'+q.mag.toFixed(1)+'</div><div class="feed-body"><div class="feed-title">'+esc(q.place)+'</div><div class="feed-meta">'+q.depth.toFixed(0)+' km prof. · '+Math.round(q.distance).toLocaleString('es-ES')+' km</div></div><div class="feed-time">'+timeAgo(q.time)+'</div>';
     container.appendChild(row);
-    if (idx < quakes.length-1) {
-      const div = document.createElement('div');
-      div.className = 'feed-divider';
-      container.appendChild(div);
-    }
+    if(idx<quakes.length-1){const div=document.createElement('div');div.className='feed-divider';container.appendChild(div);}
   });
 }
 
-/* ================================================================
-   DETALLE
-   ================================================================ */
-function openDetail(q) {
-  if (!q) return;
-  const c = magColor(q.mag);
-  const banner = document.getElementById('detailMagBanner');
-  banner.style.background = 'linear-gradient(135deg,'+c.bannerA+','+c.bannerB+')';
-  document.getElementById('detailMag').textContent = q.mag.toFixed(1);
-  document.getElementById('detailMagType').textContent = q.mag>=6?'Fuerte':q.mag>=4.5?'Moderado':q.mag>=3?'Leve':'Menor';
-  document.getElementById('detailPlace').textContent = q.place;
-  document.getElementById('detailDate').textContent = fmtDate(q.time);
-  document.getElementById('detailDepth').textContent = q.depth.toFixed(0)+' km';
-  document.getElementById('detailDistance').textContent = Math.round(q.distance).toLocaleString('es-ES')+' km';
-  document.getElementById('detailTsunami').textContent = q.tsunami===1?'Posible':'Ninguno';
-  document.getElementById('detailSig').textContent = q.sig||'—';
-  currentDetailUrl = q.url||'#';
+function openDetail(q){
+  if(!q) return;
+  const c=magColor(q.mag);
+  document.getElementById('detailMagBanner').style.background='linear-gradient(135deg,'+c.bannerA+','+c.bannerB+')';
+  document.getElementById('detailMag').textContent=q.mag.toFixed(1);
+  document.getElementById('detailMagType').textContent=q.mag>=6?'Fuerte':q.mag>=4.5?'Moderado':q.mag>=3?'Leve':'Menor';
+  document.getElementById('detailPlace').textContent=q.place;
+  document.getElementById('detailDate').textContent=fmtDate(q.time);
+  document.getElementById('detailDepth').textContent=q.depth.toFixed(0)+' km';
+  document.getElementById('detailDistance').textContent=Math.round(q.distance).toLocaleString('es-ES')+' km';
+  document.getElementById('detailTsunami').textContent=q.tsunami===1?'Posible':'Ninguno';
+  document.getElementById('detailSig').textContent=q.sig||'—';
+  currentDetailUrl=q.url||'#';
   goToView('detail');
 }
 
 /* ================================================================
-   ALARMA USGS (auto-detect sismos)
+   USGS ALARM
    ================================================================ */
-function checkUSGSAlarm() {
-  if (!state.alarmOn) return;
-  const relevant = state.quakes.filter(q=>q.mag>=state.magThreshold).sort((a,b)=>b.time-a.time)[0];
-  if (relevant && relevant.id !== state.lastAlertedId) {
-    state.lastAlertedId = relevant.id;
-    // Sintetizar como alerta Firebase
-    const synth = {
-      activa: true,
-      id: relevant.id,
-      tipo: 'sismo',
-      titulo: 'Sismo M' + relevant.mag.toFixed(1) + ' · ' + relevant.place,
-      cuerpo: relevant.depth.toFixed(0)+' km de profundidad · '+Math.round(relevant.distance).toLocaleString('es-ES')+' km de tu ubicación',
-      magnitud: relevant.mag,
-      lugar: relevant.place,
-      severidad: relevant.mag>=6?'critica':relevant.mag>=4.5?'alta':'media',
-      timestamp: relevant.time,
-      emitidaPor: 'USGS (automático)'
-    };
-    state.activeAlert = synth;
+function checkUSGSAlarm(){
+  if(!state.alarmOn) return;
+  const r=state.quakes.filter(q=>q.mag>=state.magThreshold).sort((a,b)=>b.time-a.time)[0];
+  if(r&&r.id!==state.lastAlertedId){
+    state.lastAlertedId=r.id;
+    const synth={activa:true,id:r.id,tipo:'sismo',titulo:'Sismo M'+r.mag.toFixed(1)+' · '+r.place,cuerpo:r.depth.toFixed(0)+' km profundidad · '+Math.round(r.distance).toLocaleString('es-ES')+' km de distancia',magnitud:r.mag,lugar:r.place,severidad:r.mag>=6?'critica':r.mag>=4.5?'alta':'media',timestamp:r.time,emitidaPor:'USGS'};
+    state.activeAlert=synth;
     onNewActiveAlert(synth);
   }
 }
 
 /* ================================================================
-   GEOLOCALIZACIÓN & SWITCHES
+   SETTINGS
    ================================================================ */
-function toggleSwitch(el, key) {
-  const isOn = el.classList.toggle('on');
-  state[key+'On'] = isOn;
-  if (key==='geo') { isOn ? requestGeolocation() : (state.hasRealGeo=false); }
-}
-function requestGeolocation() {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos => {
-    state.userLat = pos.coords.latitude;
-    state.userLon = pos.coords.longitude;
-    state.hasRealGeo = true;
-    state.quakes.forEach(q => q.distance = haversine(state.userLat,state.userLon,q.lat,q.lon));
-    renderAll();
-  }, err => console.warn('[Geo]',err.message), {enableHighAccuracy:false,timeout:8000});
-}
-function updateMagThresh(val) {
-  state.magThreshold = parseFloat(val);
-  document.getElementById('magThreshVal').textContent = 'M '+parseFloat(val).toFixed(1);
-}
+function toggleSwitch(el,key){const isOn=el.classList.toggle('on');state[key+'On']=isOn;if(key==='geo'){isOn?requestGeolocation():(state.hasRealGeo=false);}}
+function requestGeolocation(){if(!navigator.geolocation) return;navigator.geolocation.getCurrentPosition(pos=>{state.userLat=pos.coords.latitude;state.userLon=pos.coords.longitude;state.hasRealGeo=true;state.quakes.forEach(q=>q.distance=haversine(state.userLat,state.userLon,q.lat,q.lon));renderAll();},err=>console.warn('[Geo]',err.message),{enableHighAccuracy:false,timeout:8000});}
+function updateMagThresh(val){state.magThreshold=parseFloat(val);document.getElementById('magThreshVal').textContent='M '+parseFloat(val).toFixed(1);}
 
 /* ================================================================
-   AUDIO — Web Audio API (sintetizado, sin archivos)
+   AUDIO
    ================================================================ */
-let audioCtx = null;
-let selectedSound = 'seismic';
+let audioCtx=null,selectedSound='seismic';
+function getAudioCtx(){if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended') audioCtx.resume();return audioCtx;}
+function selectSound(key,el){selectedSound=key;document.querySelectorAll('.sound-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');}
+function previewSound(key){playSoundByKey(key);}
+function playSoundByKey(key){switch(key){case 'eas':return playEASSiren();case 'seismic':return playSeismicAlert();case 'civildef':return playCivilDefense();default:return playSeismicAlert();}}
 
-function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  if (audioCtx.state==='suspended') audioCtx.resume();
-  return audioCtx;
-}
-function selectSound(key, el) {
-  selectedSound = key;
-  document.querySelectorAll('.sound-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-}
-function previewSound(key) { playSoundByKey(key); }
-function playSoundByKey(key) {
-  switch(key) {
-    case 'eas': return playEASSiren();
-    case 'seismic': return playSeismicAlert();
-    case 'civildef': return playCivilDefense();
-    default: return playSeismicAlert();
-  }
-}
+function playEASSiren(){const ctx=getAudioCtx(),now=ctx.currentTime,dur=3.0;const m=ctx.createGain();m.gain.value=0.0001;m.connect(ctx.destination);m.gain.exponentialRampToValueAtTime(0.38,now+0.03);const osc=ctx.createOscillator();osc.type='sawtooth';const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=1200;f.Q.value=0.8;const g=ctx.createGain();g.gain.value=0.6;osc.connect(f);f.connect(g);g.connect(m);const step=0.28;for(let i=0;i<dur/(step*2);i++){const t=now+i*step*2;osc.frequency.setValueAtTime(660,t);osc.frequency.linearRampToValueAtTime(1320,t+step);osc.frequency.linearRampToValueAtTime(660,t+step*2);}m.gain.setValueAtTime(0.38,now+dur-0.2);m.gain.exponentialRampToValueAtTime(0.0001,now+dur);osc.start(now);osc.stop(now+dur);return dur;}
 
-function playEASSiren() {
-  const ctx=getAudioCtx(),now=ctx.currentTime,dur=3.0;
-  const master=ctx.createGain();
-  master.gain.value=0.0001;master.connect(ctx.destination);
-  master.gain.exponentialRampToValueAtTime(0.38,now+0.03);
-  const osc=ctx.createOscillator();osc.type='sawtooth';
-  const filt=ctx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=1200;filt.Q.value=0.8;
-  const g=ctx.createGain();g.gain.value=0.6;
-  osc.connect(filt);filt.connect(g);g.connect(master);
-  const step=0.28;
-  for(let i=0;i<dur/(step*2);i++){
-    const t=now+i*step*2;
-    osc.frequency.setValueAtTime(660,t);
-    osc.frequency.linearRampToValueAtTime(1320,t+step);
-    osc.frequency.linearRampToValueAtTime(660,t+step*2);
-  }
-  master.gain.setValueAtTime(0.38,now+dur-0.2);
-  master.gain.exponentialRampToValueAtTime(0.0001,now+dur);
-  osc.start(now);osc.stop(now+dur);return dur;
-}
+function playSeismicAlert(){const ctx=getAudioCtx(),now=ctx.currentTime,dur=4.0;const m=ctx.createGain();m.gain.setValueAtTime(0.0001,now);m.gain.linearRampToValueAtTime(0.42,now+0.05);m.gain.setValueAtTime(0.42,now+dur-0.2);m.gain.linearRampToValueAtTime(0.0001,now+dur);m.connect(ctx.destination);const r=ctx.createOscillator();r.type='sine';r.frequency.setValueAtTime(38,now);r.frequency.linearRampToValueAtTime(55,now+dur);const rg=ctx.createGain();rg.gain.value=0.6;r.connect(rg);rg.connect(m);r.start(now);r.stop(now+dur);[0,0.5,0.9,1.2,1.45,1.65,1.82,1.96,2.08,2.18].forEach((offset,i)=>{const t=now+offset,osc=ctx.createOscillator();osc.type='square';osc.frequency.value=440+i*55;const env=ctx.createGain();const bd=0.07+i*0.008;env.gain.setValueAtTime(0.0001,t);env.gain.linearRampToValueAtTime(0.35+i*0.04,t+0.008);env.gain.setValueAtTime(0.35+i*0.04,t+bd-0.01);env.gain.linearRampToValueAtTime(0.0001,t+bd);osc.connect(env);env.connect(m);osc.start(t);osc.stop(t+bd+0.02);});return dur;}
 
-function playSeismicAlert() {
-  const ctx=getAudioCtx(),now=ctx.currentTime,dur=4.0;
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(0.0001,now);
-  master.gain.linearRampToValueAtTime(0.42,now+0.05);
-  master.gain.setValueAtTime(0.42,now+dur-0.2);
-  master.gain.linearRampToValueAtTime(0.0001,now+dur);
-  master.connect(ctx.destination);
-  const rumble=ctx.createOscillator();rumble.type='sine';
-  rumble.frequency.setValueAtTime(38,now);
-  rumble.frequency.linearRampToValueAtTime(55,now+dur);
-  const rg=ctx.createGain();rg.gain.value=0.6;
-  rumble.connect(rg);rg.connect(master);
-  rumble.start(now);rumble.stop(now+dur);
-  [0,0.5,0.9,1.2,1.45,1.65,1.82,1.96,2.08,2.18].forEach((offset,i) => {
-    const t=now+offset,osc=ctx.createOscillator();
-    osc.type='square';osc.frequency.value=440+i*55;
-    const env=ctx.createGain();const beepDur=0.07+i*0.008;
-    env.gain.setValueAtTime(0.0001,t);
-    env.gain.linearRampToValueAtTime(0.35+i*0.04,t+0.008);
-    env.gain.setValueAtTime(0.35+i*0.04,t+beepDur-0.01);
-    env.gain.linearRampToValueAtTime(0.0001,t+beepDur);
-    osc.connect(env);env.connect(master);
-    osc.start(t);osc.stop(t+beepDur+0.02);
-  });
-  return dur;
-}
+function playCivilDefense(){const ctx=getAudioCtx(),now=ctx.currentTime,dur=6.0;const m=ctx.createGain();m.gain.setValueAtTime(0.0001,now);m.gain.linearRampToValueAtTime(0.45,now+0.3);m.gain.setValueAtTime(0.45,now+dur-0.4);m.gain.linearRampToValueAtTime(0.0001,now+dur);m.connect(ctx.destination);const osc=ctx.createOscillator();osc.type='sawtooth';const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=2400;const g=ctx.createGain();g.gain.value=0.55;osc.connect(f);f.connect(g);g.connect(m);const cl=3.0;for(let i=0;i<Math.ceil(dur/cl);i++){const t=now+i*cl;osc.frequency.setValueAtTime(220,t);osc.frequency.exponentialRampToValueAtTime(900,t+cl*0.67);osc.frequency.exponentialRampToValueAtTime(220,t+cl);}osc.start(now);osc.stop(now+dur);return dur;}
 
-function playCivilDefense() {
-  const ctx=getAudioCtx(),now=ctx.currentTime,dur=6.0;
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(0.0001,now);
-  master.gain.linearRampToValueAtTime(0.45,now+0.3);
-  master.gain.setValueAtTime(0.45,now+dur-0.4);
-  master.gain.linearRampToValueAtTime(0.0001,now+dur);
-  master.connect(ctx.destination);
-  const osc=ctx.createOscillator();osc.type='sawtooth';
-  const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=2400;
-  const g=ctx.createGain();g.gain.value=0.55;
-  osc.connect(filt);filt.connect(g);g.connect(master);
-  const cycleLen=3.0;
-  for(let i=0;i<Math.ceil(dur/cycleLen);i++){
-    const t=now+i*cycleLen;
-    osc.frequency.setValueAtTime(220,t);
-    osc.frequency.exponentialRampToValueAtTime(900,t+cycleLen*0.67);
-    osc.frequency.exponentialRampToValueAtTime(220,t+cycleLen);
-  }
-  osc.start(now);osc.stop(now+dur);return dur;
-}
-
-function testAlarm() {
-  const btn=document.getElementById('testAlarmBtn');
-  const dur=playSoundByKey(selectedSound);
-  if(state.vibrateOn&&navigator.vibrate) navigator.vibrate([250,90,250,90,250,90,600]);
-  btn.classList.add('playing');
-  flashScreen();
-  setTimeout(()=>btn.classList.remove('playing'),dur*1000);
-}
-
-function flashScreen() {
-  const el=document.getElementById('screenFlash');
-  el.classList.remove('active');
-  void el.offsetWidth;
-  el.classList.add('active');
-  setTimeout(()=>el.classList.remove('active'),2600);
-}
+function testAlarm(){const btn=document.getElementById('testAlarmBtn');const dur=playSoundByKey(selectedSound);if(state.vibrateOn&&navigator.vibrate) navigator.vibrate([250,90,250,90,250,90,600]);btn.classList.add('playing');flashScreen();setTimeout(()=>btn.classList.remove('playing'),dur*1000);}
+function flashScreen(){const el=document.getElementById('screenFlash');el.classList.remove('active');void el.offsetWidth;el.classList.add('active');setTimeout(()=>el.classList.remove('active'),2600);}
 
 /* ================================================================
-   POLLING & ARRANQUE
+   POLLING
    ================================================================ */
-let pollInterval = null;
-function startPolling() {
-  if(pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(loadQuakes, 60000);
-}
+let pollInterval=null;
+function startPolling(){if(pollInterval) clearInterval(pollInterval);pollInterval=setInterval(loadQuakes,60000);}
 
-async function init() {
-  // Iniciar audio con primer clic
-  document.body.addEventListener('click', () => getAudioCtx(), {once:true});
-
-  // Firebase
-  initFirebase();
-
-  // USGS
-  await loadQuakes();
-  startPolling();
-
-  // Service Worker
-  if ('serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('[SW] Firebase Messaging SW registrado');
-    } catch(err) {
-      console.warn('[SW]', err.message);
-    }
-  }
-
-  // FCM foreground handler
-  setupFCMForeground();
-
-  // Comprobar permisos actuales
-  if ('Notification' in window) {
-    const statusEl = document.getElementById('pushPermStatus');
-    if (Notification.permission === 'granted') {
-      statusEl.textContent = 'Notificaciones activadas ✓';
-    } else if (Notification.permission === 'denied') {
-      statusEl.textContent = 'Notificaciones bloqueadas — actívalas desde ajustes';
-    }
-  }
-}
-
-init();
+/* ================================================================
+   BOOT
+   ================================================================ */
+startSplash();
 </script>
 </body>
 </html>
