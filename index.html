@@ -170,7 +170,9 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .welcome-sub{font-size:15px;color:var(--text-2);text-align:center;line-height:1.55;max-width:300px;margin-bottom:40px;}
 
 /* ID verification */
-.id-section{padding:28px 24px;display:flex;flex-direction:column;gap:16px;flex:1;}
+.id-screen{display:flex;flex-direction:column;min-height:100%;background:#fff;}
+.id-header{padding:calc(env(safe-area-inset-top)+28px) 24px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.id-section{padding:12px 24px 16px;display:flex;flex-direction:column;gap:16px;flex:1;width:100%;max-width:520px;margin:0 auto;}
 .id-card-btn{
   background:var(--surface);border:1.5px solid var(--stroke-strong);border-radius:18px;
   padding:20px 18px;display:flex;align-items:center;gap:16px;
@@ -192,7 +194,7 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .id-card-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
 .id-card-btn.done .id-card-status{color:#22c55e;}
 .id-submit{
-  margin:16px 24px;border-radius:16px;padding:17px;
+  margin:auto 24px calc(env(safe-area-inset-bottom) + 20px);border-radius:16px;padding:17px;
   font-size:15.5px;font-weight:800;color:#fff;
   background:linear-gradient(135deg,var(--primary),#f2542d);
   box-shadow:0 12px 28px -10px rgba(206,17,38,0.5);
@@ -591,7 +593,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 
 <!-- ===== ID VERIFICATION ===== -->
 <div class="screen" id="screen-id">
-  <div style="padding:calc(env(safe-area-inset-top)+28px) 24px 16px;display:flex;align-items:center;gap:10px;">
+  <div class="id-screen">
+  <div class="id-header">
     <div>
       <div style="font-family:var(--font-display);font-size:26px;letter-spacing:.02em;">Verifica tu Carné</div>
       <div style="font-size:13px;color:var(--text-2);margin-top:2px;">Escanea ambos lados de tu carnet de identidad</div>
@@ -625,6 +628,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </p>
   </div>
   <button class="id-submit" id="idSubmitBtn" onclick="completeIdVerification()">Continuar a AlertaCuba</button>
+  </div>
 </div>
 
 <!-- ===== CAMERA OVERLAY ===== -->
@@ -1280,16 +1284,20 @@ let _camStream = null;
 let _camAnimFrame = null;
 let _detectionTimer = null;
 let _detectionProgress = 0;
+let _idCaptures = {front: null, back: null};
+let _barcodeDetector = null;
 
-document.getElementById('idFrontBtn').addEventListener('click', () => openCamera('front'));
-document.getElementById('idBackBtn').addEventListener('click', () => openCamera('back'));
-document.getElementById('linkEmailRow').addEventListener('click', toggleLinkEmail);
+const linkEmailRow = document.getElementById('linkEmailRow');
+if (linkEmailRow) linkEmailRow.addEventListener('click', toggleLinkEmail);
 
 async function openCamera(mode) {
   _camMode = mode;
   const overlay = document.getElementById('cam-overlay');
   const title = document.getElementById('camTitle');
   title.textContent = mode === 'front' ? 'Parte delantera del carnet' : 'Reverso del carnet';
+  document.getElementById('camStatus').textContent = 'Coloca tu carnet dentro del recuadro';
+  document.getElementById('camProgressBar').style.width = '0%';
+  document.getElementById(mode === 'front' ? 'idFrontBtn' : 'idBackBtn').classList.add('active');
   overlay.classList.add('active');
 
   try {
@@ -1299,16 +1307,26 @@ async function openCamera(mode) {
     const video = document.getElementById('cam-video');
     video.srcObject = _camStream;
     await video.play();
+    if (mode === 'back' && 'BarcodeDetector' in window) {
+      _barcodeDetector = new BarcodeDetector({formats: ['code_128', 'code_39', 'codabar', 'ean_13', 'pdf417', 'qr_code']});
+    } else {
+      _barcodeDetector = null;
+    }
     startScanLoop();
   } catch(err) {
     console.warn('[Camera]', err);
-    // Simulate scan if camera not available
-    simulateScan();
+    const status = document.getElementById('camStatus');
+    const progressBar = document.getElementById('camProgressBar');
+    if (progressBar) progressBar.style.width = '0%';
+    if (status) status.textContent = 'No se pudo abrir la cámara. Activa permisos y usa HTTPS.';
+    document.getElementById(mode === 'front' ? 'idFrontBtn' : 'idBackBtn').classList.remove('active');
   }
 }
 
 function closeCamera() {
   stopCamera();
+  document.getElementById('idFrontBtn').classList.remove('active');
+  document.getElementById('idBackBtn').classList.remove('active');
   document.getElementById('cam-overlay').classList.remove('active');
 }
 
@@ -1316,6 +1334,8 @@ function stopCamera() {
   cancelAnimationFrame(_camAnimFrame);
   clearTimeout(_detectionTimer);
   _detectionProgress = 0;
+  const progressBar = document.getElementById('camProgressBar');
+  if (progressBar) progressBar.style.width = '0%';
   if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
 }
 
@@ -1391,6 +1411,12 @@ function startScanLoop() {
     const variance = analyze() || 0;
     let detected = false;
 
+    if (_camMode === 'back' && _barcodeDetector) {
+      _barcodeDetector.detect(video).then(codes => {
+        if (codes && codes.length) stableFrames = Math.max(stableFrames, NEEDED_FRAMES);
+      }).catch(() => { _barcodeDetector = null; });
+    }
+
     if (variance < 80) {
       status.textContent = 'Coloca tu carnet en el recuadro';
       stableFrames = 0;
@@ -1425,25 +1451,15 @@ function startScanLoop() {
   setTimeout(loop, 300);
 }
 
-function simulateScan() {
-  // Fallback when camera is unavailable (HTTP context)
-  const status = document.getElementById('camStatus');
-  const progressBar = document.getElementById('camProgressBar');
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 5;
-    progressBar.style.width = progress + '%';
-    if (progress < 60) status.textContent = 'Simulando escaneo...';
-    else status.textContent = 'Detectando carnet...';
-    if (progress >= 100) {
-      clearInterval(interval);
-      status.textContent = '✓ Detectado — procesando...';
-      setTimeout(() => captureScan(), 500);
-    }
-  }, 120);
-}
-
 function captureScan() {
+  const video = document.getElementById('cam-video');
+  if (video && video.videoWidth && video.videoHeight) {
+    const snap = document.createElement('canvas');
+    snap.width = video.videoWidth;
+    snap.height = video.videoHeight;
+    snap.getContext('2d').drawImage(video, 0, 0, snap.width, snap.height);
+    _idCaptures[_camMode] = snap.toDataURL('image/jpeg', 0.82);
+  }
   stopCamera();
   _idScanned[_camMode] = true;
 
@@ -1452,7 +1468,7 @@ function captureScan() {
   const btn = document.getElementById(btnId);
   btn.classList.add('done');
   btn.classList.remove('active');
-  document.getElementById(statusId).textContent = '✓ Escaneado correctamente';
+  document.getElementById(statusId).textContent = '✓ Escaneado real completado';
   document.getElementById('cam-overlay').classList.remove('active');
 
   if (_idScanned.front && _idScanned.back) {
