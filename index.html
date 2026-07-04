@@ -99,7 +99,11 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .form-title{font-family:var(--font-display);font-size:28px;letter-spacing:.03em;}
 
 /* form fields */
-.form-body{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;}
+.form-body{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;}
+.form-actions{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:12px;}
+.form-actions .form-submit{margin-top:0;}
+.form-actions .form-note{margin-top:0;}
+.form-fields{display:flex;flex-direction:column;gap:14px;}
 .field-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:5px;display:block;}
 .field-input{
   width:100%;padding:14px 16px;border:1.5px solid var(--stroke-strong);border-radius:14px;
@@ -509,9 +513,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <input class="field-input" type="password" id="loginPwd" placeholder="Tu contraseña" autocomplete="current-password"
           onkeydown="if(event.key==='Enter') doLogin()">
       </div>
-      <p class="form-error" id="loginError"></p>
-      <button class="form-submit" id="loginBtn" onclick="doLogin()">Entrar</button>
-      <p class="form-note">¿No tienes cuenta? <span class="form-link" onclick="showScreen('screen-register')">Regístrate</span></p>
+      <div class="form-actions">
+        <p class="form-error" id="loginError"></p>
+        <button class="form-submit" id="loginBtn" onclick="doLogin()">Entrar</button>
+        <p class="form-note">¿No tienes cuenta? <span class="form-link" onclick="showScreen('screen-register')">Regístrate</span></p>
+      </div>
     </div>
   </div>
 </div>
@@ -541,9 +547,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <input class="field-input" type="password" id="regPwd2" placeholder="Repite la contraseña" autocomplete="new-password"
           onkeydown="if(event.key==='Enter') doRegister()">
       </div>
-      <p class="form-error" id="regError"></p>
-      <button class="form-submit" id="regBtn" onclick="doRegister()">Verificar número</button>
-      <p class="form-note">Al registrarte aceptas los términos del servicio de AlertaCuba.</p>
+      <div class="form-actions">
+        <p class="form-error" id="regError"></p>
+        <button class="form-submit" id="regBtn" onclick="doRegister()">Crear cuenta</button>
+        <p class="form-note">Al registrarte aceptas los términos del servicio de AlertaCuba.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -560,9 +568,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
       <div id="captchaContainer" style="background:var(--surface-2);border-radius:14px;padding:20px;margin:16px 0;border:1.5px solid var(--stroke-strong);">
         <div id="captchaContent"></div>
       </div>
-      <p class="form-error" id="captchaError"></p>
-      <button class="form-submit" id="captchaBtn" onclick="verifyCaptcha()" disabled>Verificar</button>
-      <p class="form-note"><span class="form-link" onclick="refreshCaptcha()">Generar nuevo desafío</span></p>
+      <div class="form-actions">
+        <p class="form-error" id="captchaError"></p>
+        <button class="form-submit" id="captchaBtn" onclick="verifyCaptcha()" disabled>Verificar</button>
+        <p class="form-note"><span class="form-link" onclick="refreshCaptcha()">Generar nuevo desafío</span></p>
+      </div>
     </div>
   </div>
 </div>
@@ -943,8 +953,6 @@ const FIREBASE_CONFIG = {
 /* Emails con acceso de administrador */
 const ADMIN_EMAILS = ['zam.contact@yahoo.com'];
 
-/* VAPID key — obtener de Firebase Console → Cloud Messaging → Web configuration */
-const VAPID_KEY = "";
 
 const USGS_FEEDS = {
   hour:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
@@ -1032,9 +1040,6 @@ function enterApp(user) {
   loadQuakes();
   startPolling();
   setupFCMForeground();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
-  }
   document.body.addEventListener('click', () => getAudioCtx(), {once:true});
 }
 
@@ -1080,7 +1085,7 @@ async function doRegister() {
     const internalEmail = normalizePhoneEmail(_regPhone);
     const emailCred = firebase.auth.EmailAuthProvider.credential(internalEmail, _regPassword);
     const result = await auth.signInWithCredential(emailCred).catch(err => {
-      if (err.code === 'auth/user-not-found') {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
         return firebase.auth().createUserWithEmailAndPassword(internalEmail, _regPassword);
       }
       throw err;
@@ -1743,7 +1748,7 @@ function magColor(mag){if(mag>=6) return{badgeBg:'rgba(225,6,0,0.15)',badgeFg:'#
 function timeAgo(ts){if(!ts) return'—';const diff=Date.now()-ts,min=Math.floor(diff/60000);if(min<1) return'ahora';if(min<60) return min+' min';const h=Math.floor(min/60);if(h<24) return h+' h';return Math.floor(h/24)+' d';}
 function fmtDate(ts){return new Date(ts).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function errorMsg(code){const m={'auth/invalid-phone-number':'Número de teléfono inválido.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
+function errorMsg(code){const m={'auth/invalid-credential':'Credenciales incorrectas. Revisa el teléfono/correo y la contraseña, o crea una cuenta nueva.','auth/invalid-phone-number':'Número de teléfono inválido.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
 
 /* ================================================================
    USGS — SISMOS
