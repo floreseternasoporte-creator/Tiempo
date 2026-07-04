@@ -125,6 +125,7 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .form-note{font-size:12px;color:var(--text-3);text-align:center;line-height:1.5;margin-top:4px;}
 .form-error{font-size:13px;color:var(--danger);font-weight:600;text-align:center;min-height:18px;}
 .form-link{font-size:13px;color:var(--info);font-weight:700;cursor:pointer;text-align:center;margin-top:8px;}
+.form-link:active{opacity:.7;}
 
 /* OTP input */
 .otp-wrap{display:flex;gap:10px;justify-content:center;margin:8px 0;}
@@ -136,6 +137,19 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 }
 .otp-box:focus{border-color:var(--primary);}
 .otp-hint{font-size:13px;color:var(--text-2);text-align:center;line-height:1.5;}
+
+/* CAPTCHA PERSONALIZADO */
+.captcha-puzzle{display:flex;flex-direction:column;gap:16px;}
+.captcha-question{font-size:15px;font-weight:700;color:var(--text-1);text-align:center;}
+.captcha-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.captcha-option{padding:12px;border:2px solid var(--stroke-strong);border-radius:12px;background:var(--surface);cursor:pointer;transition:all .2s;text-align:center;font-weight:600;font-size:14px;color:var(--text-1);}
+.captcha-option:active{transform:scale(0.95);}
+.captcha-option.selected{border-color:var(--primary);background:rgba(206,17,38,0.08);color:var(--primary);}
+.captcha-math{font-size:18px;font-weight:800;color:var(--primary);font-family:monospace;}
+.captcha-input-group{display:flex;gap:8px;}
+.captcha-input{flex:1;padding:12px;border:2px solid var(--stroke-strong);border-radius:12px;font-size:16px;font-weight:700;text-align:center;background:var(--surface);outline:none;transition:border-color .2s;}
+.captcha-input:focus{border-color:var(--primary);}
+.captcha-input::placeholder{color:var(--text-3);}
 
 /* Welcome screen */
 .welcome-icon{
@@ -534,26 +548,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
   </div>
 </div>
 
-<!-- ===== OTP ===== -->
-<div class="screen" id="screen-otp">
+<!-- ===== CAPTCHA PERSONALIZADO ===== -->
+<div class="screen" id="screen-captcha">
   <div class="auth-screen" style="justify-content:flex-start;padding-top:calc(env(safe-area-inset-top)+28px);">
     <div class="form-header">
-      <button class="back-btn" onclick="showScreen('screen-register')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
-      <span class="form-title">Código SMS</span>
+      <button class="back-btn" onclick="showScreen('screen-login')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="form-title">Verificación de seguridad</span>
     </div>
     <div class="form-body">
-      <p class="otp-hint">Enviamos un código de 6 dígitos al número <strong id="otpPhoneLabel">+53 —</strong>. Introdúcelo aquí.</p>
-      <div class="otp-wrap" id="otpWrap">
-        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
-        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
-        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
-        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
-        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
-        <input class="otp-box" type="tel" maxlength="1" inputmode="numeric">
+      <p class="otp-hint">Resuelve el desafío para continuar</p>
+      <div id="captchaContainer" style="background:var(--surface-2);border-radius:14px;padding:20px;margin:16px 0;border:1.5px solid var(--stroke-strong);">
+        <div id="captchaContent"></div>
       </div>
-      <p class="form-error" id="otpError"></p>
-      <button class="form-submit" id="otpBtn" onclick="doConfirmOTP()">Confirmar código</button>
-      <p class="form-note">¿No recibiste el código? <span class="form-link" onclick="resendOTP()">Reenviar</span></p>
+      <p class="form-error" id="captchaError"></p>
+      <button class="form-submit" id="captchaBtn" onclick="verifyCaptcha()" disabled>Verificar</button>
+      <p class="form-note"><span class="form-link" onclick="refreshCaptcha()">Generar nuevo desafío</span></p>
     </div>
   </div>
 </div>
@@ -979,8 +988,12 @@ function initFirebase() {
       const snap = await db.ref('users/' + user.uid + '/idVerified').get();
       if (snap.val() === true) {
         enterApp(user);
-      } else {
+      } else if (_captchaVerified) {
+        // Si el captcha fue verificado, mostrar la pantalla de ID
         showScreen('screen-id');
+      } else {
+        // Si no hay sesión, mostrar login
+        showScreen('screen-auth');
       }
     } else {
       showScreen('screen-auth');
@@ -1006,6 +1019,7 @@ function startSplash() {
    ================================================================ */
 function enterApp(user) {
   showScreen('screen-app');
+  _captchaVerified = false; // Resetear captcha para próximas sesiones
   // Show/hide admin entry
   const isAdmin = ADMIN_EMAILS.includes((user.email||'').toLowerCase());
   document.getElementById('adminEntry').style.display = isAdmin ? 'block' : 'none';
@@ -1040,9 +1054,8 @@ async function doSignOut() {
 }
 
 /* ================================================================
-   REGISTER — phone OTP + link email/password
+   REGISTER — phone + password (sin OTP)
    ================================================================ */
-let _confirmationResult = null;
 let _regPassword = '';
 let _regPhone = '';
 
@@ -1061,94 +1074,149 @@ async function doRegister() {
   _regPassword = pwd;
 
   const btn = document.getElementById('regBtn');
-  btn.disabled = true; btn.textContent = 'Enviando código...';
+  btn.disabled = true; btn.textContent = 'Creando cuenta...';
 
   try {
-    if (!window._recaptchaVerifier) {
-      window._recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {size:'invisible'});
-    }
-    _confirmationResult = await auth.signInWithPhoneNumber(_regPhone, window._recaptchaVerifier);
-    document.getElementById('otpPhoneLabel').textContent = _regPhone;
-    showScreen('screen-otp');
-    setupOTPBoxes();
-  } catch(err) {
-    console.error('[Auth]', err);
-    errEl.textContent = errorMsg(err.code);
-    // Reset recaptcha on error
-    window._recaptchaVerifier = null;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Verificar número';
-  }
-}
-
-function setupOTPBoxes() {
-  const boxes = document.querySelectorAll('.otp-box');
-  boxes.forEach((box, i) => {
-    box.value = '';
-    box.oninput = () => {
-      box.value = box.value.replace(/\D/g,'').slice(-1);
-      if (box.value && i < boxes.length - 1) boxes[i+1].focus();
-    };
-    box.onkeydown = (e) => {
-      if (e.key === 'Backspace' && !box.value && i > 0) boxes[i-1].focus();
-      if (e.key === 'Enter') doConfirmOTP();
-    };
-  });
-  boxes[0].focus();
-}
-
-async function doConfirmOTP() {
-  const boxes = document.querySelectorAll('.otp-box');
-  const code = Array.from(boxes).map(b => b.value).join('');
-  const errEl = document.getElementById('otpError');
-  errEl.textContent = '';
-
-  if (code.length < 6) { errEl.textContent = 'Introduce los 6 dígitos del código.'; return; }
-
-  const btn = document.getElementById('otpBtn');
-  btn.disabled = true; btn.textContent = 'Verificando...';
-
-  try {
-    const result = await _confirmationResult.confirm(code);
-    const user = result.user;
-
-    // Link email/password credential using phone-based internal email
     const internalEmail = normalizePhoneEmail(_regPhone);
     const emailCred = firebase.auth.EmailAuthProvider.credential(internalEmail, _regPassword);
-    try {
-      await user.linkWithCredential(emailCred);
-    } catch(linkErr) {
-      // credential-already-in-use means it was already linked (e.g. re-registration); ok
-      if (linkErr.code !== 'auth/provider-already-linked' && linkErr.code !== 'auth/credential-already-in-use') {
-        console.error('[Link]', linkErr);
-        throw new Error('No se pudo crear tu cuenta completa. Intenta de nuevo.');
+    const result = await auth.signInWithCredential(emailCred).catch(err => {
+      if (err.code === 'auth/user-not-found') {
+        return firebase.auth().createUserWithEmailAndPassword(internalEmail, _regPassword);
       }
-    }
+      throw err;
+    });
+    const user = result.user;
 
     // Save profile to DB
     await db.ref('users/' + user.uid).set({
       phone: _regPhone,
-      internalEmail: _regPhone.replace('+','') + '@alertacuba.internal',
+      internalEmail: internalEmail,
       createdAt: Date.now()
     });
 
-    showScreen('screen-welcome');
+    // Después del registro, mostrar el captcha
+    _captchaVerified = false;
+    refreshCaptcha();
+    showScreen('screen-captcha');
   } catch(err) {
-    console.error('[OTP]', err);
-    errEl.textContent = 'Código incorrecto. Intenta de nuevo.';
+    console.error('[Register]', err);
+    errEl.textContent = errorMsg(err.code);
   } finally {
-    btn.disabled = false; btn.textContent = 'Confirmar código';
+    btn.disabled = false; btn.textContent = 'Crear cuenta';
   }
 }
 
-async function resendOTP() {
-  try {
-    window._recaptchaVerifier = null;
-    window._recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {size:'invisible'});
-    _confirmationResult = await auth.signInWithPhoneNumber(_regPhone, window._recaptchaVerifier);
-    document.getElementById('otpError').textContent = 'Código reenviado.';
-  } catch(err) {
-    document.getElementById('otpError').textContent = errorMsg(err.code);
+/* ================================================================
+   CAPTCHA PERSONALIZADO
+   ================================================================ */
+let _currentCaptcha = null;
+let _captchaVerified = false;
+
+function generateCaptcha() {
+  _captchaVerified = false;
+  const types = ['math', 'select', 'sequence'];
+  const type = types[Math.floor(Math.random() * types.length)];
+  
+  switch(type) {
+    case 'math': return generateMathCaptcha();
+    case 'select': return generateSelectCaptcha();
+    case 'sequence': return generateSequenceCaptcha();
+    default: return generateMathCaptcha();
+  }
+}
+
+function generateMathCaptcha() {
+  const a = Math.floor(Math.random() * 20) + 1;
+  const b = Math.floor(Math.random() * 20) + 1;
+  const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
+  let result;
+  
+  if (op === '+') result = a + b;
+  else if (op === '-') result = a - b;
+  else result = a * b;
+  
+  _currentCaptcha = {
+    type: 'math',
+    question: `¿Cuál es el resultado de ${a} ${op} ${b}?`,
+    answer: result.toString(),
+    display: `<div class="captcha-puzzle"><div class="captcha-question">¿Cuál es el resultado?</div><div class="captcha-math">${a} ${op} ${b} = ?</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric"></div></div>`
+  };
+  return _currentCaptcha.display;
+}
+
+function generateSelectCaptcha() {
+  const questions = [
+    { q: '¿Cuál es la capital de Cuba?', options: ['La Habana', 'Santiago', 'Matanzas', 'Cienfuegos'], answer: 'La Habana' },
+    { q: '¿Cuál es el color del cielo?', options: ['Azul', 'Verde', 'Rojo', 'Amarillo'], answer: 'Azul' },
+    { q: '¿Cuántos días tiene una semana?', options: ['5', '6', '7', '8'], answer: '7' },
+    { q: '¿Cuál es el planeta más grande?', options: ['Tierra', 'Marte', 'Júpiter', 'Venus'], answer: 'Júpiter' }
+  ];
+  const q = questions[Math.floor(Math.random() * questions.length)];
+  const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+  
+  _currentCaptcha = {
+    type: 'select',
+    question: q.q,
+    answer: q.answer,
+    display: `<div class="captcha-puzzle"><div class="captcha-question">${q.q}</div><div class="captcha-options">${shuffled.map(opt => `<button type="button" class="captcha-option" onclick="selectCaptchaOption(this, '${opt}')">${opt}</button>`).join('')}</div></div>`
+  };
+  return _currentCaptcha.display;
+}
+
+function generateSequenceCaptcha() {
+  const sequences = [
+    { seq: [2, 4, 6, 8], next: 10, q: '¿Cuál es el siguiente número?' },
+    { seq: [1, 1, 2, 3, 5], next: 8, q: '¿Cuál es el siguiente número?' },
+    { seq: [10, 9, 8, 7], next: 6, q: '¿Cuál es el siguiente número?' }
+  ];
+  const s = sequences[Math.floor(Math.random() * sequences.length)];
+  
+  _currentCaptcha = {
+    type: 'sequence',
+    question: s.q,
+    answer: s.next.toString(),
+    display: `<div class="captcha-puzzle"><div class="captcha-question">${s.seq.join(', ')}, ?</div><div class="captcha-question" style="font-size:13px;color:var(--text-2);margin-top:-8px;">${s.q}</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric"></div></div>`
+  };
+  return _currentCaptcha.display;
+}
+
+function selectCaptchaOption(el, value) {
+  document.querySelectorAll('.captcha-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.dataset.selected = value;
+  document.getElementById('captchaBtn').disabled = false;
+}
+
+function refreshCaptcha() {
+  document.getElementById('captchaError').textContent = '';
+  const content = generateCaptcha();
+  document.getElementById('captchaContent').innerHTML = content;
+  document.getElementById('captchaBtn').disabled = true;
+  const input = document.getElementById('captchaAnswer');
+  if (input) input.focus();
+}
+
+function verifyCaptcha() {
+  const errEl = document.getElementById('captchaError');
+  errEl.textContent = '';
+  
+  let userAnswer = '';
+  if (_currentCaptcha.type === 'select') {
+    const selected = document.querySelector('.captcha-option.selected');
+    userAnswer = selected ? selected.dataset.selected : '';
+  } else {
+    const input = document.getElementById('captchaAnswer');
+    userAnswer = input ? input.value.trim() : '';
+  }
+  
+  if (!userAnswer) { errEl.textContent = 'Por favor, completa el desafío.'; return; }
+  
+  if (userAnswer === _currentCaptcha.answer) {
+    _captchaVerified = true;
+    showScreen('screen-id');
+  } else {
+    errEl.textContent = 'Respuesta incorrecta. Intenta de nuevo.';
+    refreshCaptcha();
   }
 }
 
@@ -1173,7 +1241,10 @@ async function doLogin() {
       email = normalizePhoneEmail(id);
     }
     await auth.signInWithEmailAndPassword(email, pwd);
-    // onAuthStateChanged will handle navigation
+    // Mostrar captcha después del login
+    _captchaVerified = false;
+    refreshCaptcha();
+    showScreen('screen-captcha');
   } catch(err) {
     console.error('[Login]', err);
     errEl.textContent = errorMsg(err.code);
