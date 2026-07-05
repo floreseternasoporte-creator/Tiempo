@@ -170,18 +170,18 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .welcome-sub{font-size:15px;color:var(--text-2);text-align:center;line-height:1.55;max-width:300px;margin-bottom:40px;}
 
 /* ID verification */
-.id-screen{display:flex;flex-direction:column;min-height:100%;background:#fff;}
-.id-header{padding:calc(env(safe-area-inset-top)+28px) 24px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.id-section{padding:12px 24px 16px;display:flex;flex-direction:column;gap:16px;flex:1;width:100%;max-width:520px;margin:0 auto;}
+.id-screen{display:flex;flex-direction:column;height:100%;min-height:100%;background:#fff;overflow:hidden;}
+.id-header{padding:calc(env(safe-area-inset-top)+18px) 22px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.id-section{padding:8px 22px 12px;display:flex;flex-direction:column;gap:12px;flex:1;width:100%;max-width:520px;margin:0 auto;overflow-y:auto;}
 .id-card-btn{
   background:var(--surface);border:1.5px solid var(--stroke-strong);border-radius:18px;
-  padding:20px 18px;display:flex;align-items:center;gap:16px;
+  padding:16px 16px;display:flex;align-items:center;gap:14px;
   cursor:pointer;transition:border-color .2s,background .2s;
 }
 .id-card-btn.done{border-color:#22c55e;background:rgba(34,197,94,0.04);}
 .id-card-btn.active{border-color:var(--primary);background:rgba(206,17,38,0.04);}
 .id-card-icon{
-  width:52px;height:52px;border-radius:14px;flex-shrink:0;
+  width:46px;height:46px;border-radius:14px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   background:var(--surface-2);
 }
@@ -194,7 +194,7 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 .id-card-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
 .id-card-btn.done .id-card-status{color:#22c55e;}
 .id-submit{
-  margin:auto 24px calc(env(safe-area-inset-bottom) + 20px);border-radius:16px;padding:17px;
+  margin:8px 22px calc(env(safe-area-inset-bottom) + 14px);border-radius:16px;padding:16px;flex-shrink:0;
   font-size:15.5px;font-weight:800;color:#fff;
   background:linear-gradient(135deg,var(--primary),#f2542d);
   box-shadow:0 12px 28px -10px rgba(206,17,38,0.5);
@@ -269,7 +269,6 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
 }
 .brand-wordmark{color:var(--text-1);}
 .topbar-title .brand-icon{width:26px;height:26px;color:var(--primary);}
-.topbar-actions{display:flex;align-items:center;gap:10px;}
 .icon-btn{
   width:36px;height:36px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -727,11 +726,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         </svg>
         <span style="color:var(--primary);">Alerta</span><span class="brand-wordmark">Cuba</span>
       </div>
-      <div class="topbar-actions">
-        <button class="icon-btn" onclick="goToView('settings')">
-          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-      </div>
+
     </div>
 
     <!-- VIEW: INICIO -->
@@ -1339,7 +1334,9 @@ function startScanLoop() {
   const progressBar = document.getElementById('camProgressBar');
 
   let stableFrames = 0;
-  const NEEDED_FRAMES = 18; // ~1.5s at 12fps
+  const NEEDED_FRAMES = 90;
+  const MIN_SCAN_MS = 4500;
+  const scanStartedAt = Date.now();
   _detectionProgress = 0;
 
   function drawOverlay(detected) {
@@ -1405,7 +1402,7 @@ function startScanLoop() {
 
     if (_camMode === 'back' && _barcodeDetector) {
       _barcodeDetector.detect(video).then(codes => {
-        if (codes && codes.length) stableFrames = Math.max(stableFrames, NEEDED_FRAMES);
+        if (codes && codes.length) stableFrames = Math.max(stableFrames, Math.ceil(NEEDED_FRAMES * 0.75));
       }).catch(() => { _barcodeDetector = null; });
     }
 
@@ -1422,15 +1419,18 @@ function startScanLoop() {
       stableFrames++;
       detected = stableFrames > 3;
       if (stableFrames < NEEDED_FRAMES) {
-        status.textContent = 'Perfecto, mantén firme... (' + Math.round(stableFrames/NEEDED_FRAMES*100) + '%)';
+        const elapsedPct = Math.min(100, Math.round(((Date.now() - scanStartedAt) / MIN_SCAN_MS) * 100));
+        status.textContent = 'Perfecto, mantén firme... (' + Math.min(elapsedPct, Math.round(stableFrames/NEEDED_FRAMES*100)) + '%)';
       }
     }
 
-    _detectionProgress = Math.min(100, (stableFrames / NEEDED_FRAMES) * 100);
+    const frameProgress = Math.min(100, (stableFrames / NEEDED_FRAMES) * 100);
+    const timeProgress = Math.min(100, ((Date.now() - scanStartedAt) / MIN_SCAN_MS) * 100);
+    _detectionProgress = Math.min(frameProgress, timeProgress);
     progressBar.style.width = _detectionProgress + '%';
     drawOverlay(detected);
 
-    if (stableFrames >= NEEDED_FRAMES) {
+    if (stableFrames >= NEEDED_FRAMES && Date.now() - scanStartedAt >= MIN_SCAN_MS) {
       status.textContent = '✓ Detectado — procesando...';
       progressBar.style.width = '100%';
       setTimeout(() => captureScan(), 500);
