@@ -111,12 +111,6 @@ svg.icon.filled *{fill:currentColor;stroke:none;}
   outline:none;transition:border-color .2s;
 }
 .field-input:focus{border-color:var(--primary);}
-.phone-row{display:flex;gap:10px;}
-.phone-prefix{
-  padding:14px 14px;border:1.5px solid var(--stroke-strong);border-radius:14px;
-  font-size:15px;font-weight:700;background:var(--surface-2);
-  flex-shrink:0;min-width:72px;text-align:center;color:var(--text-2);
-}
 .form-submit{
   width:100%;border-radius:16px;padding:17px;margin-top:6px;
   font-size:15.5px;font-weight:800;color:#fff;
@@ -459,12 +453,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .fb-alert-card .fb-footer{display:flex;justify-content:space-between;align-items:center;margin-top:7px;}
 .fb-alert-card .fb-source{font-size:11px;color:var(--text-3);font-weight:600;}
 .fb-alert-card .fb-time{font-size:11px;color:var(--text-3);font-weight:600;}
-/* Link email section */
-.link-email-section{padding:12px 16px;background:var(--surface);display:flex;flex-direction:column;gap:8px;}
-.link-email-section input{width:100%;padding:11px 14px;border:1.5px solid var(--stroke);border-radius:12px;font-size:14px;font-weight:600;color:var(--text-1);background:var(--surface-2);outline:none;}
-.link-email-section input:focus{border-color:var(--primary);}
-.link-email-btn{width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:800;color:#fff;background:var(--info);transition:opacity .2s;}
-.link-email-btn:active{opacity:.8;}
 @media (min-width:640px){
   body{max-width:520px;margin:0 auto;border-left:1px solid var(--stroke);border-right:1px solid var(--stroke);}
   .tabbar{max-width:520px;}
@@ -506,8 +494,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </div>
     <div class="form-body">
       <div>
-        <label class="field-label">Número de teléfono o correo</label>
-        <input class="field-input" type="text" id="loginId" placeholder="Ej: 55555555 o correo@email.com" autocomplete="username">
+        <label class="field-label">Correo electrónico</label>
+        <input class="field-input" type="email" id="loginId" placeholder="correo@email.com" autocomplete="email">
       </div>
       <div>
         <label class="field-label">Contraseña</label>
@@ -532,12 +520,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </div>
     <div class="form-body">
       <div>
-        <label class="field-label">Número de Cuba</label>
-        <p class="form-note" style="text-align:left;margin-bottom:8px;color:var(--text-2);">Para crear una cuenta necesitas un número de teléfono cubano.</p>
-        <div class="phone-row">
-          <span class="phone-prefix">🇨🇺 +53</span>
-          <input class="field-input" type="tel" id="regPhone" placeholder="55 555 5555" maxlength="8" autocomplete="tel-national">
-        </div>
+        <label class="field-label">Correo electrónico</label>
+        <input class="field-input" type="email" id="regEmail" placeholder="correo@email.com" autocomplete="email">
       </div>
       <div>
         <label class="field-label">Contraseña</label>
@@ -816,18 +800,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
       <div class="divider-lg"></div>
       <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Cuenta</p></div>
       <div class="section">
-        <div class="setting-row" id="linkEmailRow">
-          <div class="left"><div class="ico-badge" style="background:#8b5cf6;"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="label">Vincular correo electrónico</div><div class="desc" id="linkEmailDesc">Vincula un email como respaldo de tu cuenta</div></div></div>
-          <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-        <div class="link-email-section" id="linkEmailSection" style="display:none;border-radius:0 0 16px 16px;">
-          <p style="font-size:12px;color:var(--text-2);line-height:1.5;">Si pierdes tu número, podrás acceder con este correo y contraseña.</p>
-          <input type="email" id="linkEmailInput" placeholder="tucorreo@email.com" autocomplete="email">
-          <input type="password" id="linkEmailPwd" placeholder="Elige una contraseña para este correo" autocomplete="new-password"
-            style="width:100%;padding:11px 14px;border:1.5px solid var(--stroke);border-radius:12px;font-size:14px;font-weight:600;color:var(--text-1);background:var(--surface-2);outline:none;margin-top:6px;">
-          <button class="link-email-btn" onclick="doLinkEmail()">Vincular correo</button>
-          <p class="form-error" id="linkEmailError"></p>
-        </div>
         <div class="setting-row" style="cursor:pointer;" onclick="doSignOut()">
           <div class="left"><div class="ico-badge" style="background:#ef4444;"><svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><div><div class="label">Cerrar sesión</div><div class="desc" id="signOutDesc">Sesión activa</div></div></div>
           <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
@@ -915,7 +887,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 
 </div><!-- /screen-app -->
 
-<!-- reCAPTCHA invisible para Firebase phone auth -->
+<!-- Contenedor reservado para verificaciones de seguridad -->
 <div id="recaptcha-container"></div>
 
 <!-- Firebase SDKs -->
@@ -1024,9 +996,7 @@ function enterApp(user) {
   document.getElementById('adminEntry').style.display = isAdmin ? 'block' : 'none';
   // Show user info in sign out row
   const desc = document.getElementById('signOutDesc');
-  if (desc) desc.textContent = user.email || user.phoneNumber || 'Sesión activa';
-  // Check linked email status
-  updateLinkEmailUI(user);
+  if (desc) desc.textContent = user.email || 'Sesión activa';
   // Load data
   loadQuakes();
   startPolling();
@@ -1034,11 +1004,6 @@ function enterApp(user) {
   document.body.addEventListener('click', () => getAudioCtx(), {once:true});
 }
 
-function updateLinkEmailUI(user) {
-  const hasEmail = user.providerData.some(p => p.providerId === 'password');
-  const desc = document.getElementById('linkEmailDesc');
-  if (hasEmail && desc) desc.textContent = 'Correo vinculado: ' + (user.email || '');
-}
 
 /* ================================================================
    SIGN OUT
@@ -1050,47 +1015,31 @@ async function doSignOut() {
 }
 
 /* ================================================================
-   REGISTER — phone + password (sin OTP)
+   REGISTER — email + password
    ================================================================ */
-let _regPassword = '';
-let _regPhone = '';
-
 async function doRegister() {
-  const phone = document.getElementById('regPhone').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pwd   = document.getElementById('regPwd').value;
   const pwd2  = document.getElementById('regPwd2').value;
   const errEl = document.getElementById('regError');
   errEl.textContent = '';
 
-  if (!phone || phone.length < 7) { errEl.textContent = 'Introduce un número de teléfono cubano válido.'; return; }
+  if (!isValidEmail(email)) { errEl.textContent = 'Introduce un correo electrónico válido.'; return; }
   if (pwd.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
   if (pwd !== pwd2) { errEl.textContent = 'Las contraseñas no coinciden.'; return; }
-
-  _regPhone = '+53' + phone.replace(/\s/g,'');
-  _regPassword = pwd;
 
   const btn = document.getElementById('regBtn');
   btn.disabled = true; btn.textContent = 'Creando cuenta...';
 
   try {
-    const internalEmail = normalizePhoneEmail(_regPhone);
-    const emailCred = firebase.auth.EmailAuthProvider.credential(internalEmail, _regPassword);
-    const result = await auth.signInWithCredential(emailCred).catch(err => {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        return firebase.auth().createUserWithEmailAndPassword(internalEmail, _regPassword);
-      }
-      throw err;
-    });
+    const result = await auth.createUserWithEmailAndPassword(email, pwd);
     const user = result.user;
 
-    // Save profile to DB
     await db.ref('users/' + user.uid).set({
-      phone: _regPhone,
-      internalEmail: internalEmail,
+      email: email,
       createdAt: Date.now()
     });
 
-    // Después del registro, mostrar el captcha
     _captchaVerified = false;
     refreshCaptcha();
     showScreen('screen-captcha');
@@ -1234,24 +1183,19 @@ function verifyCaptcha() {
    LOGIN
    ================================================================ */
 async function doLogin() {
-  const id  = document.getElementById('loginId').value.trim();
+  const email = document.getElementById('loginId').value.trim().toLowerCase();
   const pwd = document.getElementById('loginPwd').value;
   const errEl = document.getElementById('loginError');
   errEl.textContent = '';
 
-  if (!id || !pwd) { errEl.textContent = 'Rellena todos los campos.'; return; }
+  if (!email || !pwd) { errEl.textContent = 'Rellena todos los campos.'; return; }
+  if (!isValidEmail(email)) { errEl.textContent = 'Introduce un correo electrónico válido.'; return; }
 
   const btn = document.getElementById('loginBtn');
   btn.disabled = true; btn.textContent = 'Entrando...';
 
   try {
-    let email = id;
-    // If it looks like a phone number, convert to internal email using shared normalizer
-    if (/^\+?[\d\s\-]{7,}$/.test(id)) {
-      email = normalizePhoneEmail(id);
-    }
     await auth.signInWithEmailAndPassword(email, pwd);
-    // Mostrar captcha después del login
     _captchaVerified = false;
     refreshCaptcha();
     showScreen('screen-captcha');
@@ -1274,8 +1218,6 @@ let _detectionProgress = 0;
 let _idCaptures = {front: null, back: null};
 let _barcodeDetector = null;
 
-const linkEmailRow = document.getElementById('linkEmailRow');
-if (linkEmailRow) linkEmailRow.addEventListener('click', toggleLinkEmail);
 
 async function openCamera(mode) {
   _camMode = mode;
@@ -1477,41 +1419,6 @@ async function completeIdVerification() {
   } catch(err) {
     console.error('[ID]', err);
     enterApp(currentUser);
-  }
-}
-
-/* ================================================================
-   LINK EMAIL
-   ================================================================ */
-function toggleLinkEmail() {
-  const section = document.getElementById('linkEmailSection');
-  const visible = section.style.display !== 'none';
-  section.style.display = visible ? 'none' : 'block';
-}
-
-async function doLinkEmail() {
-  const email = document.getElementById('linkEmailInput').value.trim();
-  const pwd   = document.getElementById('linkEmailPwd').value;
-  const errEl = document.getElementById('linkEmailError');
-  errEl.style.color = 'var(--danger)';
-  errEl.textContent = '';
-
-  if (!email || !email.includes('@')) { errEl.textContent = 'Introduce un correo electrónico válido.'; return; }
-  if (!pwd || pwd.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
-
-  try {
-    // Create a new email/password credential and link it to the current user
-    const credential = firebase.auth.EmailAuthProvider.credential(email, pwd);
-    await currentUser.linkWithCredential(credential);
-    errEl.style.color = '#22c55e';
-    errEl.textContent = '✓ Correo vinculado correctamente';
-    document.getElementById('linkEmailInput').value = '';
-    document.getElementById('linkEmailPwd').value = '';
-    document.getElementById('linkEmailSection').style.display = 'none';
-    updateLinkEmailUI(auth.currentUser);
-  } catch(err) {
-    errEl.style.color = 'var(--danger)';
-    errEl.textContent = errorMsg(err.code);
   }
 }
 
@@ -1744,14 +1651,10 @@ function setMagFilter(mag,btn){
 }
 
 /* ================================================================
-   PHONE NORMALIZATION — shared between register and login
+   EMAIL VALIDATION — shared between register and login
    ================================================================ */
-function normalizePhoneEmail(rawInput) {
-  // Strip everything except digits
-  const digits = rawInput.replace(/\D/g, '');
-  // Ensure it starts with 53 (Cuba country code)
-  const withCode = digits.startsWith('53') ? digits : '53' + digits;
-  return withCode + '@alertacuba.internal';
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
 }
 
 /* ================================================================
@@ -1762,7 +1665,7 @@ function magColor(mag){if(mag>=6) return{badgeBg:'rgba(225,6,0,0.15)',badgeFg:'#
 function timeAgo(ts){if(!ts) return'—';const diff=Date.now()-ts,min=Math.floor(diff/60000);if(min<1) return'ahora';if(min<60) return min+' min';const h=Math.floor(min/60);if(h<24) return h+' h';return Math.floor(h/24)+' d';}
 function fmtDate(ts){return new Date(ts).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function errorMsg(code){const m={'auth/invalid-credential':'Credenciales incorrectas. Revisa el teléfono/correo y la contraseña, o crea una cuenta nueva.','auth/invalid-phone-number':'Número de teléfono inválido.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
+function errorMsg(code){const m={'auth/invalid-credential':'Credenciales incorrectas. Revisa el correo y la contraseña, o crea una cuenta nueva.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
 
 /* ================================================================
    USGS — SISMOS
