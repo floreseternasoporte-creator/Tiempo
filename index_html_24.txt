@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ce1126">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AlertaCuba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+/* ===== VARIABLES ===== */
+:root{
+  --bg:#ffffff;--surface:#ffffff;--surface-2:#faf3e8;--surface-hover:#f3e7d4;
+  --stroke:rgba(206,17,38,0.1);--stroke-strong:rgba(206,17,38,0.18);
+  --text-1:#000;--text-2:rgba(0,0,0,0.65);--text-3:rgba(0,0,0,0.45);
+  --danger:#e10600;--danger-2:#ff7a5c;--warning:#f5b700;
+  --safe:#0057b8;--info:#0057b8;--primary:#ce1126;--primary-light:#f2542d;--primary-lighter:#fbe0de;
+  --font:'Poppins',-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+  --font-display:'Bebas Neue',var(--font);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);}
+body{font-family:var(--font);color:var(--text-1);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{display:none;}*{scrollbar-width:none;}
+button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+svg.icon{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;flex-shrink:0;}
+svg.icon *{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+svg.icon.filled *{fill:currentColor;stroke:none;}
+
+/* ===== SCREENS CONTAINER ===== */
+.screen{
+  position:fixed;inset:0;display:none;flex-direction:column;
+  background:#fff;overflow-y:auto;overflow-x:hidden;
+  z-index:300;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.screen.active{display:flex;}
+.screen-enter{animation:screenIn .35s cubic-bezier(0.4,0,0.2,1) both;}
+.screen-leave{animation:screenOut .3s cubic-bezier(0.4,0,0.2,1) both;}
+@keyframes screenIn{from{opacity:0;transform:translateX(32px);}to{opacity:1;transform:none;}}
+@keyframes screenOut{from{opacity:1;}to{opacity:0;}}
+
+/* ===== SPLASH ===== */
+#screen-splash{
+  background:#fff;
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:0;z-index:500;
+}
+.splash-word{
+  font-family:var(--font-display);
+  font-size:clamp(56px,16vw,88px);letter-spacing:.1em;line-height:1;
+  opacity:0;transform:translateY(28px);
+  max-width:100%;padding:0 16px;text-align:center;
+}
+.splash-word.red{color:var(--primary);animation:splashIn .55s cubic-bezier(0.34,1.56,0.64,1) .15s forwards;}
+.splash-word.blue{color:var(--info);animation:splashIn .55s cubic-bezier(0.34,1.56,0.64,1) .5s forwards;}
+@keyframes splashIn{to{opacity:1;transform:none;}}
+.splash-line{width:48px;height:3px;background:linear-gradient(90deg,var(--primary),var(--info));border-radius:2px;margin:10px 0;opacity:0;animation:splashIn .4s ease .9s forwards;}
+
+/* ===== AUTH SCREENS ===== */
+.auth-screen{
+  min-height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 28px calc(env(safe-area-inset-bottom) + 32px);
+  gap:0;
+}
+.auth-logo{
+  font-family:var(--font-display);font-size:clamp(36px,11vw,48px);letter-spacing:.06em;
+  line-height:1;margin-bottom:8px;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  max-width:100%;text-align:center;
+}
+.auth-logo .l-red{color:var(--primary);}
+.auth-logo .l-blue{color:var(--info);}
+.auth-tagline{font-size:13px;font-weight:600;color:var(--text-3);text-align:center;margin-bottom:48px;letter-spacing:.03em;}
+.auth-btn{
+  width:100%;max-width:360px;border-radius:16px;padding:17px;
+  font-size:15.5px;font-weight:800;letter-spacing:.02em;
+  margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .12s ease,opacity .2s;
+}
+.auth-btn:active{transform:scale(0.97);}
+.auth-btn.primary{background:linear-gradient(135deg,var(--primary),#f2542d);color:#fff;box-shadow:0 12px 28px -10px rgba(206,17,38,0.55);}
+.auth-btn.secondary{background:transparent;border:2px solid var(--stroke-strong);color:var(--primary);font-weight:800;}
+
+/* form header with back button */
+.form-header{
+  width:100%;max-width:420px;
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:28px;
+}
+.back-btn{
+  width:38px;height:38px;border-radius:50%;background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.back-btn svg{width:20px;height:20px;color:var(--text-1);}
+.form-title{font-family:var(--font-display);font-size:28px;letter-spacing:.03em;min-width:0;overflow-wrap:anywhere;}
+
+/* form fields */
+.form-body{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;}
+.form-actions{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:12px;}
+.form-actions .form-submit{margin-top:0;}
+.form-actions .form-note{margin-top:0;}
+.form-fields{display:flex;flex-direction:column;gap:14px;}
+.field-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:5px;display:block;}
+.field-input{
+  width:100%;padding:14px 16px;border:1.5px solid var(--stroke-strong);border-radius:14px;
+  font-size:15px;font-weight:600;color:var(--text-1);background:var(--surface-2);
+  outline:none;transition:border-color .2s;
+}
+.field-input:focus{border-color:var(--primary);}
+.form-submit{
+  width:100%;border-radius:16px;padding:17px;margin-top:6px;
+  font-size:15.5px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--primary),#f2542d);
+  box-shadow:0 12px 28px -10px rgba(206,17,38,0.5);
+  transition:transform .12s,opacity .2s;
+}
+.form-submit:active{transform:scale(0.97);}
+.form-submit:disabled{opacity:.45;}
+.form-note{font-size:12px;color:var(--text-3);text-align:center;line-height:1.5;margin-top:4px;}
+.form-error{font-size:13px;color:var(--danger);font-weight:600;text-align:center;min-height:18px;}
+.form-link{font-size:13px;color:var(--info);font-weight:700;cursor:pointer;text-align:center;margin-top:8px;}
+.form-link:active{opacity:.7;}
+
+/* OTP input */
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:8px 0;}
+.otp-box{
+  width:48px;height:58px;border:2px solid var(--stroke-strong);border-radius:14px;
+  text-align:center;font-size:24px;font-weight:800;color:var(--text-1);
+  background:var(--surface-2);outline:none;transition:border-color .2s;
+  -webkit-appearance:none;
+}
+.otp-box:focus{border-color:var(--primary);}
+.otp-hint{font-size:13px;color:var(--text-2);text-align:center;line-height:1.5;}
+
+/* CAPTCHA PERSONALIZADO */
+.captcha-puzzle{display:flex;flex-direction:column;gap:16px;}
+.captcha-question{font-size:15px;font-weight:700;color:var(--text-1);text-align:center;}
+.captcha-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.captcha-option{padding:12px;border:2px solid var(--stroke-strong);border-radius:12px;background:var(--surface);cursor:pointer;transition:all .2s;text-align:center;font-weight:600;font-size:14px;color:var(--text-1);min-width:0;overflow-wrap:anywhere;}
+.captcha-option:active{transform:scale(0.95);}
+.captcha-option.selected{border-color:var(--primary);background:rgba(206,17,38,0.08);color:var(--primary);}
+.captcha-math{font-size:18px;font-weight:800;color:var(--primary);font-family:monospace;}
+.captcha-input-group{display:flex;gap:8px;}
+.captcha-input{flex:1;padding:12px;border:2px solid var(--stroke-strong);border-radius:12px;font-size:16px;font-weight:700;text-align:center;background:var(--surface);outline:none;transition:border-color .2s;}
+.captcha-input:focus{border-color:var(--primary);}
+.captcha-input::placeholder{color:var(--text-3);}
+
+/* Welcome screen */
+.welcome-icon{
+  width:90px;height:90px;border-radius:50%;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:24px;
+  box-shadow:0 12px 32px -8px rgba(34,197,94,0.5);
+  animation:popIn .6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.welcome-icon svg{width:44px;height:44px;color:#fff;}
+@keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.welcome-title{font-family:var(--font-display);font-size:clamp(32px,10vw,44px);letter-spacing:.03em;color:var(--text-1);text-align:center;margin-bottom:10px;max-width:100%;overflow-wrap:anywhere;}
+.welcome-sub{font-size:15px;color:var(--text-2);text-align:center;line-height:1.55;max-width:300px;margin-bottom:40px;}
+
+/* ID verification */
+.id-screen{display:flex;flex-direction:column;height:100%;min-height:100%;background:#fff;overflow:hidden;}
+.id-header{padding:calc(env(safe-area-inset-top)+18px) 22px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.id-section{padding:8px 22px 12px;display:flex;flex-direction:column;gap:12px;flex:1;width:100%;max-width:520px;margin:0 auto;overflow-y:auto;}
+.id-card-btn{
+  background:var(--surface);border:1.5px solid var(--stroke-strong);border-radius:18px;
+  padding:16px 16px;display:flex;align-items:center;gap:14px;
+  cursor:pointer;transition:border-color .2s,background .2s;
+}
+.id-card-btn.done{border-color:#22c55e;background:rgba(34,197,94,0.04);}
+.id-card-btn.active{border-color:var(--primary);background:rgba(206,17,38,0.04);}
+.id-card-icon{
+  width:46px;height:46px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface-2);
+}
+.id-card-btn.done .id-card-icon{background:rgba(34,197,94,0.12);}
+.id-card-icon svg{width:24px;height:24px;color:var(--text-2);}
+.id-card-btn.done .id-card-icon svg{color:#22c55e;}
+.id-card-body{flex:1;min-width:0;}
+.id-card-body>div{overflow-wrap:anywhere;}
+.id-card-name{font-size:15px;font-weight:800;}
+.id-card-desc{font-size:12.5px;color:var(--text-2);margin-top:2px;}
+.id-card-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.id-card-btn.done .id-card-status{color:#22c55e;}
+.id-submit{
+  margin:8px 22px calc(env(safe-area-inset-bottom) + 14px);border-radius:16px;padding:16px;flex-shrink:0;
+  font-size:15.5px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--primary),#f2542d);
+  box-shadow:0 12px 28px -10px rgba(206,17,38,0.5);
+  display:none;
+}
+.id-submit.show{display:block;}
+
+/* ===== CAMERA OVERLAY ===== */
+#cam-overlay{
+  position:fixed;inset:0;z-index:600;background:#000;
+  display:none;flex-direction:column;
+}
+#cam-overlay.active{display:flex;}
+#cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#cam-canvas{position:absolute;inset:0;width:100%;height:100%;}
+.cam-top{
+  position:absolute;top:0;left:0;right:0;
+  padding:calc(env(safe-area-inset-top)+16px) 20px 16px;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.65),transparent);
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:2;
+}
+.cam-top .cam-title{font-size:17px;font-weight:800;color:#fff;}
+.cam-close-btn{
+  width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;
+}
+.cam-bottom{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:16px 20px calc(env(safe-area-inset-bottom)+24px);
+  background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  z-index:2;
+}
+.cam-status{
+  font-size:15px;font-weight:700;color:#fff;
+  text-align:center;padding:10px 20px;
+  background:rgba(0,0,0,0.5);border-radius:20px;
+  backdrop-filter:blur(6px);
+  min-width:200px;
+}
+.cam-progress{
+  height:4px;width:160px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;
+}
+.cam-progress-bar{height:100%;background:#22c55e;border-radius:2px;width:0%;transition:width .1s linear;}
+
+/* ===== MAIN APP STYLES ===== */
+#screen-app{
+  position:fixed;inset:0;display:none;flex-direction:column;
+  background:var(--bg);overflow:hidden;z-index:200;
+  padding-bottom:0;
+}
+#screen-app.active{display:flex;}
+.app-inner{flex:1;overflow-y:auto;padding-bottom:96px;}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  padding:calc(env(safe-area-inset-top)+14px) 20px 12px;
+  background:rgba(255,255,255,0.98);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--stroke);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+
+.topbar-title{
+  font-family:var(--font-display);font-size:24px;letter-spacing:.04em;
+  display:flex;align-items:center;gap:9px;
+}
+.brand-wordmark{color:var(--text-1);}
+.topbar-title .brand-icon{width:26px;height:26px;color:var(--primary);}
+.icon-btn{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface-2);font-size:16px;color:var(--text-1);
+  transition:transform .15s,background .15s;
+}
+.icon-btn:active{transform:scale(0.88);background:var(--surface-hover);}
+.status-chip{
+  display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+  color:var(--primary);background:rgba(206,17,38,0.09);border:1px solid rgba(206,17,38,0.22);
+  padding:5px 10px 5px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;
+}
+.status-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);box-shadow:0 0 8px var(--primary);}
+.status-chip.pulse .dot{animation:dotpulse 1.4s ease-in-out infinite;}
+@keyframes dotpulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.5);}}
+
+/* ===== HERO STATUS ===== */
+.hero-status{
+  margin:16px 20px 0;border-radius:20px;padding:22px 20px;
+  background:linear-gradient(140deg,#f9f0ee,#fbe0de);
+  border:1px solid rgba(206,17,38,0.12);
+  display:flex;align-items:center;gap:16px;
+}
+.hero-status.ok{background:linear-gradient(140deg,#eef4fc,#ddeafb);border-color:rgba(0,87,184,0.14);}
+.hero-status.warn{background:linear-gradient(140deg,#fdf7e3,#faeec8);border-color:rgba(245,183,0,0.22);}
+.hero-status.danger{background:linear-gradient(140deg,#fdecea,#fbd8d5);border-color:rgba(225,6,0,0.2);}
+.hero-pulse-ring{position:relative;width:52px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.hero-pulse-ring .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--primary);opacity:0;animation:heroRing 2.4s ease-out infinite;}
+.hero-pulse-ring .ring:nth-child(2){animation-delay:.8s;}.hero-pulse-ring .ring:nth-child(3){animation-delay:1.6s;}
+@keyframes heroRing{0%{transform:scale(.5);opacity:.6;}100%{transform:scale(1.6);opacity:0;}}
+.hero-pulse-ring .dot-center{width:22px;height:22px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;box-shadow:0 3px 10px rgba(206,17,38,0.4);}
+.hero-pulse-ring .dot-center svg{width:12px;height:12px;color:#fff;}
+.hero-status.ok .ring{border-color:var(--info);}.hero-status.ok .dot-center{background:var(--info);box-shadow:0 3px 10px rgba(0,87,184,0.35);}
+.hero-status.warn .ring{border-color:var(--warning);}.hero-status.warn .dot-center{background:var(--warning);box-shadow:0 3px 10px rgba(245,183,0,0.4);}
+.hero-status.danger .ring{border-color:var(--danger);}.hero-status.danger .dot-center{background:var(--danger);box-shadow:0 3px 10px rgba(225,6,0,0.45);}
+.hero-text .title{font-size:15px;font-weight:800;line-height:1.2;}
+.hero-text .sub{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.4;}
+.hero-text .since{font-size:11.5px;color:var(--text-3);margin-top:5px;font-weight:600;}
+
+
+/* Containment fixes: keep cards, rows, and text inside the app frame */
+.topbar,.hero-status,.nearest-card,.section,.segment-wrap,.feed-row,.detail-mag-banner{max-width:100%;}
+.hero-text,.nearest-info,.feed-body,.setting-row .left,.setting-row .left>div{min-width:0;}
+.hero-text .title,.hero-text .sub,.setting-row .label,.setting-row .desc{overflow-wrap:anywhere;}
+.setting-row{gap:12px;overflow:hidden;}
+.setting-row>svg,.setting-row>.switch,.setting-row>.icon-btn{flex-shrink:0;}
+.detail-mag-banner{min-width:0;overflow:hidden;}
+.detail-mag-banner>div:last-child{min-width:0;overflow-wrap:anywhere;}
+@media (max-width:380px){
+  .hero-status{margin-left:14px;margin-right:14px;padding:18px 14px;gap:12px;}
+  .nearest-card,.detail-mag-banner{margin-left:14px;margin-right:14px;}
+  .section{padding-left:14px;padding-right:14px;}
+  .detail-mag-num{font-size:64px;}
+}
+
+/* ===== MISC APP ===== */
+.segment-wrap{padding:14px 20px 6px;overflow-x:auto;}
+.segment{display:inline-flex;background:transparent;border-radius:12px;padding:3px;border:1px solid var(--stroke);}
+.segment button{padding:8px 16px;font-size:13px;font-weight:700;color:var(--text-2);border-radius:10px;transition:background .2s,color .2s;white-space:nowrap;}
+.segment button.active{background:var(--primary);color:#fff;font-weight:800;}
+.nearest-card{margin:12px 20px;background:var(--surface);border:1px solid var(--stroke);border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(206,17,38,0.07);cursor:pointer;transition:transform .12s,box-shadow .12s;}
+.nearest-card:active{transform:scale(0.98);}
+.nearest-badge{width:52px;height:52px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;}
+.nearest-info{flex:1;min-width:0;}
+.nearest-info .place{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nearest-info .meta{font-size:12px;color:var(--text-2);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+.nearest-info .meta span{display:inline-flex;align-items:center;gap:4px;}
+.nearest-info .meta svg{width:13px;height:13px;}
+.nearest-chevron{color:var(--text-3);width:16px;height:16px;flex-shrink:0;}
+.section{padding:6px 20px 8px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-head h2{font-family:var(--font-display);font-size:22px;font-weight:400;letter-spacing:.01em;}
+.section-head .see-all{font-size:13px;color:var(--info);font-weight:700;cursor:pointer;}
+.feed-list{display:flex;flex-direction:column;}
+.feed-row{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;transition:background .15s;}
+.feed-row:active{background:var(--surface-2);}
+.feed-num{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;}
+.feed-body{flex:1;min-width:0;}
+.feed-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-meta{font-size:12px;color:var(--text-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-time{font-size:11.5px;color:var(--text-3);flex-shrink:0;text-align:right;min-width:44px;font-weight:600;}
+.feed-divider{height:.5px;background:var(--stroke);margin-left:73px;}
+.empty-state{padding:44px 20px;text-align:center;color:var(--text-2);}
+.empty-state svg{width:36px;height:36px;color:var(--text-3);margin-bottom:10px;}
+.empty-state p{font-size:13.5px;line-height:1.5;}
+.detail-mag-banner{margin:16px 20px 4px;border-radius:20px;padding:28px 24px;display:flex;align-items:center;gap:20px;}
+.detail-mag-num{font-family:var(--font-display);font-size:80px;font-weight:400;line-height:1;color:#fff;flex-shrink:0;}
+.detail-mag-type{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.85);}
+.weather-metric{background:var(--surface-2);border-radius:14px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;border:.5px solid var(--stroke);min-width:0;overflow:hidden;}
+.weather-metric svg{width:19px;height:19px;color:var(--info);flex-shrink:0;}
+.weather-metric .val{font-size:15px;font-weight:800;overflow-wrap:anywhere;max-width:100%;}
+.weather-metric .lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:.5px solid var(--stroke);}
+.setting-row:first-child{border-radius:16px 16px 0 0;}.setting-row:last-child{border-radius:0 0 16px 16px;border-bottom:none;}
+.setting-row .left{display:flex;align-items:center;gap:12px;}
+.setting-row .left .ico-badge{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+.setting-row .left .ico-badge svg{width:16px;height:16px;}
+.setting-row .label{font-size:14.5px;font-weight:600;}
+.setting-row .desc{font-size:12px;color:var(--text-2);margin-top:1px;}
+.switch{width:48px;height:28px;border-radius:16px;background:var(--surface-2);position:relative;flex-shrink:0;transition:background .2s;border:.5px solid var(--stroke);cursor:pointer;}
+.switch.on{background:var(--safe);border-color:var(--safe);}
+.switch .knob{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.switch.on .knob{transform:translateX(20px);}
+.slider-row{padding:14px 16px;background:var(--surface);}
+.slider-row .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.slider-row .top .label{font-size:14.5px;font-weight:600;}
+.slider-row .top .value{font-size:14px;font-weight:800;color:var(--danger-2);}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--surface-2);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer;border:.5px solid var(--stroke);}
+.tabbar{
+  position:sticky;bottom:0;z-index:90;
+  padding:9px 8px calc(env(safe-area-inset-bottom)+8px);
+  background:rgba(255,255,255,.98);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--stroke);display:flex;flex-shrink:0;
+}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 0;color:var(--text-3);cursor:pointer;transition:color .15s,transform .15s;}
+.tab-item svg{width:24px;height:24px;}
+.tab-item span{font-size:10px;font-weight:700;}
+.tab-item.active{color:var(--primary);}
+.tab-item:active{transform:scale(0.88);}
+.view{display:none;}
+.view.active{display:block;}
+.divider-lg{height:8px;}.divider-xl{height:26px;}
+/* Admin panel */
+.admin-panel{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .3s;}
+.admin-panel.show{opacity:1;pointer-events:all;}
+.admin-sheet{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px calc(env(safe-area-inset-bottom)+32px);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.admin-sheet h3{font-family:var(--font-display);font-size:24px;letter-spacing:.03em;margin-bottom:4px;color:var(--primary);}
+.admin-sheet .sub{font-size:12.5px;color:var(--text-2);margin-bottom:20px;}
+.admin-field{margin-bottom:14px;min-width:0;}
+.admin-field label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px;}
+.admin-field input,.admin-field select,.admin-field textarea{width:100%;max-width:100%;padding:12px 14px;border:1.5px solid var(--stroke);border-radius:12px;font-size:14.5px;font-weight:600;color:var(--text-1);background:var(--surface-2);outline:none;transition:border-color .2s;}
+.admin-field input:focus,.admin-field select:focus,.admin-field textarea:focus{border-color:var(--primary);}
+.admin-field textarea{resize:vertical;min-height:80px;}
+.admin-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:0;}
+.admin-row .admin-field{min-width:0;}
+.admin-send-btn{width:100%;border-radius:14px;padding:16px;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--primary),#f2542d);box-shadow:0 10px 28px -8px rgba(206,17,38,.5);margin-top:8px;transition:transform .12s,opacity .2s;}
+.admin-send-btn:active{transform:scale(0.97);}
+.admin-send-btn:disabled{opacity:.5;}
+.admin-cancel{width:100%;margin-top:10px;padding:14px;font-size:14px;font-weight:700;color:var(--text-2);border-radius:14px;background:var(--surface-2);}
+/* Notif banner */
+.notif-banner{position:fixed;top:calc(env(safe-area-inset-top)+60px);left:16px;right:16px;z-index:600;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:14px 16px;display:flex;align-items:center;gap:12px;transform:translateY(-120px);opacity:0;transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),opacity .4s;border:1px solid var(--stroke);}
+.notif-banner.show{transform:translateY(0);opacity:1;}
+.notif-banner .nb-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);flex-shrink:0;box-shadow:0 0 8px var(--danger);}
+.notif-banner .nb-body{flex:1;min-width:0;}
+.notif-banner .nb-title{font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notif-banner .nb-sub{font-size:12px;color:var(--text-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notif-banner .nb-close{width:24px;height:24px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--text-3);}
+/* Firebase alert cards */
+.fb-alert-card{margin:0 20px 12px;background:var(--surface);border:1px solid var(--stroke);border-radius:16px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 1px 6px rgba(206,17,38,.05);}
+.fb-alert-card .fb-icon{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.fb-alert-card .fb-icon svg{width:20px;height:20px;}
+.fb-alert-card .fb-body{flex:1;min-width:0;}
+.fb-alert-card .fb-title{font-size:14px;font-weight:800;line-height:1.25;overflow-wrap:anywhere;}
+.fb-alert-card .fb-msg{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.4;overflow-wrap:anywhere;}
+.fb-alert-card .fb-footer{display:flex;justify-content:space-between;align-items:center;margin-top:7px;gap:8px;flex-wrap:wrap;}
+.fb-alert-card .fb-source{font-size:11px;color:var(--text-3);font-weight:600;overflow-wrap:anywhere;min-width:0;}
+.fb-alert-card .fb-time{font-size:11px;color:var(--text-3);font-weight:600;flex-shrink:0;}
+@media (min-width:640px){
+  body{max-width:520px;margin:0 auto;border-left:1px solid var(--stroke);border-right:1px solid var(--stroke);}
+  .tabbar{max-width:520px;}
+  .notif-banner{max-width:488px;}
+  #cam-overlay{max-width:520px;left:50%;transform:translateX(-50%);}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== SPLASH ===== -->
+<div class="screen active" id="screen-splash">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:0;">
+    <span class="splash-word red">ALERTA</span>
+    <div class="splash-line"></div>
+    <span class="splash-word blue">CUBA</span>
+  </div>
+</div>
+
+<!-- ===== AUTH CHOICE ===== -->
+<div class="screen" id="screen-auth">
+  <div class="auth-screen">
+    <div class="auth-logo">
+      <span class="l-red">ALERTA</span>
+      <span class="l-blue">CUBA</span>
+    </div>
+    <p class="auth-tagline">Sistema de Alerta para Cuba</p>
+    <button class="auth-btn primary" onclick="showScreen('screen-login')">Iniciar sesión</button>
+    <button class="auth-btn secondary" onclick="showScreen('screen-register')">Registrarse</button>
+  </div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div class="screen" id="screen-login">
+  <div class="auth-screen" style="justify-content:flex-start;padding-top:calc(env(safe-area-inset-top)+28px);">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('screen-auth')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="form-title">Iniciar sesión</span>
+    </div>
+    <div class="form-body">
+      <div>
+        <label class="field-label">Correo electrónico</label>
+        <input class="field-input" type="email" id="loginId" placeholder="correo@email.com" autocomplete="email">
+      </div>
+      <div>
+        <label class="field-label">Contraseña</label>
+        <input class="field-input" type="password" id="loginPwd" placeholder="Tu contraseña" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div class="form-actions">
+        <p class="form-error" id="loginError"></p>
+        <button class="form-submit" id="loginBtn" onclick="doLogin()">Entrar</button>
+        <p class="form-note">¿No tienes cuenta? <span class="form-link" onclick="showScreen('screen-register')">Regístrate</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REGISTER ===== -->
+<div class="screen" id="screen-register">
+  <div class="auth-screen" style="justify-content:flex-start;padding-top:calc(env(safe-area-inset-top)+28px);">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('screen-auth')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="form-title">Crear cuenta</span>
+    </div>
+    <div class="form-body">
+      <div>
+        <label class="field-label">Correo electrónico</label>
+        <input class="field-input" type="email" id="regEmail" placeholder="correo@email.com" autocomplete="email">
+      </div>
+      <div>
+        <label class="field-label">Contraseña</label>
+        <input class="field-input" type="password" id="regPwd" placeholder="Crea una contraseña segura" autocomplete="new-password">
+      </div>
+      <div>
+        <label class="field-label">Confirmar contraseña</label>
+        <input class="field-input" type="password" id="regPwd2" placeholder="Repite la contraseña" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter') doRegister()">
+      </div>
+      <div class="form-actions">
+        <p class="form-error" id="regError"></p>
+        <button class="form-submit" id="regBtn" onclick="doRegister()">Crear cuenta</button>
+        <p class="form-note">Al registrarte aceptas los términos del servicio de AlertaCuba.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CAPTCHA PERSONALIZADO ===== -->
+<div class="screen" id="screen-captcha">
+  <div class="auth-screen" style="justify-content:flex-start;padding-top:calc(env(safe-area-inset-top)+28px);">
+    <div class="form-header">
+      <button class="back-btn" onclick="showScreen('screen-login')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="form-title">Verificación de seguridad</span>
+    </div>
+    <div class="form-body">
+      <p class="otp-hint">Resuelve el desafío para continuar</p>
+      <div id="captchaContainer" style="background:var(--surface-2);border-radius:14px;padding:20px;margin:16px 0;border:1.5px solid var(--stroke-strong);">
+        <div id="captchaContent"></div>
+      </div>
+      <div class="form-actions">
+        <p class="form-error" id="captchaError"></p>
+        <button class="form-submit" id="captchaBtn" onclick="verifyCaptcha()" disabled>Verificar</button>
+        <p class="form-note"><span class="form-link" onclick="refreshCaptcha()">Generar nuevo desafío</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WELCOME ===== -->
+<div class="screen" id="screen-welcome">
+  <div class="auth-screen">
+    <div class="welcome-icon">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" stroke-width="2.5"/></svg>
+    </div>
+    <h2 class="welcome-title">¡Todo listo!</h2>
+    <p class="welcome-sub">Ahora por favor confirmemos tu identidad.<br>Necesitamos verificar tu Carné de Identidad cubano.</p>
+    <button class="auth-btn primary" style="max-width:360px;" onclick="showScreen('screen-id')">Aceptar</button>
+  </div>
+</div>
+
+<!-- ===== ID VERIFICATION ===== -->
+<div class="screen" id="screen-id">
+  <div class="id-screen">
+  <div class="id-header">
+    <div>
+      <div style="font-family:var(--font-display);font-size:26px;letter-spacing:.02em;">Verifica tu Carné</div>
+      <div style="font-size:13px;color:var(--text-2);margin-top:2px;">Escanea ambos lados de tu carnet de identidad</div>
+    </div>
+  </div>
+  <div class="id-section">
+    <div class="id-card-btn" id="idFrontBtn" onclick="openCamera('front')">
+      <div class="id-card-icon">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h2M13 15h4"/></svg>
+      </div>
+      <div class="id-card-body">
+        <div class="id-card-name">Parte delantera</div>
+        <div class="id-card-desc">Cara con tu foto e información</div>
+        <div class="id-card-status" id="idFrontStatus">Toca para escanear</div>
+      </div>
+      <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);flex-shrink:0;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </div>
+    <div class="id-card-btn" id="idBackBtn" onclick="openCamera('back')">
+      <div class="id-card-icon">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M7 15h10"/></svg>
+      </div>
+      <div class="id-card-body">
+        <div class="id-card-name">Reverso del carnet</div>
+        <div class="id-card-desc">Cara trasera con el código de barras</div>
+        <div class="id-card-status" id="idBackStatus">Toca para escanear</div>
+      </div>
+      <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);flex-shrink:0;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </div>
+    <p style="font-size:12.5px;color:var(--text-3);line-height:1.5;margin-top:4px;">
+      Tus datos son procesados de forma segura. Solo se verifican para confirmar tu identidad.
+    </p>
+  </div>
+  <button class="id-submit" id="idSubmitBtn" onclick="completeIdVerification()">Continuar a AlertaCuba</button>
+  </div>
+</div>
+
+<!-- ===== CAMERA OVERLAY ===== -->
+<div id="cam-overlay">
+  <video id="cam-video" autoplay playsinline muted></video>
+  <canvas id="cam-canvas"></canvas>
+  <div class="cam-top">
+    <span class="cam-title" id="camTitle">Escanea tu carnet</span>
+    <button class="cam-close-btn" onclick="closeCamera()">✕</button>
+  </div>
+  <div class="cam-bottom">
+    <div class="cam-status" id="camStatus">Coloca tu carnet en el recuadro</div>
+    <div class="cam-progress"><div class="cam-progress-bar" id="camProgressBar"></div></div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="screen-app">
+  <div class="app-inner">
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-panel" id="adminPanel">
+      <div class="admin-sheet">
+        <h3>Emitir Alerta</h3>
+        <p class="sub">Envía una alerta a todos los usuarios de AlertaCuba.</p>
+        <div class="admin-row">
+          <div class="admin-field">
+            <label>Tipo de alerta</label>
+            <select id="adminTipo">
+              <option value="sismo">🌊 Sismo / Terremoto</option>
+              <option value="tsunami">🌊 Tsunami</option>
+              <option value="ciclon">🌀 Ciclón / Huracán</option>
+              <option value="general">📢 Alerta general</option>
+              <option value="aviso">ℹ️ Aviso informativo</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <label>Severidad</label>
+            <select id="adminSeveridad">
+              <option value="critica">🔴 Emergencia crítica</option>
+              <option value="alta">🟡 Alerta alta</option>
+              <option value="media">🔵 Aviso</option>
+              <option value="info">⚪ Informativo</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-field"><label>Título</label><input type="text" id="adminTitulo" placeholder="Ej: Sismo detectado en Santiago de Cuba" maxlength="80"></div>
+        <div class="admin-field"><label>Mensaje / descripción</label><textarea id="adminMensaje" placeholder="Detalles de la alerta..."></textarea></div>
+        <div class="admin-row">
+          <div class="admin-field"><label>Magnitud (opcional)</label><input type="number" id="adminMagnitud" placeholder="Ej: 5.5" step="0.1" min="1" max="10"></div>
+          <div class="admin-field"><label>Lugar</label><input type="text" id="adminLugar" placeholder="Ej: Santiago de Cuba"></div>
+        </div>
+        <div class="admin-field"><label>Emitida por</label><input type="text" id="adminEmitidaPor" value="Defensa Civil Cuba"></div>
+        <button class="admin-send-btn" id="adminSendBtn" onclick="sendAlert()">🚨 Emitir alerta ahora</button>
+        <button class="admin-cancel" onclick="closeAdmin()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- NOTIF BANNER -->
+    <div class="notif-banner" id="notifBanner">
+      <div class="nb-dot"></div>
+      <div class="nb-body"><div class="nb-title" id="nbTitle">Nueva alerta</div><div class="nb-sub" id="nbSub"></div></div>
+      <button class="nb-close" onclick="closeNotifBanner()">✕</button>
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-title">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2a1 1 0 0 1 0 4M12 18a1 1 0 0 1 0 4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke-width="1.8"/>
+        </svg>
+        <span style="color:var(--primary);">Alerta</span><span class="brand-wordmark">Cuba</span>
+      </div>
+
+    </div>
+
+    <!-- VIEW: INICIO -->
+    <div class="view active" id="view-home">
+      <div class="hero-status ok" id="heroStatus">
+        <div class="hero-pulse-ring">
+          <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+          <div class="dot-center"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+        </div>
+        <div class="hero-text">
+          <div class="title" id="heroTitle">Conectado — Sin alertas activas</div>
+          <div class="sub" id="heroSub">Sistema monitoreando Cuba en tiempo real</div>
+          <div class="since" id="heroSince">Última actualización: ahora</div>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div id="activeAlertSection" style="display:none;">
+        <div class="section-head" style="padding:6px 20px 10px;"><h2 style="color:var(--danger);">🚨 Alerta activa</h2></div>
+        <div id="activeAlertCard"></div>
+        <div class="divider-lg"></div>
+      </div>
+      <div class="nearest-card" id="nearestCard" style="display:none;" onclick="openDetail(currentNearest)">
+        <div class="nearest-badge" id="nearestBadge">—</div>
+        <div class="nearest-info">
+          <div class="place" id="nearestPlace">—</div>
+          <div class="meta">
+            <span id="nearestDist"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>—</span>
+            <span id="nearestDepth"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>—</span>
+            <span id="nearestTime"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>—</span>
+          </div>
+        </div>
+        <svg class="icon nearest-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section">
+        <div class="section-head"><h2>Alertas emitidas</h2></div>
+      </div>
+      <div id="fbAlertsHome"></div>
+      <div class="divider-lg"></div>
+      <div class="section">
+        <div class="section-head">
+          <h2>Actividad sísmica</h2>
+          <div class="segment" style="border:none;padding:0;">
+            <button class="active" data-range="hour" onclick="setRange('hour',this)" style="padding:5px 10px;font-size:12px;">1h</button>
+            <button data-range="day" onclick="setRange('day',this)" style="padding:5px 10px;font-size:12px;">Hoy</button>
+            <button data-range="week" onclick="setRange('week',this)" style="padding:5px 10px;font-size:12px;">Semana</button>
+          </div>
+        </div>
+      </div>
+      <div class="feed-list" id="homeFeedList"></div>
+      <div class="divider-xl"></div>
+    </div>
+
+    <!-- VIEW: AJUSTES -->
+    <div class="view" id="view-settings">
+      <div class="segment-wrap" style="padding-top:16px;"><div class="section-head" style="padding:0 0 4px;"><h2 style="font-size:22px;">Ajustes</h2></div></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Alertas</p></div>
+      <div class="section">
+        <div class="setting-row">
+          <div class="left"><div class="ico-badge" style="background:var(--danger);"><svg class="icon filled" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="label">Alarma sonora</div><div class="desc">Sonido predeterminado al recibir alerta</div></div></div>
+          <div class="switch on" id="switchAlarm" onclick="toggleSwitch(this,'alarm')"><div class="knob"></div></div>
+        </div>
+        <div class="setting-row">
+          <div class="left"><div class="ico-badge" style="background:var(--deep,#0057b8);"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="8" height="20" rx="2"/><path d="M2 9v6M22 8v8M19 6v12"/></svg></div><div><div class="label">Vibración</div><div class="desc">Patrón de vibración de emergencia</div></div></div>
+          <div class="switch on" id="switchVibrate" onclick="toggleSwitch(this,'vibrate')"><div class="knob"></div></div>
+        </div>
+        <div class="setting-row">
+          <div class="left"><div class="ico-badge" style="background:var(--primary);"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg></div><div><div class="label">Ubicación en tiempo real</div><div class="desc">Calcula distancia desde tu posición</div></div></div>
+          <div class="switch" id="switchGeo" onclick="toggleSwitch(this,'geo')"><div class="knob"></div></div>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Cuenta</p></div>
+      <div class="section">
+        <div class="setting-row" style="cursor:pointer;" onclick="doSignOut()">
+          <div class="left"><div class="ico-badge" style="background:#ef4444;"><svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><div><div class="label">Cerrar sesión</div><div class="desc" id="signOutDesc">Sesión activa</div></div></div>
+          <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Umbral de alerta sísmica</p></div>
+      <div class="section"><div class="slider-row" style="border-radius:16px;"><div class="top"><span class="label">Magnitud mínima para alertar</span><span class="value" id="magThreshVal">M 4.5</span></div><input type="range" min="2" max="7" step="0.5" value="4.5" id="magThresh" oninput="updateMagThresh(this.value)"></div></div>
+      <div class="divider-lg"></div>
+      <!-- Admin panel entry — solo visible para admins -->
+      <div id="adminEntry" style="display:none;">
+        <div class="section"><p style="font-size:12px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Panel de administrador</p></div>
+        <div class="section">
+          <div class="setting-row" style="border-radius:16px;cursor:pointer;" onclick="openAdmin()">
+            <div class="left"><div class="ico-badge" style="background:#7c3aed;"><svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.67a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div><div><div class="label">Emitir alerta oficial</div><div class="desc">Enviar alertas a todos los usuarios</div></div></div>
+            <svg class="icon" viewBox="0 0 24 24" style="color:var(--text-3);"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+        <div class="divider-lg"></div>
+      </div>
+      <div class="divider-xl"></div>
+    </div>
+
+    <!-- VIEW: DETALLE -->
+    <div class="view" id="view-detail">
+      <div class="segment-wrap" style="padding-top:16px;display:flex;align-items:center;gap:12px;">
+        <button class="icon-btn" onclick="goToView('home')"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div style="font-size:16px;font-weight:800;">Detalle del evento</div>
+      </div>
+      <div class="detail-mag-banner" id="detailMagBanner">
+        <div class="detail-mag-num" id="detailMag">—</div>
+        <div class="detail-mag-type" id="detailMagType">—</div>
+      </div>
+      <div class="section" style="text-align:center;">
+        <div style="font-size:19px;font-weight:800;margin-bottom:4px;overflow-wrap:anywhere;" id="detailPlace">—</div>
+        <div style="font-size:13.5px;color:var(--text-2);font-weight:600;overflow-wrap:anywhere;" id="detailDate">—</div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg><div class="val" id="detailDepth">—</div><div class="lbl">Profundidad</div></div>
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg><div class="val" id="detailDistance">—</div><div class="lbl">Distancia</div></div>
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 2-5h4"/></svg><div class="val" id="detailTsunami">—</div><div class="lbl">Riesgo tsunami</div></div>
+        <div class="weather-metric"><svg class="icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><div class="val" id="detailSig">—</div><div class="lbl">Índice de impacto</div></div>
+      </div>
+      <div class="divider-lg"></div>
+      <div class="section"><button id="detailLinkBtn" onclick="window.open(currentDetailUrl,'_blank')" style="width:100%;background:var(--surface);border:.5px solid var(--stroke);border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:14.5px;font-weight:700;"><svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>Ver informe en USGS</button></div>
+      <div class="divider-xl"></div>
+    </div>
+
+  </div><!-- /app-inner -->
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <div class="tab-item active" data-tab="home" onclick="goToView('home')"><svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Inicio</span></div>
+    <div class="tab-item" data-tab="settings" onclick="goToView('settings')"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Ajustes</span></div>
+  </div>
+
+</div><!-- /screen-app -->
+
+<!-- Contenedor reservado para verificaciones de seguridad -->
+<div id="recaptcha-container"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+
+<script>
+'use strict';
+/* ================================================================
+   AlertaCuba — Sistema de Alerta para Cuba
+   ================================================================ */
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC9v2qp6zGtmvsFiOknlmTHnN6zZY1RLcI",
+  authDomain: "ggggg-f2508.firebaseapp.com",
+  databaseURL: "https://ggggg-f2508-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ggggg-f2508",
+  storageBucket: "ggggg-f2508.firebasestorage.app",
+  messagingSenderId: "120837533638",
+  appId: "1:120837533638:web:6720ebd1367f3acf9f4cc7",
+  measurementId: "G-E2JX3ZGG5K"
+};
+
+/* Emails con acceso de administrador */
+const ADMIN_EMAILS = ['zam.contact@yahoo.com'];
+
+
+const USGS_FEEDS = {
+  hour:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson',
+  day:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson',
+  week:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson'
+};
+
+let app, db, auth, messaging;
+let currentUser = null;
+
+let state = {
+  range:'day', quakes:[], userLat:23.1136, userLon:-82.3666,
+  hasRealGeo:false, alarmOn:true, vibrateOn:true, geoOn:false,
+  magThreshold:4.5, lastAlertedId:null, activeAlert:null, fbAlerts:[]
+};
+let currentNearest = null;
+let currentDetailUrl = '#';
+
+/* ================================================================
+   SCREENS
+   ================================================================ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); }
+}
+
+/* ================================================================
+   FIREBASE INIT
+   ================================================================ */
+function initFirebase() {
+  app = firebase.initializeApp(FIREBASE_CONFIG);
+  db   = firebase.database();
+  auth = firebase.auth();
+  try { messaging = firebase.messaging(); } catch(e) {}
+
+  auth.onAuthStateChanged(async user => {
+    currentUser = user;
+    if (user) {
+      // Check ID verification
+      const snap = await db.ref('users/' + user.uid + '/idVerified').get();
+      if (snap.val() === true) {
+        enterApp(user);
+      } else if (_captchaVerified) {
+        // Si el captcha fue verificado, mostrar la pantalla de ID
+        showScreen('screen-id');
+      } else {
+        // Si no hay sesión, mostrar login
+        showScreen('screen-auth');
+      }
+    } else {
+      showScreen('screen-auth');
+    }
+  });
+
+  listenActiveAlert();
+  listenAlertHistory();
+}
+
+/* ================================================================
+   SPLASH
+   ================================================================ */
+function startSplash() {
+  showScreen('screen-splash');
+  setTimeout(() => {
+    initFirebase();
+  }, 2600);
+}
+
+/* ================================================================
+   ENTER APP
+   ================================================================ */
+function enterApp(user) {
+  showScreen('screen-app');
+  _captchaVerified = false; // Resetear captcha para próximas sesiones
+  // Show/hide admin entry
+  const isAdmin = ADMIN_EMAILS.includes((user.email||'').toLowerCase());
+  document.getElementById('adminEntry').style.display = isAdmin ? 'block' : 'none';
+  // Show user info in sign out row
+  const desc = document.getElementById('signOutDesc');
+  if (desc) desc.textContent = user.email || 'Sesión activa';
+  // Load data
+  loadQuakes();
+  startPolling();
+  setupFCMForeground();
+  document.body.addEventListener('click', () => getAudioCtx(), {once:true});
+}
+
+
+/* ================================================================
+   SIGN OUT
+   ================================================================ */
+async function doSignOut() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  await auth.signOut();
+  showScreen('screen-auth');
+}
+
+/* ================================================================
+   REGISTER — email + password
+   ================================================================ */
+async function doRegister() {
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pwd   = document.getElementById('regPwd').value;
+  const pwd2  = document.getElementById('regPwd2').value;
+  const errEl = document.getElementById('regError');
+  errEl.textContent = '';
+
+  if (!isValidEmail(email)) { errEl.textContent = 'Introduce un correo electrónico válido.'; return; }
+  if (pwd.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+  if (pwd !== pwd2) { errEl.textContent = 'Las contraseñas no coinciden.'; return; }
+
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = 'Creando cuenta...';
+
+  try {
+    const result = await auth.createUserWithEmailAndPassword(email, pwd);
+    const user = result.user;
+
+    await db.ref('users/' + user.uid).set({
+      email: email,
+      createdAt: Date.now()
+    });
+
+    _captchaVerified = false;
+    refreshCaptcha();
+    showScreen('screen-captcha');
+  } catch(err) {
+    console.error('[Register]', err);
+    errEl.textContent = errorMsg(err.code);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Crear cuenta';
+  }
+}
+
+/* ================================================================
+   CAPTCHA PERSONALIZADO
+   ================================================================ */
+let _currentCaptcha = null;
+let _captchaVerified = false;
+
+function generateCaptcha() {
+  _captchaVerified = false;
+  const types = ['math', 'select', 'sequence'];
+  const type = types[Math.floor(Math.random() * types.length)];
+  
+  switch(type) {
+    case 'math': return generateMathCaptcha();
+    case 'select': return generateSelectCaptcha();
+    case 'sequence': return generateSequenceCaptcha();
+    default: return generateMathCaptcha();
+  }
+}
+
+function generateMathCaptcha() {
+  const a = Math.floor(Math.random() * 20) + 1;
+  const b = Math.floor(Math.random() * 20) + 1;
+  const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
+  let result;
+  
+  if (op === '+') result = a + b;
+  else if (op === '-') result = a - b;
+  else result = a * b;
+  
+  _currentCaptcha = {
+    type: 'math',
+    question: `¿Cuál es el resultado de ${a} ${op} ${b}?`,
+    answer: result.toString(),
+    display: `<div class="captcha-puzzle"><div class="captcha-question">¿Cuál es el resultado?</div><div class="captcha-math">${a} ${op} ${b} = ?</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric" oninput="syncCaptchaButton()" onkeydown="if(event.key==='Enter') verifyCaptcha()"></div></div>`
+  };
+  return _currentCaptcha.display;
+}
+
+function generateSelectCaptcha() {
+  const questions = [
+    { q: '¿Cuál es la capital de Cuba?', options: ['La Habana', 'Santiago', 'Matanzas', 'Cienfuegos'], answer: 'La Habana' },
+    { q: '¿Cuál es el color del cielo?', options: ['Azul', 'Verde', 'Rojo', 'Amarillo'], answer: 'Azul' },
+    { q: '¿Cuántos días tiene una semana?', options: ['5', '6', '7', '8'], answer: '7' },
+    { q: '¿Cuál es el planeta más grande?', options: ['Tierra', 'Marte', 'Júpiter', 'Venus'], answer: 'Júpiter' }
+  ];
+  const q = questions[Math.floor(Math.random() * questions.length)];
+  const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+  
+  _currentCaptcha = {
+    type: 'select',
+    question: q.q,
+    answer: q.answer,
+    display: `<div class="captcha-puzzle"><div class="captcha-question">${q.q}</div><div class="captcha-options">${shuffled.map(opt => `<button type="button" class="captcha-option" onclick="selectCaptchaOption(this, '${opt}')">${opt}</button>`).join('')}</div></div>`
+  };
+  return _currentCaptcha.display;
+}
+
+function generateSequenceCaptcha() {
+  const sequences = [
+    { seq: [2, 4, 6, 8], next: 10, q: '¿Cuál es el siguiente número?' },
+    { seq: [1, 1, 2, 3, 5], next: 8, q: '¿Cuál es el siguiente número?' },
+    { seq: [10, 9, 8, 7], next: 6, q: '¿Cuál es el siguiente número?' }
+  ];
+  const s = sequences[Math.floor(Math.random() * sequences.length)];
+  
+  _currentCaptcha = {
+    type: 'sequence',
+    question: s.q,
+    answer: s.next.toString(),
+    display: `<div class="captcha-puzzle"><div class="captcha-question">${s.seq.join(', ')}, ?</div><div class="captcha-question" style="font-size:13px;color:var(--text-2);margin-top:-8px;">${s.q}</div><div class="captcha-input-group"><input type="text" class="captcha-input" id="captchaAnswer" placeholder="Respuesta" inputmode="numeric" oninput="syncCaptchaButton()" onkeydown="if(event.key==='Enter') verifyCaptcha()"></div></div>`
+  };
+  return _currentCaptcha.display;
+}
+
+function syncCaptchaButton() {
+  const btn = document.getElementById('captchaBtn');
+  if (!btn || !_currentCaptcha) return;
+  if (_currentCaptcha.type === 'select') {
+    btn.disabled = !document.querySelector('.captcha-option.selected');
+    return;
+  }
+  const input = document.getElementById('captchaAnswer');
+  btn.disabled = !(input && input.value.trim());
+}
+
+function selectCaptchaOption(el, value) {
+  document.querySelectorAll('.captcha-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  el.dataset.selected = value;
+  syncCaptchaButton();
+}
+
+function refreshCaptcha() {
+  document.getElementById('captchaError').textContent = '';
+  const content = generateCaptcha();
+  document.getElementById('captchaContent').innerHTML = content;
+  syncCaptchaButton();
+  const input = document.getElementById('captchaAnswer');
+  if (input) {
+    input.addEventListener('input', syncCaptchaButton);
+    input.focus();
+  }
+}
+
+function verifyCaptcha() {
+  const errEl = document.getElementById('captchaError');
+  errEl.textContent = '';
+  
+  let userAnswer = '';
+  if (_currentCaptcha.type === 'select') {
+    const selected = document.querySelector('.captcha-option.selected');
+    userAnswer = selected ? selected.dataset.selected : '';
+  } else {
+    const input = document.getElementById('captchaAnswer');
+    userAnswer = input ? input.value.trim() : '';
+  }
+  
+  if (!userAnswer) { errEl.textContent = 'Por favor, completa el desafío.'; return; }
+  
+  if (userAnswer === _currentCaptcha.answer) {
+    _captchaVerified = true;
+    showScreen('screen-id');
+  } else {
+    errEl.textContent = 'Respuesta incorrecta. Intenta de nuevo.';
+    refreshCaptcha();
+  }
+}
+
+/* ================================================================
+   LOGIN
+   ================================================================ */
+async function doLogin() {
+  const email = document.getElementById('loginId').value.trim().toLowerCase();
+  const pwd = document.getElementById('loginPwd').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+
+  if (!email || !pwd) { errEl.textContent = 'Rellena todos los campos.'; return; }
+  if (!isValidEmail(email)) { errEl.textContent = 'Introduce un correo electrónico válido.'; return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+
+  try {
+    await auth.signInWithEmailAndPassword(email, pwd);
+    _captchaVerified = false;
+    refreshCaptcha();
+    showScreen('screen-captcha');
+  } catch(err) {
+    console.error('[Login]', err);
+    errEl.textContent = errorMsg(err.code);
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+/* ================================================================
+   ID VERIFICATION
+   ================================================================ */
+let _idScanned = {front: false, back: false};
+let _camMode = 'front';
+let _camStream = null;
+let _camAnimFrame = null;
+let _detectionTimer = null;
+let _detectionProgress = 0;
+let _idCaptures = {front: null, back: null};
+let _barcodeDetector = null;
+
+
+async function openCamera(mode) {
+  _camMode = mode;
+  const overlay = document.getElementById('cam-overlay');
+  const title = document.getElementById('camTitle');
+  title.textContent = mode === 'front' ? 'Parte delantera del carnet' : 'Reverso del carnet';
+  document.getElementById('camStatus').textContent = 'Coloca tu carnet dentro del recuadro';
+  document.getElementById('camProgressBar').style.width = '0%';
+  document.getElementById(mode === 'front' ? 'idFrontBtn' : 'idBackBtn').classList.add('active');
+  overlay.classList.add('active');
+
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video: {facingMode: 'environment', width:{ideal:1280}, height:{ideal:720}}
+    });
+    const video = document.getElementById('cam-video');
+    video.srcObject = _camStream;
+    await video.play();
+    if (mode === 'back' && 'BarcodeDetector' in window) {
+      _barcodeDetector = new BarcodeDetector({formats: ['code_128', 'code_39', 'codabar', 'ean_13', 'pdf417', 'qr_code']});
+    } else {
+      _barcodeDetector = null;
+    }
+    startScanLoop();
+  } catch(err) {
+    console.warn('[Camera]', err);
+    const status = document.getElementById('camStatus');
+    const progressBar = document.getElementById('camProgressBar');
+    if (progressBar) progressBar.style.width = '0%';
+    if (status) status.textContent = 'No se pudo abrir la cámara. Activa permisos y usa HTTPS.';
+    document.getElementById(mode === 'front' ? 'idFrontBtn' : 'idBackBtn').classList.remove('active');
+  }
+}
+
+function closeCamera() {
+  stopCamera();
+  document.getElementById('idFrontBtn').classList.remove('active');
+  document.getElementById('idBackBtn').classList.remove('active');
+  document.getElementById('cam-overlay').classList.remove('active');
+}
+
+function stopCamera() {
+  cancelAnimationFrame(_camAnimFrame);
+  clearTimeout(_detectionTimer);
+  _detectionProgress = 0;
+  const progressBar = document.getElementById('camProgressBar');
+  if (progressBar) progressBar.style.width = '0%';
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+}
+
+function startScanLoop() {
+  const video = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  const ctx = canvas.getContext('2d');
+  const status = document.getElementById('camStatus');
+  const progressBar = document.getElementById('camProgressBar');
+
+  let stableFrames = 0;
+  const NEEDED_FRAMES = 90;
+  const MIN_SCAN_MS = 4500;
+  const scanStartedAt = Date.now();
+  _detectionProgress = 0;
+
+  function drawOverlay(detected) {
+    canvas.width = canvas.offsetWidth * devicePixelRatio;
+    canvas.height = canvas.offsetHeight * devicePixelRatio;
+    ctx.save();
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+    // ID card rect (1.58:1 ratio, centered)
+    const rw = Math.min(W * 0.8, 340);
+    const rh = rw / 1.586;
+    const rx = (W - rw) / 2;
+    const ry = (H - rh) / 2;
+
+    // Dark overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.52)';
+    ctx.fillRect(0, 0, W, H);
+    // Clear rect
+    ctx.clearRect(rx, ry, rw, rh);
+
+    // Border
+    const color = detected ? '#22c55e' : 'rgba(255,255,255,0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(rx, ry, rw, rh);
+
+    // Corner markers
+    const cs = 22;
+    ctx.strokeStyle = detected ? '#22c55e' : '#fff';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    [[rx,ry,1,1],[rx+rw,ry,-1,1],[rx,ry+rh,1,-1],[rx+rw,ry+rh,-1,-1]].forEach(([x,y,dx,dy]) => {
+      ctx.beginPath(); ctx.moveTo(x+dx*cs, y); ctx.lineTo(x, y); ctx.lineTo(x, y+dy*cs); ctx.stroke();
+    });
+
+    ctx.restore();
+  }
+
+  function analyze() {
+    if (!_camStream) return;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = 160; offscreen.height = 90;
+    const oc = offscreen.getContext('2d');
+    oc.drawImage(video, 0, 0, 160, 90);
+    const imageData = oc.getImageData(32, 22, 96, 46);
+    const d = imageData.data;
+    let sum = 0, sumSq = 0, n = d.length / 4;
+    for (let i = 0; i < d.length; i += 4) {
+      const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+      sum += g; sumSq += g * g;
+    }
+    const mean = sum / n;
+    const variance = sumSq / n - mean * mean;
+    return variance;
+  }
+
+  function loop() {
+    if (!_camStream) return;
+    const variance = analyze() || 0;
+    let detected = false;
+
+    if (_camMode === 'back' && _barcodeDetector) {
+      _barcodeDetector.detect(video).then(codes => {
+        if (codes && codes.length) stableFrames = Math.max(stableFrames, Math.ceil(NEEDED_FRAMES * 0.75));
+      }).catch(() => { _barcodeDetector = null; });
+    }
+
+    if (variance < 80) {
+      status.textContent = 'Coloca tu carnet en el recuadro';
+      stableFrames = 0;
+    } else if (variance < 200) {
+      status.textContent = 'Acércate un poco más al carnet';
+      stableFrames = Math.max(0, stableFrames - 1);
+    } else if (variance > 1800) {
+      status.textContent = 'No muevas el teléfono';
+      stableFrames = Math.max(0, stableFrames - 2);
+    } else {
+      stableFrames++;
+      detected = stableFrames > 3;
+      if (stableFrames < NEEDED_FRAMES) {
+        const elapsedPct = Math.min(100, Math.round(((Date.now() - scanStartedAt) / MIN_SCAN_MS) * 100));
+        status.textContent = 'Perfecto, mantén firme... (' + Math.min(elapsedPct, Math.round(stableFrames/NEEDED_FRAMES*100)) + '%)';
+      }
+    }
+
+    const frameProgress = Math.min(100, (stableFrames / NEEDED_FRAMES) * 100);
+    const timeProgress = Math.min(100, ((Date.now() - scanStartedAt) / MIN_SCAN_MS) * 100);
+    _detectionProgress = Math.min(frameProgress, timeProgress);
+    progressBar.style.width = _detectionProgress + '%';
+    drawOverlay(detected);
+
+    if (stableFrames >= NEEDED_FRAMES && Date.now() - scanStartedAt >= MIN_SCAN_MS) {
+      status.textContent = '✓ Detectado — procesando...';
+      progressBar.style.width = '100%';
+      setTimeout(() => captureScan(), 500);
+      return;
+    }
+
+    _camAnimFrame = requestAnimationFrame(loop);
+  }
+
+  setTimeout(loop, 300);
+}
+
+function captureScan() {
+  const video = document.getElementById('cam-video');
+  if (video && video.videoWidth && video.videoHeight) {
+    const snap = document.createElement('canvas');
+    snap.width = video.videoWidth;
+    snap.height = video.videoHeight;
+    snap.getContext('2d').drawImage(video, 0, 0, snap.width, snap.height);
+    _idCaptures[_camMode] = snap.toDataURL('image/jpeg', 0.82);
+  }
+  stopCamera();
+  _idScanned[_camMode] = true;
+
+  const btnId = _camMode === 'front' ? 'idFrontBtn' : 'idBackBtn';
+  const statusId = _camMode === 'front' ? 'idFrontStatus' : 'idBackStatus';
+  const btn = document.getElementById(btnId);
+  btn.classList.add('done');
+  btn.classList.remove('active');
+  document.getElementById(statusId).textContent = '✓ Escaneado real completado';
+  document.getElementById('cam-overlay').classList.remove('active');
+
+  if (_idScanned.front && _idScanned.back) {
+    const submitBtn = document.getElementById('idSubmitBtn');
+    submitBtn.classList.add('show');
+  }
+}
+
+async function completeIdVerification() {
+  if (!currentUser) return;
+  try {
+    await db.ref('users/' + currentUser.uid + '/idVerified').set(true);
+    enterApp(currentUser);
+  } catch(err) {
+    console.error('[ID]', err);
+    enterApp(currentUser);
+  }
+}
+
+/* ================================================================
+   FIREBASE REALTIME — ALERTS
+   ================================================================ */
+function listenActiveAlert() {
+  db.ref('alertas/activa').on('value', snap => {
+    const data = snap.val();
+    if (data && data.activa === true) {
+      if (!state.activeAlert || state.activeAlert.id !== data.id) {
+        state.activeAlert = data;
+        if (document.getElementById('screen-app').classList.contains('active')) {
+          onNewActiveAlert(data);
+        }
+      }
+    } else {
+      state.activeAlert = null;
+      const s = document.getElementById('activeAlertSection');
+      if(s) s.style.display = 'none';
+    }
+  });
+}
+
+function listenAlertHistory() {
+  db.ref('alertas/historial').orderByChild('timestamp').limitToLast(20).on('value', snap => {
+    const items = [];
+    snap.forEach(child => items.push(child.val()));
+    items.reverse();
+    state.fbAlerts = items;
+    renderFbAlerts();
+  });
+}
+
+/* Al llegar una alerta nueva: solo la notificación clásica del navegador
+   (con el sonido predeterminado) y la tarjeta "Alerta activa" en Inicio.
+   No hay pantalla completa ni sonidos personalizados. */
+function onNewActiveAlert(data) {
+  showNotifBanner(data.titulo, data.cuerpo || '');
+  renderActiveAlertCard(data);
+  updateHeroStatus('danger', '🚨 ' + data.titulo, data.cuerpo || '', '');
+  sendNativeNotification(data);
+}
+
+function renderActiveAlertCard(data) {
+  const section=document.getElementById('activeAlertSection');
+  const card=document.getElementById('activeAlertCard');
+  const colors=severityColors(data.severidad);
+  let details='';
+  if(data.magnitud) details+='M'+parseFloat(data.magnitud).toFixed(1)+' · ';
+  if(data.lugar) details+=data.lugar;
+  card.innerHTML=`<div class="fb-alert-card" style="border-color:${colors.border};background:${colors.bg};">
+    <div class="fb-icon" style="background:${colors.iconBg};"><svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
+    <div class="fb-body">
+      <div class="fb-title" style="color:${colors.fg};">${esc(data.titulo)}</div>
+      <div class="fb-msg">${esc(data.cuerpo||'')}</div>
+      ${details?`<div class="fb-msg" style="margin-top:4px;font-weight:700;">${esc(details)}</div>`:''}
+      <div class="fb-footer"><div class="fb-source">${esc(data.emitidaPor||'AlertaCuba')}</div><div class="fb-time">${timeAgo(data.timestamp)}</div></div>
+    </div>
+  </div>`;
+  section.style.display='block';
+}
+
+function renderFbAlerts() {
+  const container=document.getElementById('fbAlertsHome');
+  if(!container) return;
+  if(!state.fbAlerts.length){ container.innerHTML='<div class="empty-state"><p>No hay alertas emitidas aún. El sistema está monitoreando Cuba.</p></div>'; return; }
+  container.innerHTML=state.fbAlerts.map(a=>{
+    const colors=severityColors(a.severidad);
+    let meta=[];
+    if(a.magnitud) meta.push('M'+parseFloat(a.magnitud).toFixed(1));
+    if(a.lugar) meta.push(a.lugar);
+    return `<div class="fb-alert-card" style="border-color:${colors.border};background:${colors.bg};">
+      <div class="fb-icon" style="background:${colors.iconBg};"><svg class="icon" viewBox="0 0 24 24" style="color:${colors.fg};"><path d="M2 12h2.5l2-7 3 14 2.5-7 1.5 4.5 2-4.5H22"/></svg></div>
+      <div class="fb-body">
+        <div class="fb-title">${esc(a.titulo)}</div>
+        <div class="fb-msg">${esc(a.cuerpo||'')}</div>
+        ${meta.length?`<div class="fb-msg" style="margin-top:3px;font-weight:700;font-size:11.5px;">${esc(meta.join(' · '))}</div>`:''}
+        <div class="fb-footer"><div class="fb-source">${esc(a.emitidaPor||'AlertaCuba')}</div><div class="fb-time">${timeAgo(a.timestamp)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function severityColors(s) {
+  return {critica:{bg:'rgba(225,6,0,0.06)',border:'rgba(225,6,0,0.25)',iconBg:'rgba(225,6,0,0.12)',fg:'#e10600'},
+    alta:{bg:'rgba(245,183,0,0.06)',border:'rgba(245,183,0,0.28)',iconBg:'rgba(245,183,0,0.13)',fg:'#b58500'},
+    media:{bg:'rgba(0,87,184,0.05)',border:'rgba(0,87,184,0.2)',iconBg:'rgba(0,87,184,0.1)',fg:'#0057b8'},
+    info:{bg:'rgba(0,0,0,0.02)',border:'rgba(0,0,0,0.08)',iconBg:'rgba(0,0,0,0.06)',fg:'#555'}}[s||'media']||{bg:'rgba(0,87,184,0.05)',border:'rgba(0,87,184,0.2)',iconBg:'rgba(0,87,184,0.1)',fg:'#0057b8'};
+}
+
+/* ================================================================
+   ADMIN PANEL
+   ================================================================ */
+function openAdmin() { document.getElementById('adminPanel').classList.add('show'); }
+function closeAdmin() { document.getElementById('adminPanel').classList.remove('show'); }
+
+async function sendAlert() {
+  if (!currentUser || !ADMIN_EMAILS.includes((currentUser.email||'').toLowerCase())) { closeAdmin(); return; }
+  const btn=document.getElementById('adminSendBtn');
+  const titulo=document.getElementById('adminTitulo').value.trim();
+  const cuerpo=document.getElementById('adminMensaje').value.trim();
+  const tipo=document.getElementById('adminTipo').value;
+  const severidad=document.getElementById('adminSeveridad').value;
+  const magnitud=document.getElementById('adminMagnitud').value;
+  const lugar=document.getElementById('adminLugar').value.trim();
+  const emitidaPor=document.getElementById('adminEmitidaPor').value.trim()||'AlertaCuba';
+  if(!titulo){alert('Escribe un título.');return;}
+  btn.disabled=true;btn.textContent='Enviando...';
+  const alertData={activa:true,id:'alerta-'+Date.now(),tipo,titulo,cuerpo,severidad,lugar,emitidaPor,timestamp:Date.now(),...(magnitud?{magnitud:parseFloat(magnitud)}:{})};
+  try {
+    await db.ref('alertas/activa').set(alertData);
+    await db.ref('alertas/historial/'+alertData.id).set(alertData);
+    closeAdmin();
+    document.getElementById('adminTitulo').value='';
+    document.getElementById('adminMensaje').value='';
+    document.getElementById('adminMagnitud').value='';
+    document.getElementById('adminLugar').value='';
+  } catch(err){
+    alert('Error: '+err.message);
+  } finally {
+    btn.disabled=false;btn.textContent='🚨 Emitir alerta ahora';
+  }
+}
+
+/* ================================================================
+   PUSH NOTIFICATIONS
+   ================================================================ */
+function setupFCMForeground() {
+  if(!messaging) return;
+  messaging.onMessage(payload => {
+    const title=payload.notification?.title||payload.data?.titulo||'AlertaCuba';
+    const body=payload.notification?.body||payload.data?.cuerpo||'';
+    showNotifBanner(title,body);
+  });
+}
+
+/* Notificación clásica del navegador — usa el sonido predeterminado
+   del sistema/navegador, sin efectos de sonido personalizados. */
+function sendNativeNotification(data) {
+  if(!('Notification' in window)||Notification.permission!=='granted') return;
+  new Notification('🚨 '+(data.titulo||'ALERTA — AlertaCuba'),{body:data.cuerpo||data.lugar||'',tag:'alertacuba',renotify:true,requireInteraction:data.severidad==='critica'||data.severidad==='alta'});
+}
+
+let _bannerTimeout=null;
+function showNotifBanner(title,sub){
+  document.getElementById('nbTitle').textContent=title;
+  document.getElementById('nbSub').textContent=sub;
+  const banner=document.getElementById('notifBanner');
+  banner.classList.add('show');
+  clearTimeout(_bannerTimeout);
+  _bannerTimeout=setTimeout(()=>banner.classList.remove('show'),7000);
+}
+function closeNotifBanner(){ clearTimeout(_bannerTimeout); document.getElementById('notifBanner').classList.remove('show'); }
+
+/* ================================================================
+   HERO & NAVIGATION
+   ================================================================ */
+function updateHeroStatus(type,title,sub,since){
+  const hero=document.getElementById('heroStatus');
+  if(!hero) return;
+  hero.className='hero-status '+type;
+  document.getElementById('heroTitle').textContent=title;
+  document.getElementById('heroSub').textContent=sub;
+  if(since) document.getElementById('heroSince').textContent=since;
+}
+
+function goToView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  const tab=document.querySelector('.tab-item[data-tab="'+name+'"]');
+  if(tab) tab.classList.add('active');
+  const inner=document.querySelector('.app-inner');
+  if(inner) inner.scrollTo({top:0,behavior:'instant'});
+}
+
+function setRange(range,btn){
+  state.range=range;
+  document.querySelectorAll('.segment button[data-range]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadQuakes();
+}
+
+/* ================================================================
+   EMAIL VALIDATION — shared between register and login
+   ================================================================ */
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+}
+
+/* ================================================================
+   UTILS
+   ================================================================ */
+function haversine(lat1,lon1,lat2,lon2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function magColor(mag){if(mag>=6) return{badgeBg:'rgba(225,6,0,0.15)',badgeFg:'#ff7a5c',numBg:'#e10600',bannerA:'#5c120f',bannerB:'#1f0503'};if(mag>=4.5) return{badgeBg:'rgba(245,183,0,0.15)',badgeFg:'#b58500',numBg:'#f5b700',bannerA:'#3a2c08',bannerB:'#1c1503'};if(mag>=3) return{badgeBg:'rgba(0,87,184,0.15)',badgeFg:'#3d8bc7',numBg:'#0057b8',bannerA:'#123a5c',bannerB:'#04141f'};return{badgeBg:'rgba(150,150,150,0.12)',badgeFg:'#888',numBg:'#888',bannerA:'#1a1a1a',bannerB:'#0a0a0a'};}
+function timeAgo(ts){if(!ts) return'—';const diff=Date.now()-ts,min=Math.floor(diff/60000);if(min<1) return'ahora';if(min<60) return min+' min';const h=Math.floor(min/60);if(h<24) return h+' h';return Math.floor(h/24)+' d';}
+function fmtDate(ts){return new Date(ts).toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function errorMsg(code){const m={'auth/invalid-credential':'Credenciales incorrectas. Revisa el correo y la contraseña, o crea una cuenta nueva.','auth/too-many-requests':'Demasiados intentos. Intenta más tarde.','auth/code-expired':'El código expiró. Solicita uno nuevo.','auth/invalid-verification-code':'Código incorrecto.','auth/user-not-found':'Cuenta no encontrada.','auth/wrong-password':'Contraseña incorrecta.','auth/email-already-in-use':'Este correo ya está en uso.','auth/network-request-failed':'Error de conexión. Verifica tu internet.'};return m[code]||'Error: '+code;}
+
+/* ================================================================
+   USGS — SISMOS
+   ================================================================ */
+async function loadQuakes(){
+  try{
+    const res=await fetch(USGS_FEEDS[state.range]);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    state.quakes=data.features.map(f=>({id:f.id,mag:f.properties.mag,place:f.properties.place||'Ubicación desconocida',time:f.properties.time,tsunami:f.properties.tsunami,sig:f.properties.sig,url:f.properties.url,lon:f.geometry.coordinates[0],lat:f.geometry.coordinates[1],depth:f.geometry.coordinates[2]})).filter(q=>typeof q.mag==='number').filter(q=>/cuba/i.test(q.place)).sort((a,b)=>b.time-a.time);
+    state.quakes.forEach(q=>q.distance=haversine(state.userLat,state.userLon,q.lat,q.lon));
+    renderAll();
+    document.getElementById('heroSince').textContent='Última actualización: '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    checkUSGSAlarm();
+  }catch(err){console.error('[USGS]',err);}
+}
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+function renderAll(){renderNearest();renderHomeFeed();if(!state.activeAlert){if(!state.quakes.length){updateHeroStatus('ok','Sin actividad sísmica en Cuba','Sistema activo — monitoreando en tiempo real','');}else{const t=state.quakes[0];updateHeroStatus(t.mag>=4.5?'warn':'ok',t.mag>=4.5?'Sismo M'+t.mag.toFixed(1)+' registrado':'Actividad menor — sin riesgo significativo',t.place,'');}}}
+
+function renderNearest(){
+  if(!state.quakes.length){document.getElementById('nearestCard').style.display='none';return;}
+  const sorted=[...state.quakes].sort((a,b)=>a.distance-b.distance);
+  currentNearest=sorted[0];const q=currentNearest,c=magColor(q.mag);
+  document.getElementById('nearestCard').style.display='flex';
+  const badge=document.getElementById('nearestBadge');
+  badge.textContent=q.mag.toFixed(1);badge.style.background=c.badgeBg;badge.style.color=c.badgeFg;
+  document.getElementById('nearestPlace').textContent=q.place;
+  document.getElementById('nearestDist').innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-7.58 7-13a7 7 0 1 0-14 0c0 5.42 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>'+Math.round(q.distance).toLocaleString('es-ES')+' km';
+  document.getElementById('nearestDepth').innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M6 13l6 6 6-6"/></svg>'+q.depth.toFixed(0)+' km prof.';
+  document.getElementById('nearestTime').innerHTML='<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>'+timeAgo(q.time);
+}
+
+function renderHomeFeed(){renderFeedInto(document.getElementById('homeFeedList'),state.quakes.slice(0,6));}
+function renderFeedInto(container,quakes,showEmpty){
+  container.innerHTML='';
+  if(!quakes.length&&showEmpty){container.innerHTML='<div class="empty-state"><p>No hay eventos que coincidan con este filtro.</p></div>';return;}
+  quakes.forEach((q,idx)=>{
+    const c=magColor(q.mag),row=document.createElement('div');
+    row.className='feed-row';row.onclick=()=>openDetail(q);
+    row.innerHTML='<div class="feed-num" style="background:'+c.numBg+';">'+q.mag.toFixed(1)+'</div><div class="feed-body"><div class="feed-title">'+esc(q.place)+'</div><div class="feed-meta">'+q.depth.toFixed(0)+' km prof. · '+Math.round(q.distance).toLocaleString('es-ES')+' km</div></div><div class="feed-time">'+timeAgo(q.time)+'</div>';
+    container.appendChild(row);
+    if(idx<quakes.length-1){const div=document.createElement('div');div.className='feed-divider';container.appendChild(div);}
+  });
+}
+
+function openDetail(q){
+  if(!q) return;
+  const c=magColor(q.mag);
+  document.getElementById('detailMagBanner').style.background='linear-gradient(135deg,'+c.bannerA+','+c.bannerB+')';
+  document.getElementById('detailMag').textContent=q.mag.toFixed(1);
+  document.getElementById('detailMagType').textContent=q.mag>=6?'Fuerte':q.mag>=4.5?'Moderado':q.mag>=3?'Leve':'Menor';
+  document.getElementById('detailPlace').textContent=q.place;
+  document.getElementById('detailDate').textContent=fmtDate(q.time);
+  document.getElementById('detailDepth').textContent=q.depth.toFixed(0)+' km';
+  document.getElementById('detailDistance').textContent=Math.round(q.distance).toLocaleString('es-ES')+' km';
+  document.getElementById('detailTsunami').textContent=q.tsunami===1?'Posible':'Ninguno';
+  document.getElementById('detailSig').textContent=q.sig||'—';
+  currentDetailUrl=q.url||'#';
+  goToView('detail');
+}
+
+/* ================================================================
+   USGS ALARM
+   ================================================================ */
+function checkUSGSAlarm(){
+  if(!state.alarmOn) return;
+  const r=state.quakes.filter(q=>q.mag>=state.magThreshold).sort((a,b)=>b.time-a.time)[0];
+  if(r&&r.id!==state.lastAlertedId){
+    state.lastAlertedId=r.id;
+    const synth={activa:true,id:r.id,tipo:'sismo',titulo:'Sismo M'+r.mag.toFixed(1)+' · '+r.place,cuerpo:r.depth.toFixed(0)+' km profundidad · '+Math.round(r.distance).toLocaleString('es-ES')+' km de distancia',magnitud:r.mag,lugar:r.place,severidad:r.mag>=6?'critica':r.mag>=4.5?'alta':'media',timestamp:r.time,emitidaPor:'USGS'};
+    state.activeAlert=synth;
+    onNewActiveAlert(synth);
+  }
+}
+
+/* ================================================================
+   SETTINGS
+   ================================================================ */
+function toggleSwitch(el,key){const isOn=el.classList.toggle('on');state[key+'On']=isOn;if(key==='geo'){isOn?requestGeolocation():(state.hasRealGeo=false);}}
+function requestGeolocation(){if(!navigator.geolocation) return;navigator.geolocation.getCurrentPosition(pos=>{state.userLat=pos.coords.latitude;state.userLon=pos.coords.longitude;state.hasRealGeo=true;state.quakes.forEach(q=>q.distance=haversine(state.userLat,state.userLon,q.lat,q.lon));renderAll();},err=>console.warn('[Geo]',err.message),{enableHighAccuracy:false,timeout:8000});}
+function updateMagThresh(val){state.magThreshold=parseFloat(val);document.getElementById('magThreshVal').textContent='M '+parseFloat(val).toFixed(1);}
+
+
+/* ================================================================
+   POLLING
+   ================================================================ */
+let pollInterval=null;
+function startPolling(){if(pollInterval) clearInterval(pollInterval);pollInterval=setInterval(loadQuakes,60000);}
+
+/* ================================================================
+   BOOT
+   ================================================================ */
+startSplash();
+</script>
+</body>
+</html>
